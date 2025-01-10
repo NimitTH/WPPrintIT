@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `user` ADD COLUMN `money` DOUBLE NULL DEFAULT 1000,
+    ADD COLUMN `status` VARCHAR(191) NULL DEFAULT 'approve';

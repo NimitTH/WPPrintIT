@@ -1,0 +1,229 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model account {
+  id                       String   @id @default(cuid())
+  userId                   Int      @unique(map: "Account_userId_key")
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String?  @db.Text
+  access_token             String?  @db.Text
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String?  @db.Text
+  session_state            String?
+  refresh_token_expires_in Int?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  user                     user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Account_userId_fkey")
+
+  @@unique([provider, providerAccountId], map: "Account_provider_providerAccountId_key")
+}
+
+model cart {
+  cart_id      Int        @id @default(autoincrement())
+  userId       Int
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  total_amount Float
+  user         user       @relation(fields: [userId], references: [id], map: "Cart_userId_fkey")
+  cartitem     cartitem[]
+
+  @@index([userId], map: "Cart_userId_fkey")
+}
+
+model cartitem {
+  cart_item_id   Int     @id @default(autoincrement())
+  screened_image String?
+  quantity       Int
+  userId         Int
+  cartId         Int
+  productId      Int
+  total_price    Float
+  cart           cart    @relation(fields: [cartId], references: [cart_id], map: "CartItem_cartId_fkey")
+  product        product @relation(fields: [productId], references: [product_id], map: "CartItem_productId_fkey")
+  user           user    @relation(fields: [userId], references: [id], map: "CartItem_userId_fkey")
+
+  @@index([cartId], map: "CartItem_cartId_fkey")
+  @@index([productId], map: "CartItem_productId_fkey")
+  @@index([userId], map: "CartItem_userId_fkey")
+}
+
+model category {
+  category_id       Int                 @id @default(autoincrement())
+  name              String              @unique(map: "Category_name_key")
+  createdAt         DateTime            @default(now())
+  producttocategory producttocategory[]
+  product           product[]           @relation("producttocategory")
+}
+
+model history {
+  history_id Int      @id @default(autoincrement())
+  status     String?
+  timestamp  DateTime
+  userId     Int
+  orderId    Int
+  order      order    @relation(fields: [orderId], references: [order_id], map: "History_orderId_fkey")
+  user       user     @relation(fields: [userId], references: [id], map: "History_userId_fkey")
+
+  @@index([orderId], map: "History_orderId_fkey")
+  @@index([userId], map: "History_userId_fkey")
+}
+
+model order {
+  order_id       Int         @id @default(autoincrement())
+  status         String?
+  order_date     DateTime    @default(now())
+  total_amount   Float
+  userId         Int
+  updatedAt      DateTime    @updatedAt
+  total_quantity Int
+  history        history[]
+  user           user        @relation(fields: [userId], references: [id], map: "Order_userId_fkey")
+  orderitem      orderitem[]
+  review         review[]
+
+  @@index([userId], map: "Order_userId_fkey")
+}
+
+model orderitem {
+  order_item_id  Int      @id @default(autoincrement())
+  screened_image String?
+  price          Float
+  quantity       Int
+  productId      Int
+  orderId        Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  total_price    Float
+  order          order    @relation(fields: [orderId], references: [order_id], map: "OrderItem_orderId_fkey")
+  product        product  @relation(fields: [productId], references: [product_id], map: "OrderItem_productId_fkey")
+
+  @@index([orderId], map: "OrderItem_orderId_fkey")
+  @@index([productId], map: "OrderItem_productId_fkey")
+}
+
+model product {
+  product_id        Int                 @id @default(autoincrement())
+  product_name      String
+  description       String?
+  price             Float
+  image             String?
+  stock             Int?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  cartitem          cartitem[]
+  orderitem         orderitem[]
+  productcolor      productcolor[]
+  productsize       productsize[]
+  producttocategory producttocategory[]
+  review            review[]
+  category          category[]          @relation("producttocategory")
+}
+
+model productcolor {
+  color_id   Int      @id @default(autoincrement())
+  color_name String   @unique(map: "ProductColor_color_name_key")
+  productId  Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  product    product? @relation(fields: [productId], references: [product_id], map: "ProductColor_productId_fkey")
+
+  @@index([productId], map: "ProductColor_productId_fkey")
+}
+
+model productsize {
+  size_id   Int      @id @default(autoincrement())
+  size_name String   @unique(map: "ProductSize_size_name_key")
+  productId Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   product? @relation(fields: [productId], references: [product_id], map: "ProductSize_productId_fkey")
+
+  @@index([productId], map: "ProductSize_productId_fkey")
+}
+
+model producttocategory {
+  productId  Int
+  categoryId Int
+  createdAt  DateTime @default(now())
+  category   category @relation(fields: [categoryId], references: [category_id], map: "ProductToCategory_categoryId_fkey")
+  product    product  @relation(fields: [productId], references: [product_id], map: "ProductToCategory_productId_fkey")
+
+  @@id([productId, categoryId])
+  @@index([categoryId], map: "ProductToCategory_categoryId_fkey")
+}
+
+model review {
+  review_id   Int      @id @default(autoincrement())
+  rating      Int?
+  comment     String?
+  review_date DateTime @default(now())
+  userId      Int
+  productId   Int
+  orderId     Int
+  order       order    @relation(fields: [orderId], references: [order_id], map: "Review_orderId_fkey")
+  product     product  @relation(fields: [productId], references: [product_id], map: "Review_productId_fkey")
+  user        user     @relation(fields: [userId], references: [id], map: "Review_userId_fkey")
+
+  @@index([orderId], map: "Review_orderId_fkey")
+  @@index([productId], map: "Review_productId_fkey")
+  @@index([userId], map: "Review_userId_fkey")
+}
+
+model session {
+  id           String   @id
+  sessionToken String   @unique(map: "Session_sessionToken_key")
+  userId       Int
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Session_userId_fkey")
+
+  @@index([userId], map: "Session_userId_fkey")
+}
+
+model user {
+  id            Int        @id @default(autoincrement())
+  username      String?    @unique(map: "User_username_key")
+  name          String?
+  tel           String?    @db.VarChar(10)
+  email         String?    @unique(map: "User_email_key")
+  emailVerified DateTime?
+  password      String?
+  money         Float?     @default(1000)
+  address       String?
+  image         String?
+  status        String?    @default("approve")
+  role          user_role  @default(USER)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  account       account?
+  cart          cart[]
+  cartitem      cartitem[]
+  history       history[]
+  order         order[]
+  review        review[]
+  session       session[]
+}
+
+model verificationtoken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token], map: "VerificationToken_identifier_token_key")
+}
+
+enum user_role {
+  USER
+  ADMIN
+}

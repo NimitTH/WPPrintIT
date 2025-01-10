@@ -34,3 +34,21 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+## ตัวที่จะใช้ในโปรเจ็ค
+
+- [Next.js](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Auth.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Auth.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+## แพ็คเก็ตที่จะติดตั้ง
+
+ติดตั้งแพ็คที่จะใช้ในโปรเจ็ค
+
+```bash
+# ติดตั้ง ไอคอน
+npm install --save-dev @iconify/react
+# ติดตั้ง axios
+npm install axios
+```
