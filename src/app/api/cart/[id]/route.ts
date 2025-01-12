@@ -36,6 +36,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
     try {
+        
         await prisma.cartitem.delete({
             where: { cart_item_id: Number(params.id) },
         });

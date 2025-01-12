@@ -35,7 +35,7 @@ import {
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 
-import ListBox from "./ListBox";
+import ListBox from "./ListManage";
 
 
 
@@ -323,8 +323,8 @@ export const columns = [
     { name: "Order ID", uid: "order_id", sortable: true },
     { name: "ชื่อผู้สั่งซื้อ", uid: "user" },
     { name: "สินค้าที่สั่งซื้อ", uid: "product" },
-    { name: "รวมจำนวนสินค้า", uid: "total_quantity" },
-    { name: "รวมราคาสินค้า", uid: "total_amount" },
+    { name: "รวมจำนวนสินค้า", uid: "total_quantity", sortable: true },
+    { name: "รวมราคาสินค้า", uid: "total_amount", sortable: true },
     { name: "สถานะสินค้า", uid: "status" },
     // { name: "ACTIONS", uid: "actions" },
 ];
@@ -361,7 +361,7 @@ export default function CartProductList() {
         new Set(INITIAL_VISIBLE_COLUMNS),
     );
     const [statusFilter, setStatusFilter] = useState<Selection>("all");
-    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [rowsPerPage, setRowsPerPage] = useState(20);
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
         column: "order_id",
         direction: "ascending",
@@ -379,23 +379,44 @@ export default function CartProductList() {
         return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
     }, [visibleColumns]);
 
-    // const filteredItems = React.useMemo(() => {
-    //     let filteredOrderItems = [...orderItems];
+    const statusOptions = [
+        {name: "ที่ต้องชำระ", uid: "ToBePaid"},
+        {name: "ที่ต้องจัดส่ง", uid: "ToBeDelivered"},
+        {name: "ที่ต้องได้รับ", uid: "ToBeReceived"},
+        {name: "ส่งสำเร็จ", uid: "SuccessfulDelivery"},
+        // {name: "ยกเลิก", uid: "Canceled"},
+        // {name: "คืนเงิน/คืนสินค้า", uid: "RefundAndReturn"},
+      ];
 
-    //     if (hasSearchFilter) {
-    //             filteredOrderItems = filteredOrderItems.filter((orderItems) =>
-    //             orderItems.product.product_name.toLowerCase().includes(filterValue.toLowerCase()),
-    //         );
-    //     }
-    //     return filteredOrderItems;
-    // }, [orderItems, filterValue, statusFilter]);
+      console.log(orderItems);
+      
+
+    const filteredItems = React.useMemo(() => {
+        let filteredOrderItems = [...orderItems];
+
+        if (hasSearchFilter) {
+            filteredOrderItems = filteredOrderItems.filter((order) =>
+                order.orderitem.some((item: any) => 
+                    item.product.product_name.toLowerCase().includes(filterValue.toLowerCase())
+                )
+            );
+        }
+
+        if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
+            filteredOrderItems = filteredOrderItems.filter((orderItems) =>
+                Array.from(statusFilter).includes(orderItems.status),
+            );
+        }
+
+        return filteredOrderItems;
+    }, [orderItems, filterValue, statusFilter]);
 
     const items = React.useMemo(() => {
         const start = (page - 1) * rowsPerPage;
         const end = start + rowsPerPage;
 
-        return orderItems.slice(start, end);
-    }, [page, orderItems, rowsPerPage]);
+        return filteredItems.slice(start, end);
+    }, [page, orderItems, filteredItems, rowsPerPage]);
 
     const sortedItems = React.useMemo(() => {
 
@@ -411,39 +432,6 @@ export default function CartProductList() {
             return sortDescriptor.direction === "descending" ? -cmp : cmp;
         });
     }, [sortDescriptor, items]);
-
-
-    // ✦. ── ✦. ── ✦. ลบสินค้าออกจากรถเข็น .✦ ── .✦ ── .✦
-
-    const deleteCartItem = async (cartItemId: number) => {
-        try {
-            console.log("cartItemId", cartItemId);
-
-            await axios.delete(`/api/cart/${cartItemId}`);
-            setOrderItems((prevProducts) =>
-                prevProducts.filter((product) => product.order_item_id !== cartItemId)
-            );
-        } catch (error) {
-            console.error("Error deleting cart item:", error);
-        }
-    }
-
-    // ✦. ── ✦. ── ✦. จัดการสั่งซื้อ .✦ ── .✦ ── .✦
-
-    const handleSubmit = async () => {
-        try {
-            console.log(selectedIds);
-
-            const res = await axios.post("/api/order", { userId: session?.user?.id, selectedItems: selectedIds });
-            console.log("Order created:", res.data);
-            alert("Order created successfully!");
-            fetchOrders(); // รีเฟรชหน้า Cart
-        } catch (error) {
-            console.error("Error creating order:", error);
-            alert("Failed to create order");
-        }
-
-    }
 
     // const handleDeleteSelected = async () => {
     //     try {
@@ -533,8 +521,8 @@ export default function CartProductList() {
         "ToBeDelivered": "ที่ต้องจัดส่ง",
         "ToBeReceived": "ที่ต้องได้รับ",
         "SuccessfulDelivery": "ส่งสำเร็จ",
-        "Canceled": "ยกเลิก",
-        "RefundAndReturn": "คืนเงิน/คืนสินค้า",
+        // "Canceled": "ยกเลิก",
+        // "RefundAndReturn": "คืนเงิน/คืนสินค้า",
     };
 
     // ✦. ── ✦. ── ✦. พวก Modal .✦ ── .✦ ── .✦
@@ -575,6 +563,15 @@ export default function CartProductList() {
         )
     }, [isModalScreenedImageOpen, imageSrc]);
 
+    const downloadImage = (url: string) => {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = url.substring(url.lastIndexOf('/') + 1); // ใช้ชื่อไฟล์จาก URL
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
 
     const renderCell = React.useCallback((order: OrderItems, columnKey: React.Key) => {
         const cellValue = order[columnKey as keyof OrderItems];
@@ -587,7 +584,7 @@ export default function CartProductList() {
                         classNames={{
                             description: "text-default-500 line-clamp-1 w-[100px]",
                         }}
-                        description={order.user.name}
+                        description={order.user.email}
                         name={order.user.name}
                     >
                         {order.user.name}
@@ -601,7 +598,7 @@ export default function CartProductList() {
                             ดูสินค้า
                         </PopoverTrigger>
                         <PopoverContent className="p-1">
-                            <Card className="max-w-full border-none bg-transparent" shadow="none">
+                            <Card className="max-w-full border-none dark:border-1 dark:border-default-200 bg-transparent" shadow="none">
                                 <CardHeader>
                                     รายละเอียดสินค้าที่สั่งซื้อ
                                 </CardHeader>
@@ -615,13 +612,13 @@ export default function CartProductList() {
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <p>Product ID: {item.productId}</p>
-                                                    <p>Quantity: {item.quantity}</p>
-                                                    <p>Total Price: {item.total_price}</p>
+                                                    <p>จำนวนสินค้า: {item.quantity}</p>
+                                                    <p>ราคารวม: {item.total_price}</p>
 
                                                 </div>
                                                 <div>
                                                     <p>ภาพที่จะสกรีน</p>
-                                                    <img src={item.screened_image} alt={`Product ${item.productId}`} className="w-16 h-16" />
+                                                    <img src={item.screened_image ?? "/cart/images/000000.png"} onClick={() => downloadImage(item.screened_image)} alt={`Product ${item.productId}`} className="w-16 h-16" />
                                                 </div>
                                             </div>
                                         </div>
@@ -703,8 +700,8 @@ export default function CartProductList() {
                             <DropdownItem key="ToBeDelivered">ที่ต้องจัดส่ง</DropdownItem>
                             <DropdownItem key="ToBeReceived">ที่ต้องได้รับ</DropdownItem>
                             <DropdownItem key="SuccessfulDelivery">ส่งสำเร็จ</DropdownItem>
-                            <DropdownItem key="Canceled">ยกเลิก</DropdownItem>
-                            <DropdownItem key="RefundAndReturn">คืนเงิน/คืนสินค้า</DropdownItem>
+                            {/* <DropdownItem key="Canceled">ยกเลิก</DropdownItem>
+                            <DropdownItem key="RefundAndReturn">คืนเงิน/คืนสินค้า</DropdownItem> */}
                         </DropdownMenu>
                     </Dropdown>
                 );
@@ -763,7 +760,7 @@ export default function CartProductList() {
                             base: "w-full sm:max-w-[44%]",
                             inputWrapper: "border-1",
                         }}
-                        placeholder="ค้นหาชื่อสินค้าในรถเข็น..."
+                        placeholder="ค้นหาออร์เดอร์ที่สั่งซื้อ..."
                         size="sm"
                         startContent={<SearchIcon className="text-default-300" />}
                         value={filterValue}
@@ -774,6 +771,31 @@ export default function CartProductList() {
 
 
                     <div className="flex gap-3">
+                        <Dropdown>
+                            <DropdownTrigger className="hidden sm:flex">
+                                <Button
+                                    endContent={<ChevronDownIcon className="text-small" />}
+                                    size="sm"
+                                    variant="flat"
+                                >
+                                    สถานะ
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu
+                                disallowEmptySelection
+                                aria-label="Table Columns"
+                                closeOnSelect={false}
+                                selectedKeys={statusFilter}
+                                selectionMode="single"
+                                onSelectionChange={setStatusFilter}
+                            >
+                                {statusOptions.map((status) => (
+                                    <DropdownItem key={status.uid} className="capitalize">
+                                        {capitalize(status.name)}
+                                    </DropdownItem>
+                                ))}
+                            </DropdownMenu>
+                        </Dropdown>
                         <Dropdown>
                             <DropdownTrigger className="">
                                 <Button
@@ -900,6 +922,7 @@ export default function CartProductList() {
                     variant="light"
                     onChange={setPage}
                 />
+                <div></div>
                 {/* <div>
                     <span className="mr-2 text-small font-medium text-default-400">
                         {selectedKeys === "all"
@@ -994,7 +1017,7 @@ export default function CartProductList() {
                     </TableBody>
                 </Table>
             </div>
-
+            
 
             {renderModal()}
         </>

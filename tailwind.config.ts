@@ -16,8 +16,11 @@ const config: Config = {
         // sans: ['var(--font-bai_jamjuree)', 'sans-serif'],
       },
       colors: {
+        transparent: 'transparent',
+        current: "currentColor",
         background: "var(--background)",
         foreground: "var(--foreground)",
+
       },
 
       animation: {

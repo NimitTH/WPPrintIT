@@ -172,7 +172,7 @@ export const Cancel = ({ size = 24, width, height, ...otherProps }: IconSvgProps
 export const columns = [
     { name: "ID", uid: "cart_item_id", sortable: true },
     { name: "สินค้า", uid: "product", },
-    { name: "ภาพสกรีน", uid: "screened_image", },
+    { name: "ภาพที่สกรีน", uid: "screened_image", },
     { name: "ราคาต่อชิ้น", uid: "price", sortable: true },
     { name: "จำนวน", uid: "quantity", sortable: true },
     { name: "ราคารวม", uid: "total_price", sortable: true },
@@ -318,7 +318,7 @@ export default function CartProductList() {
                         price: item.price,
                     })),
                     total: order.total_amount,
-                    user: { name: session?.user?.name, email: session?.user?.email },
+                    user: { name: session?.user?.name, email: session?.user?.email, phone: session?.user?.phone, address: session?.user?.address },
                 }),
             });
 
@@ -434,6 +434,7 @@ export default function CartProductList() {
 
     const closeModal = React.useCallback(() => {
         setModalScreenedImageOpen(false)
+        setModalReceiptOpen(false)
     }, []);
 
     const renderModal = React.useCallback(() => {
@@ -495,19 +496,24 @@ export default function CartProductList() {
                     <ModalContent>
                         <ModalHeader>สั่งซื้อสินค้าสำเร็จ</ModalHeader>
                         <ModalBody>
-                            ดาวน์โหลดใบเสร็จหรือไม่
-                            <Button onPress={handleDownloadReceipt} className="text-background" color="success">
+                            <div className="flex justify-center items-center">
+                                <Image className="w-full h-full mx-auto" src="https://media.tenor.com/bi6I4XsPH3sAAAAi/kitty-fancy.gif" alt="receipt" />
+                            </div>
+                            <span>
+                                ดาวน์โหลดใบเสร็จหรือไม่
+                            </span>
+                            <Button onPress={handleDownloadReceipt} className="text-white" variant="shadow" color="success">
                                 ดาวน์โหลดใบเสร็จ
                             </Button>
                         </ModalBody>
                         <ModalFooter>
-                            <Button onPress={closeModal} color="danger" radius="sm">ปิด</Button>
+                            {/* <Button onPress={closeModal} color="danger" radius="sm">ปิด</Button> */}
                         </ModalFooter>
                     </ModalContent>
                 </Modal>
             </>
         )
-    }, [isModalScreenedImageOpen, imageSrc, isModalReceiptOpen]);
+    }, [isModalScreenedImageOpen, imageSrc, isModalReceiptOpen, closeModal, handleDownloadReceipt]);
 
 
     const renderCell = React.useCallback((cartProduct: CartProducts, columnKey: React.Key) => {
@@ -518,7 +524,7 @@ export default function CartProductList() {
                 return (
                     <User
                         as={Link}
-                        href={`/products/${cartProduct.product.product_id}`}
+                        href={`/product/${cartProduct.product.product_id}`}
                         avatarProps={{ radius: "full", size: "sm", src: cartProduct.product.image }}
                         classNames={{
                             description: "text-default-500 line-clamp-1 w-[100px]",

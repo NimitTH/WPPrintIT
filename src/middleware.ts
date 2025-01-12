@@ -15,7 +15,7 @@ export async function middleware(req: Request) {
   ];
 
   // หน้าที่ต้องการให้เฉพาะ admin เข้าถึง
-  const adminPaths = ['/admin/users', '/admin/products', '/admin/order'];
+  const adminPaths = ['/admin', '/admin/user', '/admin/product', '/admin/order'];
   
   const isProtectedPath = protectedPaths.some((path) => req.url.includes(path));
   if (isProtectedPath && !token) {
@@ -45,5 +45,7 @@ export const config = {
     '/cart',
     '/order',
     '/profile',
+    '/password',
+    '/api/user/password',
   ],
 };

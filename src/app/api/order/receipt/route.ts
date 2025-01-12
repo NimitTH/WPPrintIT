@@ -23,24 +23,57 @@ export async function POST(req: NextRequest) {
             pdfStream.font('Courier');
         }
 
-
         const headers = new Headers();
         headers.set('Content-Type', 'application/pdf');
         headers.set('Content-Disposition', `attachment; filename=receipt-${orderId}.pdf`);
 
-        pdfStream.text('ใบเสร็จ / Receipt', { align: 'center' });
+        pdfStream.text('WPPrintIT', { align: 'center', });
+        pdfStream.text('ใบเสร็จ / Receipt', { align: 'center', });
+        pdfStream.moveDown();
+    
+        pdfStream.text(`Order ID: ${orderId}`);
+        pdfStream.text(`ผู้สั่งซื้อ: ${user.name}`);
+        pdfStream.text(`อีเมล: ${user.email}`);
+        pdfStream.text(`เบอร์โทรศัพท์: ${user.phone}`);
+        pdfStream.text(`ที่อยู่: ${user.address}`);
+        pdfStream.text(`วันที่: ${new Date().toLocaleDateString()}`, { align: 'right' });
+        pdfStream.moveDown();
+
+        pdfStream.text('รายการสินค้าที่สั่งซื้อ', { align: 'center', });
+        pdfStream.moveDown();
+
+        // Define table columns
+        const tableStartX = 50;
+        const tableEndX = 550;
+        
+        const productNameColumn = 60;
+        const priceColumn = 370;
+        const quantityColumn = 450;
+        let currentY = pdfStream.y;
+
+        // Draw column headers
+        pdfStream.text('ชื่อสินค้า', productNameColumn, currentY);
+        pdfStream.text('ราคา', priceColumn, currentY);
+        pdfStream.text('จำนวน', quantityColumn, currentY);
+        pdfStream.moveDown();
+
+        // Draw separator line
+        currentY = pdfStream.y;
+        pdfStream.moveTo(tableStartX, currentY)
+            .lineTo(tableEndX, currentY)
+            .stroke();
         pdfStream.moveDown();
         
-        pdfStream.text(`Order ID: ${orderId}`);
-        pdfStream.text(`Customer: ${user.name}`);
-        pdfStream.text(`Email: ${user.email}`);
-        pdfStream.moveDown();
-        pdfStream.text('รายการสินค้า / Items:', { align: 'center' });
-        items.forEach((item: any, index: number) => {
-            pdfStream.text(`${index + 1}. ${item.productName} - ${item.quantity} x ฿${item.price}`, { align: 'left' });
+         // Populate table rows
+         items.forEach((item: any) => {
+            pdfStream.text(item.productName, productNameColumn, pdfStream.y);
+            pdfStream.text(`฿${item.price.toFixed(2)}`, -250, pdfStream.y, { align: 'right' });
+            pdfStream.text(item.quantity.toString(), -150, pdfStream.y, { align: 'right' });
+            pdfStream.moveDown();
         });
+        
         pdfStream.moveDown();
-        pdfStream.text(`รวมทั้งหมด / Total: ฿${total}`, { align: 'right' });
+        pdfStream.text(`รวมทั้งหมด: ${new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(total)}`, 400, pdfStream.y, { align: 'right', underline: true });
         pdfStream.end();
 
         const pdf = await new Promise<Buffer>((resolve, reject) => {

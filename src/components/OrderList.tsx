@@ -917,7 +917,7 @@ export default function CartProductList() {
                             </div>
                         }
                     />
-                    <Tab
+                    {/* <Tab
                         key="Canceled"
                         title={
                             <div className="flex items-center space-x-2">
@@ -934,7 +934,7 @@ export default function CartProductList() {
                                 <span>คืนเงิน / คืนสินค้า</span>
                             </div>
                         }
-                    />
+                    /> */}
                 </Tabs>
             </div>
 

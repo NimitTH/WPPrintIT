@@ -17,7 +17,7 @@ export default function ProductListItem1() {
 
     const fetchProduct = async () => {
         try {
-            const res = await axios.get("/api/products");
+            const res = await axios.get("/api/product");
             setProduct(res.data);
         } catch (error) {
             console.error(error);
@@ -50,10 +50,10 @@ export default function ProductListItem1() {
                 onClear={() => setFilterValue("")}
                 onValueChange={onSearchChange}
             />
-            <div className=" px-2  grid gap-3 xl:grid-cols-5 md:grid-cols-4 sm:grid-cols-3 grid-cols-2">
+            <div className=" px-2 grid gap-3 xl:grid-cols-5 md:grid-cols-4 sm:grid-cols-3 grid-cols-2">
                 {filteredProducts.map((product, index) => (
                     <div key={index} className="mt-3 flex flex-col">
-                        <Link href={`/products/${product.product_id}`} className="flex-auto">
+                        <Link href={`/product/${product.product_id}`} className="flex-auto">
                             <Image
                                 isZoomed
                                 alt={product.name}
@@ -63,7 +63,7 @@ export default function ProductListItem1() {
                                 src={product.image}
                             />
                             <div className="mt-2 flex justify-between">
-                                <h3 className="text-medium font-semibold text-default-900">{product.product_name}</h3>
+                                <h3 className="text-medium font-semibold text-default-900 line-clamp-2">{product.product_name}</h3>
                                 <p className="text-medium font-semibold">
                                     <span className='text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-sky-500'>
                                         ฿{product.price}

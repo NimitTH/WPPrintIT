@@ -26,17 +26,13 @@ import { signOut } from "next-auth/react"
 import { useSession } from "next-auth/react";
 import axios from "axios";
 
-import { CartIcon, SearchIcon, HomeIcon, ProfileIcon } from "@/components/Icon"
+import { CartIcon, SearchIcon, HomeIcon, ProfileIcon, OrderIcon, PasswordIcon } from "@/components/Icon"
 
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 
 
-const menuItems = [
-    { name: "บ้าน", href: "/home", icon: <HomeIcon /> },
-    { name: "รถเข็น", href: "/cart", icon: <CartIcon /> },
-    { name: "รายการสั่งซื้อ", href: "/order", icon: <ProfileIcon /> },
-];
+
 
 export default function Component(props: NavbarProps) {
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -59,12 +55,36 @@ export default function Component(props: NavbarProps) {
         }
         if (window.location.hash === "#_=_") {
             window.history.replaceState(null, "", window.location.pathname);
-          }
+        }
     }, [session])
-
     const [isInvisible, setIsInvisible] = React.useState<boolean>();
     const pathname = usePathname();
     const isActive = (href: string) => pathname === href;
+
+    const menuItems = [
+        { name: "บ้าน", href: "/home", icon: <HomeIcon /> },
+        {
+            name: "รถเข็น",
+            href: "/cart",
+            icon: <Badge
+                content={cart.length}
+                shape="circle"
+                size="sm"
+                color="danger"
+                showOutline={false}
+                isInvisible={cart.length > 0 ? isInvisible : !isInvisible}
+            >
+                <CartIcon />
+            </Badge>
+        },
+        {
+            name: "รายการสั่งซื้อ", href: "/order", icon:
+                <OrderIcon />
+        },
+        { name: "จัดการบัญชี", href: "/profile", icon: <ProfileIcon /> },
+        { name: "จัดการรหัสผ่าน", href: "/password", icon: <PasswordIcon /> },
+    ];
+
 
     return (
         <Navbar
@@ -90,27 +110,27 @@ export default function Component(props: NavbarProps) {
                 <p className="font-semibold mr-2">WPPrintIT</p>
                 {/* <span className="font-medium">|</span> */}
                 {/* <span className="font-medium">รถเข็น</span> */}
-                
+
             </NavbarBrand>
 
             {/* Center Content */}
 
             <NavbarContent justify="center" className=" hidden md:flex">
-                {menuItems.map((item, index) => (
+                {menuItems.slice(0, 3).map((item, index) => (
                     <NavbarItem key={index}>
                         <Link
                             href={item.href}
                             aria-current={isActive(item.href) ? "page" : undefined}
                             className={
                                 isActive(item.href)
-                                    ? "text-current font-semibold"
+                                    ? "text-current font-black"
                                     : "text-default-500"
                             }
                             size="sm"
                         >
                             <span className="mr-2">{item.icon}</span>
                             {item.name}
-                            
+
                         </Link>
                     </NavbarItem>
                 ))}
@@ -123,29 +143,15 @@ export default function Component(props: NavbarProps) {
                     {status === 'authenticated' && session.user ? (
                         <>
                             <ThemeSwitch />
-                            {/* <Badge
-                                content={cart.length}
-                                shape="circle"
-                                size="sm"
-                                color="danger"
-                                showOutline={false}
-                                isInvisible={cart.length > 0 ? isInvisible : !isInvisible}
-                            >
-                                <Button
-                                    as={Link}
-                                    href="/cart"
-                                    className="bg-transparent"
-                                    isIconOnly
-                                >
-                                    <CartIcon size={24} />
-                                </Button>
-                            </Badge> */}
+
                             <Dropdown>
                                 <DropdownTrigger>
                                     <User
                                         as="button"
+                                        key={session.user.image}
                                         avatarProps={{
                                             isBordered: true,
+
                                             src: session.user.image,
                                             // src: !session.user.image ? null : session.user.image,
                                         }}
@@ -157,6 +163,9 @@ export default function Component(props: NavbarProps) {
                                 <DropdownMenu aria-label="User Actions" variant="flat">
                                     <DropdownItem key="settings" href="/profile">
                                         จัดการบัญชี
+                                    </DropdownItem>
+                                    <DropdownItem key="settings" href="/password">
+                                        เปลี่ยนรหัสผ่าน
                                     </DropdownItem>
                                     <DropdownItem key="logout" color="danger" onPress={() => signOut({ callbackUrl: '/' })}>
                                         ออกจากระบบ
@@ -191,11 +200,14 @@ export default function Component(props: NavbarProps) {
                     <>
                         {menuItems.map((item, index) => (
                             <NavbarMenuItem key={`${item}-${index}`} className="">
-                                <Link className="mb-2 w-full text-background" href={item.href} size="md">
+                                <Link
+                                    className={isActive(item.href) ? "mb-2 w-full text-background" : "mb-2 w-full text-default-500"}
+                                    href={item.href} size="md">
                                     <span className="mr-2">{item.icon}</span> {/* แสดงไอคอน */}
                                     {item.name}
                                 </Link>
                                 {index < menuItems.length - 1 && <Divider className="opacity-50" />}
+
                             </NavbarMenuItem>
                         ))}
 

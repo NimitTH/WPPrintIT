@@ -1,40 +1,48 @@
-// app/tabs/page.tsx
-"use client";
+"use client"
+import { useState } from "react";
+import axios from "axios";
 
-import { Card, CardBody, Tab, Tabs } from "@nextui-org/react";
-import {usePathname} from "next/navigation";
+export default function CreateEvent() {
+  const [title, setTitle] = useState("");
+  const [eventDate, setEventDate] = useState("");
 
-export default function ExampleClientRouterWithTabs() {
-  const pathname = usePathname();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("/api/events", { title, eventDate });
+      alert("Event created successfully!");
+      setTitle("");
+      setEventDate("");
+    } catch (error) {
+      console.error(error);
+      alert("Error creating event.");
+    }
+  };
 
   return (
-    <Tabs aria-label="Options" selectedKey={pathname}>
-      <Tab key="photos" title="Photos" href="/photos">
-        <Card>
-          <CardBody>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-          </CardBody>
-        </Card>
-      </Tab>
-      <Tab key="music" title="Music" href="/music">
-        <Card>
-          <CardBody>
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-            commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-            dolore eu fugiat nulla pariatur.
-          </CardBody>
-        </Card>
-      </Tab>
-      <Tab key="videos" title="Videos" href="/videos">
-        <Card>
-          <CardBody>
-            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-            mollit anim id est laborum.
-          </CardBody>
-        </Card>
-      </Tab>
-    </Tabs>
+    <div>
+      <h1>Create Event</h1>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Title:</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Event Date:</label>
+          <input
+            type="datetime-local"
+            value={eventDate}
+            onChange={(e) => setEventDate(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Create Event</button>
+      </form>
+    </div>
   );
 }

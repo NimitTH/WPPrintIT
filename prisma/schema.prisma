@@ -49,7 +49,7 @@ model cartitem {
   productId      Int
   total_price    Float
   cart           cart    @relation(fields: [cartId], references: [cart_id], map: "CartItem_cartId_fkey")
-  product        product @relation(fields: [productId], references: [product_id], map: "CartItem_productId_fkey")
+  product        product @relation(fields: [productId], references: [product_id], onDelete: Cascade, map: "CartItem_productId_fkey")
   user           user    @relation(fields: [userId], references: [id], map: "CartItem_userId_fkey")
 
   @@index([cartId], map: "CartItem_cartId_fkey")
@@ -58,11 +58,12 @@ model cartitem {
 }
 
 model category {
-  category_id       Int                 @id @default(autoincrement())
-  name              String              @unique(map: "Category_name_key")
-  createdAt         DateTime            @default(now())
-  producttocategory producttocategory[]
-  product           product[]           @relation("producttocategory")
+  category_id   Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now())
+  category_name String
+  updatedAt     DateTime @updatedAt
+
+  productcategory productcategory[] @relation(map: "ProductCategory_categoryId_fkey")
 }
 
 model history {
@@ -105,61 +106,43 @@ model orderitem {
   updatedAt      DateTime @updatedAt
   total_price    Float
   order          order    @relation(fields: [orderId], references: [order_id], map: "OrderItem_orderId_fkey")
-  product        product  @relation(fields: [productId], references: [product_id], map: "OrderItem_productId_fkey")
+  product        product  @relation(fields: [productId], references: [product_id], onDelete: Cascade, map: "OrderItem_productId_fkey")
 
   @@index([orderId], map: "OrderItem_orderId_fkey")
   @@index([productId], map: "OrderItem_productId_fkey")
 }
 
 model product {
-  product_id        Int                 @id @default(autoincrement())
-  product_name      String
-  description       String?
-  price             Float
-  image             String?
-  stock             Int?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  cartitem          cartitem[]
-  orderitem         orderitem[]
-  productcolor      productcolor[]
-  productsize       productsize[]
-  producttocategory producttocategory[]
-  review            review[]
-  category          category[]          @relation("producttocategory")
+  product_id   Int         @id @default(autoincrement())
+  product_name String
+  description  String?
+  price        Float
+  image        String?
+  stock        Int?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  cartitem     cartitem[]
+  orderitem    orderitem[]
+  review       review[]
+
+  productcategory productcategory[] @relation(map: "ProductCategory_productId_fkey")
 }
+
 
 model productcolor {
   color_id   Int      @id @default(autoincrement())
-  color_name String   @unique(map: "ProductColor_color_name_key")
+  color_name String
   productId  Int?
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  product    product? @relation(fields: [productId], references: [product_id], map: "ProductColor_productId_fkey")
-
-  @@index([productId], map: "ProductColor_productId_fkey")
+  updatedAt  DateTime
 }
 
 model productsize {
   size_id   Int      @id @default(autoincrement())
-  size_name String   @unique(map: "ProductSize_size_name_key")
+  size_name String
   productId Int?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  product   product? @relation(fields: [productId], references: [product_id], map: "ProductSize_productId_fkey")
-
-  @@index([productId], map: "ProductSize_productId_fkey")
-}
-
-model producttocategory {
-  productId  Int
-  categoryId Int
-  createdAt  DateTime @default(now())
-  category   category @relation(fields: [categoryId], references: [category_id], map: "ProductToCategory_categoryId_fkey")
-  product    product  @relation(fields: [productId], references: [product_id], map: "ProductToCategory_productId_fkey")
-
-  @@id([productId, categoryId])
-  @@index([categoryId], map: "ProductToCategory_categoryId_fkey")
+  updatedAt DateTime
 }
 
 model review {
@@ -171,7 +154,7 @@ model review {
   productId   Int
   orderId     Int
   order       order    @relation(fields: [orderId], references: [order_id], map: "Review_orderId_fkey")
-  product     product  @relation(fields: [productId], references: [product_id], map: "Review_productId_fkey")
+  product     product  @relation(fields: [productId], references: [product_id], onDelete: Cascade, map: "Review_productId_fkey")
   user        user     @relation(fields: [userId], references: [id], map: "Review_userId_fkey")
 
   @@index([orderId], map: "Review_orderId_fkey")
@@ -199,13 +182,13 @@ model user {
   email         String?    @unique(map: "User_email_key")
   emailVerified DateTime?
   password      String?
-  money         Float?     @default(1000)
   address       String?
   image         String?
-  status        String?    @default("approve")
   role          user_role  @default(USER)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
+  money         Float?     @default(1000)
+  status        String?    @default("approve")
   account       account?
   cart          cart[]
   cartitem      cartitem[]
@@ -221,6 +204,17 @@ model verificationtoken {
   expires    DateTime
 
   @@unique([identifier, token], map: "VerificationToken_identifier_token_key")
+}
+
+model productcategory {
+  productId  Int
+  categoryId Int
+  createdAt  DateTime @default(now())
+  category   category @relation(fields: [categoryId], references: [category_id], map: "ProductCategory_categoryId_fkey")
+  product    product  @relation(fields: [productId], references: [product_id], onDelete: Cascade, map: "ProductCategory_productId_fkey")
+
+  @@id([productId, categoryId])
+  @@index([categoryId], map: "ProductCategory_categoryId_fkey")
 }
 
 enum user_role {

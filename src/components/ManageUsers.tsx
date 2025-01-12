@@ -39,7 +39,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import ListBox from "./ListBox";
+import ListBox from "./ListManage";
 
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
@@ -342,7 +342,7 @@ type Schema = z.infer<typeof schema>;
 export const columns = [
     { name: "ID", uid: "id", sortable: true },
     { name: "ชื่อผู้ใช้", uid: "user" },
-    { name: "จำนวนเงิน", uid: "money" },
+    // { name: "จำนวนเงิน", uid: "money" },
     { name: "Role", uid: "role" },
     { name: "สถานะ", uid: "status" },
     { name: "ACTIONS", uid: "actions" },
@@ -747,10 +747,10 @@ export default function CartProductList() {
                     </User>
                 );
 
-            case "money":
-                return (
-                    <span>{new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(user.money)}</span>
-                )
+            // case "money":
+            //     return (
+            //         <span>{new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(user.money)}</span>
+            //     )
 
             case "role":
                 return (

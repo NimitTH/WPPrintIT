@@ -4,9 +4,11 @@ import axios from 'axios'
 import { useSession } from 'next-auth/react';
 import { Image, Button, Input } from '@nextui-org/react';
 
-import NavBarTest from "@/components/NavBar"
+import NavBar from "@/components/NavBar"
 import { Icon } from "@iconify/react";
 import { MinusIcon1, PlusIcon1 } from '@/components/Icon'
+
+import { useRouter } from 'next/navigation';
 
 type Props = {
     productid: {
@@ -15,13 +17,15 @@ type Props = {
 }
 
 export default function Product(params: Props) {
+    const router = useRouter()
     const id = params.productid.id
 
     const [product, setProduct] = useState<any>([])
+   
 
     const fetchProduct = async (id: Number) => {
         try {
-            const response = await axios.get(`/api/products/${id}`)
+            const response = await axios.get(`/api/product/${id}`)
             setProduct(response.data)
 
         } catch (error) {
@@ -34,13 +38,18 @@ export default function Product(params: Props) {
         fetchProduct(Number(id))
     }, [id])
 
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
 
     const [quantity, setQuantity] = useState(1)
 
     const [screenedImage, setScreenedImage] = useState<string | null>(null)
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (status === "unauthenticated") {
+            alert("กรุณาเข้าสู่ระบบก่อนทำรายการ")
+            router.push("/signin")
+            return
+        }
         const file = e.target.files?.[0];
         console.log(file);
 
@@ -61,6 +70,13 @@ export default function Product(params: Props) {
 
     const handleSubmitCart = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        if (status === "unauthenticated") {
+            alert("กรุณาเข้าสู่ระบบก่อนทำรายการ")
+            router.push("/signin")
+            return
+        }
+
         let test = product.price * quantity
         try {
             const payload = {
@@ -72,7 +88,7 @@ export default function Product(params: Props) {
             };
             
             const res = await axios.post('/api/cart', payload)
-
+            alert("เพิ่มสินค้าลงในตะกร้าเรียบร้อย")
             console.log(res.data)
         } catch (error) {
             console.error(error);
@@ -88,18 +104,18 @@ export default function Product(params: Props) {
 
     return (
         <div>
-            <NavBarTest />
+            <NavBar />
             <div className='mx-auto max-w-screen-lg'>
-                <form className='mt-4 flex' onSubmit={handleSubmitCart}>
+                <form className='mt-4 p-4 flex flex-wrap' onSubmit={handleSubmitCart}>
                     <Image
                         isZoomed
                         isBlurred
                         key={product.image}
                         loading='lazy'
                         alt={product.description}
-                        className='sm:max-2xl:w-[400px] sm:max-2xl:h-[400px]'
+                        className='flex justify-center sm:max-2xl:w-[400px] sm:max-2xl:h-[400px]'
                         classNames={{
-                            wrapper: "mr-6",
+                            wrapper: "mr-6 max-sm:mr-0",
                             img: "object-cover w-full h-full",
                             zoomedWrapper: "sm:w-[400px] sm:h-[400px]"
                         }}
@@ -107,7 +123,7 @@ export default function Product(params: Props) {
                         shadow="sm"
                         src={product.image}
                     />
-                    <div className='flex flex-col gap-4'>
+                    <div className='max-sm:w-full flex flex-col gap-4 max-sm:mt-4'>
                         <h3 className="text-3xl font-bold ">
                             <span className=' '>
                                 {product.product_name}
@@ -138,7 +154,7 @@ export default function Product(params: Props) {
                                 เพิ่มภาพ
                             </Input>
                         </div>
-                        <div className='flex flex-row gap-5 items-center'>
+                        <div className='flex flex-row gap-5 items-center flex-auto'>
                             <p className="text-xl font-bold text-default-700">จำนวน</p>
                             <Button
                                 isIconOnly
@@ -162,6 +178,8 @@ export default function Product(params: Props) {
                             color="primary"
                             radius="lg"
                             fullWidth
+                            className='flex'
+                            
                             variant="solid"
                             startContent={<Icon icon="vaadin:cart" width={24} ></Icon>}
                             type='submit'
