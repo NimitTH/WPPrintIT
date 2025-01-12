@@ -1,5 +1,5 @@
 "use client";
-import React, { SVGProps, useState, useEffect } from "react";
+import React, { SVGProps, useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
     Table,
@@ -187,6 +187,7 @@ export default function CartProductList() {
 
     type CartProducts = (typeof cartProducts)[0];
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const fetchCartProducts = async () => {
         try {
             if (!session) return; // หยุดถ้า session ยังไม่มีค่า
@@ -202,7 +203,7 @@ export default function CartProductList() {
         if (session) {
             fetchCartProducts();
         }
-    }, [session])
+    }, [fetchCartProducts, session])
 
     const [filterValue, setFilterValue] = useState("");
     const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
@@ -237,7 +238,7 @@ export default function CartProductList() {
             );
         }
         return filteredCartProducts;
-    }, [cartProducts, filterValue, statusFilter]);
+    }, [cartProducts, filterValue, hasSearchFilter]);
 
     const items = React.useMemo(() => {
         const start = (page - 1) * rowsPerPage;
@@ -265,10 +266,11 @@ export default function CartProductList() {
 
     // ✦. ── ✦. ── ✦. อัพเดทค่าจำนวน .✦ ── .✦ ── .✦
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const updateQuantity = async (cartItemId: number, newQuantity: number, price: number) => {
         if (newQuantity < 1) return;
         try {
-            let total_price = newQuantity * price;
+            const total_price = newQuantity * price;
 
             await axios.put(`/api/cart/${cartItemId}`, { quantity: newQuantity, total_price: total_price });
             setCartProducts((prevProducts) =>
@@ -302,6 +304,7 @@ export default function CartProductList() {
 
     // ✦. ── ✦. ── ✦. จัดการสั่งซื้อ .✦ ── .✦ ── .✦
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleDownloadReceipt = async () => {
         try {
             const res = await axios.get("/api/order/latest", { params: { userId: session?.user?.id } });
@@ -337,6 +340,7 @@ export default function CartProductList() {
     };
 
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleSubmit = async () => {
         try {
             console.log(selectedIds);
@@ -383,6 +387,7 @@ export default function CartProductList() {
         setModalScreenedImageOpen(true)
     }
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleImageChange = () => {
         const input = document.createElement("input");
         input.type = "file";
@@ -415,6 +420,7 @@ export default function CartProductList() {
         input.click();
     };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleImageDelete = async () => {
         try {
 
@@ -513,7 +519,7 @@ export default function CartProductList() {
                 </Modal>
             </>
         )
-    }, [isModalScreenedImageOpen, imageSrc, isModalReceiptOpen, closeModal, handleDownloadReceipt]);
+    }, [isModalScreenedImageOpen, onOpenChange, closeModal, imageSrc, handleImageChange, handleImageDelete, isModalReceiptOpen, handleDownloadReceipt]);
 
 
     const renderCell = React.useCallback((cartProduct: CartProducts, columnKey: React.Key) => {
@@ -622,7 +628,7 @@ export default function CartProductList() {
             default:
                 return cellValue;
         }
-    }, [isModalScreenedImageOpen, setImageSrc, onOpenChange, closeModal, setModalScreenedImageOpen]);
+    }, [updateQuantity]);
 
     const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));
@@ -702,16 +708,9 @@ export default function CartProductList() {
                 </div>
             </div>
         );
-    }, [
-        filterValue,
-        statusFilter,
-        visibleColumns,
-        onSearchChange,
-        onRowsPerPageChange,
-        cartProducts.length,
-        hasSearchFilter,
-    ]);
+    }, [filterValue, visibleColumns, onSearchChange, onRowsPerPageChange, cartProducts.length]);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleDeleteSelected = async () => {
         try {
             const selectedIds = Array.from(normalizedSelectedKeys).map((id: any) => parseInt(id, 10));
@@ -752,7 +751,7 @@ export default function CartProductList() {
         );
 
         return totalPrice;
-    }, [cartProducts, selectedKeys]);
+    }, [cartProducts, selectedIds]);
 
     const bottomContent = React.useMemo(() => {
         const totalPrice = calculateTotalPrice();
@@ -812,7 +811,7 @@ export default function CartProductList() {
                 </div>
             </div>
         );
-    }, [selectedKeys, items.length, calculateTotalPrice, page, pages, hasSearchFilter]);
+    }, [calculateTotalPrice, selectedKeys, cartProducts.length, hasSearchFilter, page, pages, handleDeleteSelected, handleSubmit]);
 
 
 

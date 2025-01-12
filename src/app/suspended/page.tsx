@@ -1,8 +1,8 @@
 import React from 'react'
 
-type Props = {}
 
-export default function page({ }: Props) {
+
+export default function page() {
     return (
         <div className='flex flex-col gap-2 justify-center items-center h-screen'>
             <p className='text-red-500 text-2xl font-bold'>

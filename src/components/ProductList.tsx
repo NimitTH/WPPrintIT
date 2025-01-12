@@ -1,8 +1,7 @@
 "use client";
-import { Card, CardBody, CardFooter, Image, Button, Input } from "@nextui-org/react";
+import { Image,Input } from "@nextui-org/react";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import NextImage from "next/image";
 import Link from "next/link";
 import { SearchIcon } from "./Icon";
 import React from "react";

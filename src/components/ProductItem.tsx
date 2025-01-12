@@ -23,7 +23,7 @@ export default function Product(params: Props) {
     const [product, setProduct] = useState<any>([])
    
 
-    const fetchProduct = async (id: Number) => {
+    const fetchProduct = async (id: number) => {
         try {
             const response = await axios.get(`/api/product/${id}`)
             setProduct(response.data)
@@ -77,7 +77,7 @@ export default function Product(params: Props) {
             return
         }
 
-        let test = product.price * quantity
+        const test: number = product.price * quantity
         try {
             const payload = {
                 id: session?.user?.id,

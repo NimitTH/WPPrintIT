@@ -14,28 +14,29 @@ import {
     Dropdown,
     DropdownMenu,
     DropdownItem,
-    Chip,
+
     User,
     Pagination,
     Selection,
-    ChipProps,
+
     SortDescriptor,
     Image,
     Modal,
     ModalContent,
     ModalHeader,
     ModalBody,
-    ModalFooter,
+
     useDisclosure,
-    Avatar,
-    Tabs, Tab, Popover, PopoverTrigger, PopoverContent, Card, CardHeader, CardBody, CardFooter,
-    AvatarGroup
+
+    Popover, PopoverTrigger, PopoverContent, Card, CardHeader, CardBody, CardFooter,
+
 } from "@nextui-org/react";
 
-import Link from "next/link";
 import { useSession } from "next-auth/react";
 
 import ListBox from "./ListManage";
+
+import NextImage from 'next/image'
 
 
 
@@ -123,6 +124,7 @@ export const DeliverIcon = (props: IconSvgProps) => {
             width="24"
             height="24"
             viewBox="0 0 24 24"
+            {...props}
         >
             <path
                 fill="currentColor"
@@ -333,7 +335,7 @@ const INITIAL_VISIBLE_COLUMNS = ["order_id", "user", "product", "total_quantity"
 
 export default function CartProductList() {
     const { data: session } = useSession();
-    const [orderItems, setOrderItems] = useState<any[]>([]);
+    const [orderItems, setOrderItems] = useState([]);
     // const [selectedStatus, setSelectedStatus] = useState<string>('ToBePaid');
 
     type OrderItems = (typeof orderItems)[0];
@@ -379,48 +381,49 @@ export default function CartProductList() {
         return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
     }, [visibleColumns]);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const statusOptions = [
-        {name: "ที่ต้องชำระ", uid: "ToBePaid"},
-        {name: "ที่ต้องจัดส่ง", uid: "ToBeDelivered"},
-        {name: "ที่ต้องได้รับ", uid: "ToBeReceived"},
-        {name: "ส่งสำเร็จ", uid: "SuccessfulDelivery"},
+        { name: "ที่ต้องชำระ", uid: "ToBePaid" },
+        { name: "ที่ต้องจัดส่ง", uid: "ToBeDelivered" },
+        { name: "ที่ต้องได้รับ", uid: "ToBeReceived" },
+        { name: "ส่งสำเร็จ", uid: "SuccessfulDelivery" },
         // {name: "ยกเลิก", uid: "Canceled"},
         // {name: "คืนเงิน/คืนสินค้า", uid: "RefundAndReturn"},
-      ];
+    ];
 
-      console.log(orderItems);
-      
+    console.log(orderItems);
+
 
     const filteredItems = React.useMemo(() => {
         let filteredOrderItems = [...orderItems];
 
         if (hasSearchFilter) {
-            filteredOrderItems = filteredOrderItems.filter((order) =>
-                order.orderitem.some((item: any) => 
+            filteredOrderItems = filteredOrderItems.filter((order: any) =>
+                order.orderitem.some((item: any) =>
                     item.product.product_name.toLowerCase().includes(filterValue.toLowerCase())
                 )
             );
         }
 
         if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
-            filteredOrderItems = filteredOrderItems.filter((orderItems) =>
+            filteredOrderItems = filteredOrderItems.filter((orderItems: any) =>
                 Array.from(statusFilter).includes(orderItems.status),
             );
         }
 
         return filteredOrderItems;
-    }, [orderItems, filterValue, statusFilter]);
+    }, [orderItems, hasSearchFilter, statusFilter, statusOptions.length, filterValue]);
 
     const items = React.useMemo(() => {
         const start = (page - 1) * rowsPerPage;
         const end = start + rowsPerPage;
 
         return filteredItems.slice(start, end);
-    }, [page, orderItems, filteredItems, rowsPerPage]);
+    }, [page, filteredItems, rowsPerPage]);
 
     const sortedItems = React.useMemo(() => {
 
-        return [...items].sort((a: OrderItems, b: OrderItems) => {
+        return [...items].sort((a: any, b: any) => {
 
             const first = sortDescriptor.column === "price"
                 ? a.order_item_id : a[sortDescriptor.column as keyof OrderItems];
@@ -505,6 +508,7 @@ export default function CartProductList() {
         }
     };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleStatusChange = async (status: string, order_item_id: number) => {
         try {
             console.log(status, order_item_id);
@@ -516,6 +520,7 @@ export default function CartProductList() {
         }
     }
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const statusMap: Record<string, string> = {
         "ToBePaid": "ที่ต้องชำระ",
         "ToBeDelivered": "ที่ต้องจัดส่ง",
@@ -527,7 +532,7 @@ export default function CartProductList() {
 
     // ✦. ── ✦. ── ✦. พวก Modal .✦ ── .✦ ── .✦
 
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const { onOpenChange } = useDisclosure();
     const [isModalScreenedImageOpen, setModalScreenedImageOpen] = useState(false);
 
     const closeModal = React.useCallback(() => {
@@ -561,7 +566,7 @@ export default function CartProductList() {
                 </ModalContent>
             </Modal>
         )
-    }, [isModalScreenedImageOpen, imageSrc]);
+    }, [isModalScreenedImageOpen, onOpenChange, closeModal, imageSrc]);
 
     const downloadImage = (url: string) => {
         const link = document.createElement('a');
@@ -573,7 +578,7 @@ export default function CartProductList() {
     };
 
 
-    const renderCell = React.useCallback((order: OrderItems, columnKey: React.Key) => {
+    const renderCell = React.useCallback((order: any, columnKey: React.Key) => {
         const cellValue = order[columnKey as keyof OrderItems];
 
         switch (columnKey) {
@@ -603,12 +608,12 @@ export default function CartProductList() {
                                     รายละเอียดสินค้าที่สั่งซื้อ
                                 </CardHeader>
                                 <CardBody className="px-3 py-0">
-                                    {order.orderitem.map((item: any, index: number) => (
+                                    {order.orderitem.map((item: any) => (
                                         <div key={item.order_item_id} className="p-2 border-b">
                                             <div className="flex flex-row gap-2">
                                                 <div className="flex flex-col">
                                                     <p>สินค้า</p>
-                                                    <img src={item.product.image} alt={`Product ${item.productId}`} className="w-16 h-16" />
+                                                    <NextImage src={item.product.image} alt={`Product ${item.productId}`} className="w-16 h-16" />
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <p>Product ID: {item.productId}</p>
@@ -618,7 +623,7 @@ export default function CartProductList() {
                                                 </div>
                                                 <div>
                                                     <p>ภาพที่จะสกรีน</p>
-                                                    <img src={item.screened_image ?? "/cart/images/000000.png"} onClick={() => downloadImage(item.screened_image)} alt={`Product ${item.productId}`} className="w-16 h-16" />
+                                                    <NextImage src={item.screened_image ?? "/cart/images/000000.png"} onClick={() => downloadImage(item.screened_image as string)} alt={`Product ${item.productId}`} className="w-16 h-16" />
                                                 </div>
                                             </div>
                                         </div>
@@ -693,9 +698,9 @@ export default function CartProductList() {
                         }}
                     >
                         <DropdownTrigger>
-                            <Button className="bg-transparent">{statusMap[order.status]}</Button>
+                            <Button className="bg-transparent">{statusMap[(order as any).status]}</Button>
                         </DropdownTrigger>
-                        <DropdownMenu onAction={(key) => handleStatusChange(key as string, order.order_id)}>
+                        <DropdownMenu onAction={(key) => handleStatusChange(key as string, (order as any).order_id)}>
                             <DropdownItem key="ToBePaid">ที่ต้องชำระ</DropdownItem>
                             <DropdownItem key="ToBeDelivered">ที่ต้องจัดส่ง</DropdownItem>
                             <DropdownItem key="ToBeReceived">ที่ต้องได้รับ</DropdownItem>
@@ -732,7 +737,7 @@ export default function CartProductList() {
             default:
                 return cellValue;
         }
-    }, [isModalScreenedImageOpen, setImageSrc, onOpenChange, closeModal, setModalScreenedImageOpen]);
+    }, [statusMap, handleStatusChange]);
 
     const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));
@@ -839,38 +844,30 @@ export default function CartProductList() {
                 </div>
             </div>
         );
-    }, [
-        filterValue,
-        statusFilter,
-        visibleColumns,
-        onSearchChange,
-        onRowsPerPageChange,
-        orderItems.length,
-        hasSearchFilter,
-    ]);
+    }, [filterValue, onSearchChange, statusFilter, statusOptions, visibleColumns, orderItems.length, onRowsPerPageChange]);
 
-    const handleDeleteSelected = async () => {
-        try {
-            const selectedIds = Array.from(normalizedSelectedKeys).map((id: any) => parseInt(id, 10));
+    // const handleDeleteSelected = async () => {
+    //     try {
+    //         const selectedIds = Array.from(normalizedSelectedKeys).map((id: any) => parseInt(id, 10));
 
-            await Promise.all(
-                selectedIds.map((id) => axios.delete(`/api/cart/${id}`))
-            );
+    //         await Promise.all(
+    //             selectedIds.map((id) => axios.delete(`/api/cart/${id}`))
+    //         );
 
-            setOrderItems((prevProducts) =>
-                prevProducts.filter((product) => !selectedIds.includes(product.order_item_id))
-            );
+    //         setOrderItems((prevProducts) =>
+    //             prevProducts.filter((product) => !selectedIds.includes(product.order_item_id))
+    //         );
 
-            setSelectedKeys(new Set([]));
-        } catch (error) {
-            console.error("Error deleting selected items:", error);
-        }
-    }
+    //         setSelectedKeys(new Set([]));
+    //     } catch (error) {
+    //         console.error("Error deleting selected items:", error);
+    //     }
+    // }
 
     const normalizedSelectedKeys = React.useMemo(() => {
         if (selectedKeys === "all") {
             // สร้าง Set<string> ที่มี cart_item_id ของสินค้าทั้งหมด
-            return new Set(orderItems.map((product) => String(product.order_item_id)));
+            return new Set(orderItems.map((product: any) => String(product.order_item_id)));
         }
         return selectedKeys;
     }, [selectedKeys, orderItems]);
@@ -879,17 +876,17 @@ export default function CartProductList() {
 
     const calculateTotalPrice = React.useCallback(() => {
 
-        const selectedItems = orderItems.filter((product) =>
+        const selectedItems = orderItems.filter((product: any) =>
             selectedIds.includes(product.order_item_id)
         );
 
         const totalPrice = selectedItems.reduce(
-            (sum, item) => sum + item.product.price * item.quantity,
+            (sum, item: any) => sum + item.product.price * item.quantity,
             0
         );
 
         return totalPrice;
-    }, [orderItems, selectedKeys]);
+    }, [orderItems, selectedIds]);
 
     const bottomContent = React.useMemo(() => {
         // const totalPrice = calculateTotalPrice();
@@ -950,7 +947,7 @@ export default function CartProductList() {
                 </div> */}
             </div>
         );
-    }, [selectedKeys, items.length, calculateTotalPrice, page, pages, hasSearchFilter]);
+    }, [selectedKeys, orderItems.length, hasSearchFilter, page, pages]);
 
 
 
@@ -1009,7 +1006,7 @@ export default function CartProductList() {
                         )}
                     </TableHeader>
                     <TableBody emptyContent={"ไม่มีสินค้า"} items={sortedItems}>
-                        {(item) => (
+                        {(item: any) => (
                             <TableRow key={item.order_id}>
                                 {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
                             </TableRow>
@@ -1017,7 +1014,7 @@ export default function CartProductList() {
                     </TableBody>
                 </Table>
             </div>
-            
+
 
             {renderModal()}
         </>

@@ -1,5 +1,5 @@
 "use client";
-import React, { SVGProps, useState, useEffect } from "react";
+import React, { SVGProps, useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
     Table,
@@ -332,7 +332,7 @@ export default function CartProductList() {
 
     type OrderItems = (typeof orderItems)[0];
 
-    const fetchOrders = async (status?: string) => {
+    const fetchOrders = useCallback(async (status?: string) => {
         try {
             if (!session) return;
             const query = status ? `?status=${status}` : "";
@@ -342,14 +342,14 @@ export default function CartProductList() {
         } catch (error) {
             console.error("An error occurred while fetching products", error);
         }
-    }
+    }, [session])
 
     useEffect(() => {
         fetchOrders(selectedStatus);
         if (session) {
             fetchOrders(selectedStatus);
         }
-    }, [session, selectedStatus])
+    }, [session, selectedStatus, fetchOrders])
 
     const [filterValue, setFilterValue] = useState("");
     const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
@@ -384,7 +384,7 @@ export default function CartProductList() {
             );
         }
         return filteredOrderItems;
-    }, [orderItems, filterValue, statusFilter]);
+    }, [orderItems, hasSearchFilter, filterValue]);
 
     const items = React.useMemo(() => {
         const start = (page - 1) * rowsPerPage;
@@ -549,7 +549,7 @@ export default function CartProductList() {
                 </ModalContent>
             </Modal>
         )
-    }, [isModalScreenedImageOpen, imageSrc]);
+    }, [isModalScreenedImageOpen, onOpenChange, closeModal, imageSrc]);
 
 
     const renderCell = React.useCallback((order: OrderItems, columnKey: React.Key) => {
@@ -662,7 +662,7 @@ export default function CartProductList() {
             default:
                 return cellValue;
         }
-    }, [isModalScreenedImageOpen, setImageSrc, onOpenChange, closeModal, setModalScreenedImageOpen]);
+    }, []);
 
     const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));
@@ -744,15 +744,7 @@ export default function CartProductList() {
                 </div>
             </div>
         );
-    }, [
-        filterValue,
-        statusFilter,
-        visibleColumns,
-        onSearchChange,
-        onRowsPerPageChange,
-        orderItems.length,
-        hasSearchFilter,
-    ]);
+    }, [filterValue, visibleColumns, onSearchChange, onRowsPerPageChange, orderItems.length]);
 
     const handleDeleteSelected = async () => {
         try {
@@ -794,7 +786,7 @@ export default function CartProductList() {
         );
 
         return totalPrice;
-    }, [orderItems, selectedKeys]);
+    }, [orderItems, selectedIds]);
 
     const bottomContent = React.useMemo(() => {
         // const totalPrice = calculateTotalPrice();
@@ -841,7 +833,7 @@ export default function CartProductList() {
                 </div>
             </div>
         );
-    }, [selectedKeys, items.length, calculateTotalPrice, page, pages, hasSearchFilter]);
+    }, [selectedKeys, orderItems, hasSearchFilter, page, pages]);
 
 
 

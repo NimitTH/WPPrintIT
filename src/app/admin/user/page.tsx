@@ -2,9 +2,7 @@ import React from 'react'
 import ManageUsers from '@/components/ManageUsers'
 import Navbar from '@/components/NavBar'
 
-type Props = {}
-
-export default function page({ }: Props) {
+export default function page() {
     return (
         <>
             <Navbar />

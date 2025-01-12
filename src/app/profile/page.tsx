@@ -70,7 +70,7 @@ export default function SignUpForm() {
       
     }
 
-  }, [session, setValue]);
+  }, [profileImage, session, setValue]);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 

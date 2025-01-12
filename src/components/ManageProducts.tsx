@@ -173,6 +173,7 @@ export default function CartProductList() {
         resolver: zodResolver(schemaCategory),
     });
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const onCategorySubmit: SubmitHandler<SchemaCategory> = async (category: SchemaCategory) => {
         try {
             await axios.post("/api/product/category", { category_name: category.name });
@@ -231,7 +232,7 @@ export default function CartProductList() {
             </Modal>
 
         )
-    }, [isModalAddCategoryOpen])
+    }, [closeModal, controlCategory, errorsCategory.name, handleSubmitCategory, isModalAddCategoryOpen, isSubmittingCategory, onCategorySubmit, onClose, onOpenChange])
 
     const renderModalEditCategory = useCallback(() => {
         return (
@@ -313,19 +314,21 @@ export default function CartProductList() {
                 </ModalContent>
             </Modal>
         )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isModalAddSizeOpen])
 
     const renderModalEditSize = useCallback(() => {
         return (
             <p>กำลังพัฒนา</p>
         )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isModalEditSizeOpen])
 
     const renderModalDeleteSize = useCallback(() => {
         return (
             <p>กำลังพัฒนา</p>
         )
-    }, [isModalDeleteSizeOpen])
+    }, [])
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. สีสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦
 
@@ -338,6 +341,7 @@ export default function CartProductList() {
         resolver: zodResolver(schemaColor),
     });
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const onColorSubmit: SubmitHandler<SchemaColor> = async (color: SchemaColor) => {
         try {
             await axios.post("/api/product/color", { color_name: color.name });
@@ -396,19 +400,19 @@ export default function CartProductList() {
                 </ModalContent>
             </Modal>
         )
-    }, [isModalAddColorOpen])
+    }, [closeModal, controlColor, errorsColor.name, handleSubmitColor, isModalAddColorOpen, isSubmittingColor, onClose, onColorSubmit, onOpenChange])
 
     const renderModalEditColor = useCallback(() => {
         return (
             <p>กำลังพัฒนา</p>
         )
-    }, [isModalEditColorOpen])
+    }, [])
 
     const renderModalDeleteColor = useCallback(() => {
         return (
             <p>กำลังพัฒนา</p>
         )
-    }, [isModalDeleteColorOpen])
+    }, [])
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. เพิ่มสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦
 
@@ -424,6 +428,7 @@ export default function CartProductList() {
         },
     });
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const onProductSubmit: SubmitHandler<SchemaProduct> = async (product: SchemaProduct) => {
         try {
             const payload = {
@@ -575,9 +580,7 @@ export default function CartProductList() {
                 </ModalContent>
             </Modal>
         )
-    }, [
-        isModalAddProductOpen, productImageSrc, handleSubmitProduct, onProductSubmit, controlProduct, errorsProduct, isSubmittingProduct, categories
-    ])
+    }, [isModalAddProductOpen, onOpenChange, closeModal, handleSubmitProduct, onProductSubmit, productImageSrc, controlProduct, isSubmittingProduct, errorsProduct.product_name, errorsProduct.description, errorsProduct.price, errorsProduct.stock, categories])
     
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. แก้ไขสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦
@@ -591,6 +594,7 @@ export default function CartProductList() {
         resolver: zodResolver(schemaProduct),
     });
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const onEditProductSubmit: SubmitHandler<SchemaProduct> = async (product: SchemaProduct) => {
         console.log(product);
 
@@ -612,6 +616,7 @@ export default function CartProductList() {
     const [values, setValues] = useState<Selection>(new Set([]));
     const [productEditId, setProductEditId] = useState<number>(0)
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const onSubmitEditProduct = (product: Product) => {
         setModalEditProductOpen(true);
 
@@ -764,7 +769,7 @@ export default function CartProductList() {
                 </ModalContent>
             </Modal>
         )
-    }, [isModalEditProductOpen, productImageSrc, handleSubmitEditProduct, onEditProductSubmit, controlEditProduct, errorsEditProduct, isSubmittingEditProduct, categories])
+    }, [isModalEditProductOpen, onOpenChange, closeModal, handleSubmitEditProduct, onEditProductSubmit, productImageSrc, controlEditProduct, onClose, isSubmittingEditProduct, errorsEditProduct.product_name, errorsEditProduct.description, errorsEditProduct.price, errorsEditProduct.stock, categories])
 
     const handleImageChange = () => {
         const input = document.createElement("input");
@@ -798,6 +803,7 @@ export default function CartProductList() {
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. ลบสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleDeleteProduct = async (id?: number) => {
         try {
             if (id) {
@@ -869,7 +875,7 @@ export default function CartProductList() {
                 </ModalContent>
             </Modal>
         )
-    }, [isModalDeleteProductOpen])
+    }, [DeleteProductId, closeModal, handleDeleteProduct, isModalDeleteProductOpen, onOpenChange])
 
     // ꧁𓊈𒆜 ──────────────────────────────────── ไม่เกี่ยว ──────────────────────────────────── 𒆜𓊉꧂
 
@@ -907,7 +913,7 @@ export default function CartProductList() {
             );
         }
         return filteredUsers;
-    }, [products, filterValue, statusFilter]);
+    }, [products, hasSearchFilter, filterValue]);
 
     const items = React.useMemo(() => {
         const start = (page - 1) * rowsPerPage;
@@ -988,7 +994,7 @@ export default function CartProductList() {
             default:
                 return cellValue;
         }
-    }, [setProductImageSrc, onOpenChange, closeModal]);
+    }, [onSubmitEditProduct]);
 
     const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));
@@ -1158,17 +1164,7 @@ export default function CartProductList() {
                 </div>
             </div>
         );
-    }, [
-        filterValue,
-        statusFilter,
-        visibleColumns,
-        onSearchChange,
-        onRowsPerPageChange,
-        products.length,
-        hasSearchFilter,
-        selectedOptionValue,
-        selectedOption,
-    ]);
+    }, [filterValue, visibleColumns, onSearchChange, onRowsPerPageChange, products.length]);
 
     const normalizedSelectedKeys = React.useMemo(() => {
         if (selectedKeys === "all") {
@@ -1213,7 +1209,7 @@ export default function CartProductList() {
                 <div></div>
             </div>
         );
-    }, [selectedKeys, page, pages, hasSearchFilter]);
+    }, [selectedKeys, products.length, selectedIds.length, hasSearchFilter, page, pages]);
 
     const classNames = React.useMemo(
         () => ({

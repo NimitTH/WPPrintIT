@@ -2,7 +2,7 @@
 
 import type { NavbarProps } from "@nextui-org/react";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
     Navbar,
     NavbarBrand,
@@ -43,15 +43,16 @@ export default function Component(props: NavbarProps) {
     const { data: session, status } = useSession()
 
     const [cart, setCart] = useState<any[]>([])
-    const fetchCart = async () => {
+
+    const fetchCart = useCallback(async () => {
         try {
-            if (!session) return; // หยุดถ้า session ยังไม่มีค่า
+            if (!session) return;
             const res = await axios.get('/api/cart', { headers: { userId: session?.user.id } });
-            setCart(res.data)
+            setCart(res.data);
         } catch (error) {
             console.error("An error occurred while fetching products", error);
         }
-    }
+    }, [session]);
 
     useEffect(() => {
         if (session) {
@@ -59,8 +60,8 @@ export default function Component(props: NavbarProps) {
         }
         if (window.location.hash === "#_=_") {
             window.history.replaceState(null, "", window.location.pathname);
-          }
-    }, [session])
+        }
+    }, [fetchCart, session])
 
     const [isInvisible, setIsInvisible] = React.useState<boolean>();
     const pathname = usePathname();
@@ -188,7 +189,7 @@ export default function Component(props: NavbarProps) {
                         {menuItems.map((item, index) => (
                             <NavbarMenuItem key={`${item}-${index}`} className="">
                                 <Link className="mb-2 w-full text-background" href={item.href} size="md">
-                                    <span className="mr-2">{item.icon}</span> {/* แสดงไอคอน */}
+                                    <span className="mr-2">{item.icon}</span>
                                     {item.name}
                                 </Link>
                                 {index < menuItems.length - 1 && <Divider className="opacity-50" />}

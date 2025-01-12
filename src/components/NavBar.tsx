@@ -39,24 +39,25 @@ export default function Component(props: NavbarProps) {
     const { data: session, status } = useSession()
 
     const [cart, setCart] = useState<any[]>([])
-    const fetchCart = async () => {
-        try {
-            if (!session) return; // หยุดถ้า session ยังไม่มีค่า
-            const res = await axios.get('/api/cart', { headers: { userId: session?.user.id } });
-            setCart(res.data)
-        } catch (error) {
-            console.error("An error occurred while fetching products", error);
-        }
-    }
-
+    
     useEffect(() => {
+        const fetchCart = async () => {
+            try {
+                if (!session) return;
+                const res = await axios.get('/api/cart', { headers: { userId: session?.user.id } });
+                setCart(res.data)
+            } catch (error) {
+                console.error("An error occurred while fetching products", error);
+            }
+        }
+
         if (session) {
             fetchCart();
         }
         if (window.location.hash === "#_=_") {
             window.history.replaceState(null, "", window.location.pathname);
         }
-    }, [session])
+    }, [session]);
     const [isInvisible, setIsInvisible] = React.useState<boolean>();
     const pathname = usePathname();
     const isActive = (href: string) => pathname === href;

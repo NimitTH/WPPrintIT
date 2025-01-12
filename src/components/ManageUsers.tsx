@@ -405,7 +405,7 @@ export default function CartProductList() {
             );
         }
         return filteredUsers;
-    }, [users, filterValue, statusFilter]);
+    }, [users, hasSearchFilter, filterValue]);
 
     const items = React.useMemo(() => {
         const start = (page - 1) * rowsPerPage;
@@ -454,6 +454,7 @@ export default function CartProductList() {
 
     const [imageSrc, setImageSrc] = useState<string | any>("");
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleImageChange = (id: number) => {
         const input = document.createElement("input");
         input.type = "file";
@@ -486,6 +487,7 @@ export default function CartProductList() {
         input.click();
     };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleDeleteUser = async (id: number, role: string) => {
         try {
             if (role === "ADMIN") {
@@ -517,6 +519,7 @@ export default function CartProductList() {
     //     }
     // }
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleRoleChange = async (key: string, id: number, role: string) => {
         try {
             if (key === "USER" && role === "ADMIN") {
@@ -530,6 +533,7 @@ export default function CartProductList() {
         }
     }
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleStatusChange = async (key: string, id: number, role: string) => {
         console.log(key, id, role);
         try {
@@ -568,6 +572,7 @@ export default function CartProductList() {
     });
 
     const [userId, setUserId] = useState<number>(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleEditUser = async (id: number, username: string, name: string, tel: string, email: string, address: string, image: string) => {
         setModalEditUserOpen(true);
         setUserId(id);
@@ -580,6 +585,7 @@ export default function CartProductList() {
         setImageSrc(image);
     }
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const onSubmit: SubmitHandler<Schema> = async (data: Schema) => {
         try {
             console.log(data);
@@ -714,13 +720,15 @@ export default function CartProductList() {
 
             </>
         )
-    }, [isModalEditUserOpen, closeModal]);
+    }, [isModalEditUserOpen, onOpenChange, closeModal, handleSubmit, onSubmit, imageSrc, control, isSubmitting, handleImageChange, userId, errors.username, errors.name, errors.tel, errors.email, errors.address]);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const statusMap: Record<string, string> = {
         "approve": "อนุมัติ",
         "suspended": "ระงับการใช้งาน",
     };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const roleMap: Record<string, string> = {
         "USER": "ผู้ใช้งาน",
         "ADMIN": "แอดมิน",
@@ -818,7 +826,7 @@ export default function CartProductList() {
             default:
                 return cellValue;
         }
-    }, [isModalScreenedImageOpen, setImageSrc, onOpenChange, closeModal, setModalScreenedImageOpen]);
+    }, [roleMap, statusMap, handleRoleChange, handleStatusChange, handleEditUser, handleDeleteUser]);
 
     const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));
@@ -900,15 +908,7 @@ export default function CartProductList() {
                 </div>
             </div>
         );
-    }, [
-        filterValue,
-        statusFilter,
-        visibleColumns,
-        onSearchChange,
-        onRowsPerPageChange,
-        users.length,
-        hasSearchFilter,
-    ]);
+    }, [filterValue, visibleColumns, onSearchChange, onRowsPerPageChange, users.length]);
 
     // const handleDeleteSelected = async () => {
     //     try {
@@ -982,7 +982,7 @@ export default function CartProductList() {
                 </div>
             </div>
         );
-    }, [selectedKeys, page, pages, hasSearchFilter]);
+    }, [selectedKeys, users.length, hasSearchFilter, page, pages]);
 
     const deleteUser = async (id: number) => {
         console.log("deleteUser");

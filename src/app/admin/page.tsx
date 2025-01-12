@@ -1,22 +1,12 @@
 'use client'
 import React from 'react'
 import {
-    Tabs,
-    Tab,
-    Listbox,
-    ListboxItem,
-    Dropdown,
-    DropdownTrigger,
-    DropdownMenu,
-    DropdownItem,
-    Button,
     Link,
 } from "@nextui-org/react";
 import NavBar from "@/components/NavbarAdmin";
 
-type Props = {}
 
-export default function page({ }: Props) {
+export default function page() {
     return (
         <div>
             <NavBar />

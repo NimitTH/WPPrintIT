@@ -4,9 +4,9 @@ import NavBar from '@/components/NavBar'
 
 
 
-type Props = {}
 
-export default function Order(props: Props) {
+
+export default function Order() {
     return (
         <div>
             <NavBar />

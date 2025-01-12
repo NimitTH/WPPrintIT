@@ -34,8 +34,7 @@ const schema = z.object({
 
 type Schema = z.infer<typeof schema>;
 
-export default function page() {
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+export default function Page() {
     const { data: session } = useSession();
     const router = useRouter();
     const {
