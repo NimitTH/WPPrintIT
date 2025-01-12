@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import type { FieldValues, SubmitHandler } from "react-hook-form";
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 import { Button, Input, Checkbox, Link, Divider } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
@@ -42,6 +42,8 @@ export default function SignUpForm() {
 
     const onSubmit: SubmitHandler<Schema> = async (data: Schema) => {
         try {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            const { data: session } = useSession();
             const user: any = await signIn("credentials", {
                 redirect: false,
                 email: data.email,
@@ -52,6 +54,9 @@ export default function SignUpForm() {
                 console.error(user.error)
             } else {
                 router.push('/home')
+            }
+            if (session) {
+                router.push("/home"); // เปลี่ยนเส้นทางไปหน้า Home
             }
         } catch (error) {
             console.error(error);

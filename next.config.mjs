@@ -6,6 +6,7 @@ const nextConfig = {
     },
     experimental: {
         esmExternals: true, // เปิดใช้งานการรองรับไฟล์ .mjs
+        appDir: true, // หากคุณใช้ App Router
     },
 };
 

@@ -6,8 +6,6 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { SessionProvider } from "next-auth/react"
 
-
-
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -39,18 +37,12 @@ const bai_jamjuree = Bai_Jamjuree({
   display: 'swap',
 });
 
-
-
 export const metadata: Metadata = {
   title: "WPPrintIT",
   description: "เว็บสำหรับสั่งซื้อสินค้า ปรินท์ที่มีคุณภาพ",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{children: React.ReactNode;}>) {
   return (
     <html lang="en" className="font-sans">
       <body
