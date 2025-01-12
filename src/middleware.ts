@@ -36,16 +36,16 @@ export async function middleware(req: Request) {
 }
 
 // กำหนดว่า middleware นี้จะทำงานกับทุก path
-export const config = {
-  matcher: [
-    '/',
-    '/admin/:path*',
-    '/products/:path*',
-    '/home',
-    '/cart',
-    '/order',
-    '/profile',
-    '/password',
-    '/api/user/password',
-  ],
-};
+// export const config = {
+//   matcher: [
+//     '/',
+//     '/admin/:path*',
+//     '/products/:path*',
+//     '/home',
+//     '/cart',
+//     '/order',
+//     '/profile',
+//     '/password',
+//     '/api/user/password',
+//   ],
+// };
