@@ -5,8 +5,8 @@ import { useForm, Controller, type SubmitHandler } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-    schemaProduct, schemaCategory, schemaSize, schemaColor,
-    SchemaProduct, SchemaCategory, SchemaSize, SchemaColor
+    schemaProduct,
+    SchemaProduct,
 } from "@/types";
 import axios from "axios";
 import Link from "next/link";
@@ -74,7 +74,7 @@ const INITIAL_VISIBLE_COLUMNS = ["product_id", "image", "product_name", "price",
 
 export default function CartProductList() {
     const [products, setProducts] = useState<any[]>([]);
-    const [categories, setCategories] = useState<any[]>([]);
+    // const [categories, setCategories] = useState<any[]>([]);
 
     type Product = (typeof products)[0];
 
@@ -87,18 +87,18 @@ export default function CartProductList() {
         }
     }
 
-    const fetchCategories = async () => {
-        try {
-            const res = await axios.get("/api/product/category");
-            setCategories(res.data);
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    // const fetchCategories = async () => {
+    //     try {
+    //         const res = await axios.get("/api/product/category");
+    //         setCategories(res.data);
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // };
 
     useEffect(() => {
         fetchProducts();
-        fetchCategories();
+        // fetchCategories();
     }, [])
 
     const [productImageSrc, setProductImageSrc] = useState<string | null>(null);
@@ -133,286 +133,286 @@ export default function CartProductList() {
         }
     };
 
-    const handleSelection = (key: string) => {
-        switch (key) {
-            case "addcategory":
-                setModalAddCategoryOpen(true);
-                break;
-            case "addsize":
-                setModalAddSizeOpen(true);
-                break;
-            case "addcolor":
-                setModalAddColorOpen(true);
-                break;
-            default:
-                break;
-        }
-    };
+    // const handleSelection = (key: string) => {
+    //     switch (key) {
+    //         case "addcategory":
+    //             setModalAddCategoryOpen(true);
+    //             break;
+    //         case "addsize":
+    //             setModalAddSizeOpen(true);
+    //             break;
+    //         case "addcolor":
+    //             setModalAddColorOpen(true);
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    // };
 
-    const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
+    const { onOpenChange, onClose } = useDisclosure()
 
     const closeModal = useCallback(() => {
         setProductImageSrc(null);
         setModalEditProductOpen(false);
         setModalDeleteProductOpen(false)
         setModalAddProductOpen(false);
-        setModalAddCategoryOpen(false);
-        setModalAddSizeOpen(false);
-        setModalAddColorOpen(false);
+        // setModalAddCategoryOpen(false);
+        // setModalAddSizeOpen(false);
+        // setModalAddColorOpen(false);
     }, []);
 
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. หมวดหมู่สินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦
 
-    const {
-        control: controlCategory,
-        handleSubmit: handleSubmitCategory,
-        reset: resetCategory,
-        formState: { errors: errorsCategory, isSubmitting: isSubmittingCategory },
-    } = useForm<SchemaCategory>({
-        resolver: zodResolver(schemaCategory),
-    });
+    // const {
+    //     control: controlCategory,
+    //     handleSubmit: handleSubmitCategory,
+    //     reset: resetCategory,
+    //     formState: { errors: errorsCategory, isSubmitting: isSubmittingCategory },
+    // } = useForm<SchemaCategory>({
+    //     resolver: zodResolver(schemaCategory),
+    // });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const onCategorySubmit: SubmitHandler<SchemaCategory> = async (category: SchemaCategory) => {
-        try {
-            await axios.post("/api/product/category", { category_name: category.name });
-            closeModal()
-            await fetchCategories();
-            resetCategory()
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    // const onCategorySubmit: SubmitHandler<SchemaCategory> = async (category: SchemaCategory) => {
+    //     try {
+    //         await axios.post("/api/product/category", { category_name: category.name });
+    //         closeModal()
+    //         // await fetchCategories();
+    //         resetCategory()
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // };
 
-    const [isModalAddCategoryOpen, setModalAddCategoryOpen] = useState(false);
-    const [isModalEditCategoryOpen, setModalEditCategoryOpen] = useState(false);
-    const [isModalDeleteCategoryOpen, setModalDeleteCategoryOpen] = useState(false);
+    // const [isModalAddCategoryOpen, setModalAddCategoryOpen] = useState(false);
+    // const [isModalEditCategoryOpen, setModalEditCategoryOpen] = useState(false);
+    // const [isModalDeleteCategoryOpen, setModalDeleteCategoryOpen] = useState(false);
 
-    const renderModalAddCategory = useCallback(() => {
-        return (
-            <Modal
-                isKeyboardDismissDisabled={true}
-                isOpen={isModalAddCategoryOpen}
-                onOpenChange={onOpenChange}
-                onClose={closeModal}
-                classNames={{
-                    base: "border-1 border-default-200"
-                }}
-            >
-                <ModalContent>
-                    <ModalHeader className="flex flex-col gap-1">เพิ่มหมวดหมู่สินค้า</ModalHeader>
-                    <form onSubmit={handleSubmitCategory(onCategorySubmit)} >
-                        <ModalBody className="flex flex-col gap-3">
-                            <Controller
-                                name="name"
-                                control={controlCategory}
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        label="ชื่อหมวดหมู่"
-                                        labelPlacement="outside"
-                                        placeholder="ตั้งชื่อหมวดหมู่"
-                                        isInvalid={!!errorsCategory.name}
-                                        errorMessage={errorsCategory.name?.message}
-                                    />
-                                )}
-                            />
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button color="danger" variant="light" onPress={onClose}>
-                                ปิด
-                            </Button>
-                            <Button disabled={isSubmittingCategory} color="primary" type="submit">
-                                เพิ่มหมวดหมู่สินค้า
-                            </Button>
-                        </ModalFooter>
-                    </form>
-                </ModalContent>
-            </Modal>
+    // const renderModalAddCategory = useCallback(() => {
+    //     return (
+    //         <Modal
+    //             isKeyboardDismissDisabled={true}
+    //             isOpen={isModalAddCategoryOpen}
+    //             onOpenChange={onOpenChange}
+    //             onClose={closeModal}
+    //             classNames={{
+    //                 base: "border-1 border-default-200"
+    //             }}
+    //         >
+    //             <ModalContent>
+    //                 <ModalHeader className="flex flex-col gap-1">เพิ่มหมวดหมู่สินค้า</ModalHeader>
+    //                 <form onSubmit={handleSubmitCategory(onCategorySubmit)} >
+    //                     <ModalBody className="flex flex-col gap-3">
+    //                         <Controller
+    //                             name="name"
+    //                             control={controlCategory}
+    //                             render={({ field }) => (
+    //                                 <Input
+    //                                     {...field}
+    //                                     label="ชื่อหมวดหมู่"
+    //                                     labelPlacement="outside"
+    //                                     placeholder="ตั้งชื่อหมวดหมู่"
+    //                                     isInvalid={!!errorsCategory.name}
+    //                                     errorMessage={errorsCategory.name?.message}
+    //                                 />
+    //                             )}
+    //                         />
+    //                     </ModalBody>
+    //                     <ModalFooter>
+    //                         <Button color="danger" variant="light" onPress={onClose}>
+    //                             ปิด
+    //                         </Button>
+    //                         <Button disabled={isSubmittingCategory} color="primary" type="submit">
+    //                             เพิ่มหมวดหมู่สินค้า
+    //                         </Button>
+    //                     </ModalFooter>
+    //                 </form>
+    //             </ModalContent>
+    //         </Modal>
 
-        )
-    }, [closeModal, controlCategory, errorsCategory.name, handleSubmitCategory, isModalAddCategoryOpen, isSubmittingCategory, onCategorySubmit, onClose, onOpenChange])
+    //     )
+    // }, [closeModal, controlCategory, errorsCategory.name, handleSubmitCategory, isModalAddCategoryOpen, isSubmittingCategory, onCategorySubmit, onClose, onOpenChange])
 
-    const renderModalEditCategory = useCallback(() => {
-        return (
-            <p>กำลังพัฒนา</p>
-        )
-    }, [])
+    // const renderModalEditCategory = useCallback(() => {
+    //     return (
+    //         <p>กำลังพัฒนา</p>
+    //     )
+    // }, [])
 
-    const renderModalDeleteCategory = useCallback(() => {
-        return (
-            <p>กำลังพัฒนา</p>
-        )
-    }, [])
+    // const renderModalDeleteCategory = useCallback(() => {
+    //     return (
+    //         <p>กำลังพัฒนา</p>
+    //     )
+    // }, [])
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. ── ✦. ขนาดสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦ ── .✦
 
-    const {
-        control: controlSize,
-        handleSubmit: handleSubmitSize,
-        reset: resetSize,
-        formState: { errors: errorsSize, isSubmitting: isSubmittingSize },
-    } = useForm<SchemaSize>({
-        resolver: zodResolver(schemaSize),
-    });
+    // const {
+    //     control: controlSize,
+    //     handleSubmit: handleSubmitSize,
+    //     reset: resetSize,
+    //     formState: { errors: errorsSize, isSubmitting: isSubmittingSize },
+    // } = useForm<SchemaSize>({
+    //     resolver: zodResolver(schemaSize),
+    // });
 
-    const onSizeSubmit: SubmitHandler<SchemaSize> = async (size: SchemaSize) => {
-        try {
-            await axios.post("/api/product/size", { size_name: size.name });
-            resetSize()
-            closeModal()
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    // const onSizeSubmit: SubmitHandler<SchemaSize> = async (size: SchemaSize) => {
+    //     try {
+    //         await axios.post("/api/product/size", { size_name: size.name });
+    //         resetSize()
+    //         closeModal()
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // };
 
-    const [isModalAddSizeOpen, setModalAddSizeOpen] = useState(false);
-    const [isModalEditSizeOpen, setModalEditSizeOpen] = useState(false);
-    const [isModalDeleteSizeOpen, setModalDeleteSizeOpen] = useState(false);
+    // const [isModalAddSizeOpen, setModalAddSizeOpen] = useState(false);
+    // const [isModalEditSizeOpen, setModalEditSizeOpen] = useState(false);
+    // const [isModalDeleteSizeOpen, setModalDeleteSizeOpen] = useState(false);
 
-    const renderModalAddSize = useCallback(() => {
-        return (
-            <Modal
-                isKeyboardDismissDisabled={true}
-                isOpen={isModalAddSizeOpen}
-                onOpenChange={onOpenChange}
-                onClose={closeModal}
-                classNames={{
-                    base: "border-1 border-default-200"
-                }}
-            >
-                <ModalContent>
-                    <ModalHeader className="flex flex-col gap-1">เพิ่มขนาดสินค้า</ModalHeader>
-                    <form onSubmit={handleSubmitSize(onSizeSubmit)} >
-                        <ModalBody className="flex flex-col gap-3">
-                            <Controller
-                                name="name"
-                                control={controlSize}
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        label="ขนาดสินค้า"
-                                        labelPlacement="outside"
-                                        placeholder="ตั้งขนาดสินค้าของคุณ"
-                                        isInvalid={!!errorsSize.name}
-                                        errorMessage={errorsSize.name?.message}
-                                    />
-                                )}
-                            />
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button color="danger" variant="light" onPress={closeModal}>
-                                ปิด
-                            </Button>
-                            <Button disabled={isSubmittingSize} color="primary" type="submit">
-                                เพิ่มขนาด
-                            </Button>
-                        </ModalFooter>
-                    </form>
+    // const renderModalAddSize = useCallback(() => {
+    //     return (
+    //         <Modal
+    //             isKeyboardDismissDisabled={true}
+    //             isOpen={isModalAddSizeOpen}
+    //             onOpenChange={onOpenChange}
+    //             onClose={closeModal}
+    //             classNames={{
+    //                 base: "border-1 border-default-200"
+    //             }}
+    //         >
+    //             <ModalContent>
+    //                 <ModalHeader className="flex flex-col gap-1">เพิ่มขนาดสินค้า</ModalHeader>
+    //                 <form onSubmit={handleSubmitSize(onSizeSubmit)} >
+    //                     <ModalBody className="flex flex-col gap-3">
+    //                         <Controller
+    //                             name="name"
+    //                             control={controlSize}
+    //                             render={({ field }) => (
+    //                                 <Input
+    //                                     {...field}
+    //                                     label="ขนาดสินค้า"
+    //                                     labelPlacement="outside"
+    //                                     placeholder="ตั้งขนาดสินค้าของคุณ"
+    //                                     isInvalid={!!errorsSize.name}
+    //                                     errorMessage={errorsSize.name?.message}
+    //                                 />
+    //                             )}
+    //                         />
+    //                     </ModalBody>
+    //                     <ModalFooter>
+    //                         <Button color="danger" variant="light" onPress={closeModal}>
+    //                             ปิด
+    //                         </Button>
+    //                         <Button disabled={isSubmittingSize} color="primary" type="submit">
+    //                             เพิ่มขนาด
+    //                         </Button>
+    //                     </ModalFooter>
+    //                 </form>
 
-                </ModalContent>
-            </Modal>
-        )
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isModalAddSizeOpen])
+    //             </ModalContent>
+    //         </Modal>
+    //     )
+    // // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [isModalAddSizeOpen])
 
-    const renderModalEditSize = useCallback(() => {
-        return (
-            <p>กำลังพัฒนา</p>
-        )
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isModalEditSizeOpen])
+    // const renderModalEditSize = useCallback(() => {
+    //     return (
+    //         <p>กำลังพัฒนา</p>
+    //     )
+    // // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [isModalEditSizeOpen])
 
-    const renderModalDeleteSize = useCallback(() => {
-        return (
-            <p>กำลังพัฒนา</p>
-        )
-    }, [])
+    // const renderModalDeleteSize = useCallback(() => {
+    //     return (
+    //         <p>กำลังพัฒนา</p>
+    //     )
+    // }, [])
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. สีสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦
 
-    const {
-        control: controlColor,
-        handleSubmit: handleSubmitColor,
-        reset: resetColor,
-        formState: { errors: errorsColor, isSubmitting: isSubmittingColor },
-    } = useForm<SchemaColor>({
-        resolver: zodResolver(schemaColor),
-    });
+    // const {
+    //     control: controlColor,
+    //     handleSubmit: handleSubmitColor,
+    //     reset: resetColor,
+    //     formState: { errors: errorsColor, isSubmitting: isSubmittingColor },
+    // } = useForm<SchemaColor>({
+    //     resolver: zodResolver(schemaColor),
+    // });
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const onColorSubmit: SubmitHandler<SchemaColor> = async (color: SchemaColor) => {
-        try {
-            await axios.post("/api/product/color", { color_name: color.name });
-            resetColor()
-            closeModal()
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    // // eslint-disable-next-line react-hooks/exhaustive-deps
+    // const onColorSubmit: SubmitHandler<SchemaColor> = async (color: SchemaColor) => {
+    //     try {
+    //         await axios.post("/api/product/color", { color_name: color.name });
+    //         resetColor()
+    //         closeModal()
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // };
 
-    const [isModalAddColorOpen, setModalAddColorOpen] = useState(false);
-    const [isModalEditColorOpen, setModalEditColorOpen] = useState(false);
-    const [isModalDeleteColorOpen, setModalDeleteColorOpen] = useState(false);
+    // const [isModalAddColorOpen, setModalAddColorOpen] = useState(false);
+    // const [isModalEditColorOpen, setModalEditColorOpen] = useState(false);
+    // const [isModalDeleteColorOpen, setModalDeleteColorOpen] = useState(false);
 
-    const renderModalAddColor = useCallback(() => {
-        return (
-            <Modal
-                isKeyboardDismissDisabled={true}
-                isOpen={isModalAddColorOpen}
-                onOpenChange={onOpenChange}
-                onClose={closeModal}
-                classNames={{
-                    base: "border-1 border-default-200"
-                }}
-            >
-                <ModalContent>
+    // const renderModalAddColor = useCallback(() => {
+    //     return (
+    //         <Modal
+    //             isKeyboardDismissDisabled={true}
+    //             isOpen={isModalAddColorOpen}
+    //             onOpenChange={onOpenChange}
+    //             onClose={closeModal}
+    //             classNames={{
+    //                 base: "border-1 border-default-200"
+    //             }}
+    //         >
+    //             <ModalContent>
 
-                    <ModalHeader className="flex flex-col gap-1">เพิ่มสีสินค้า</ModalHeader>
-                    <form onSubmit={handleSubmitColor(onColorSubmit)} >
-                        <ModalBody className="flex flex-col gap-3">
-                            <Controller
-                                name="name"
-                                control={controlColor}
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        label="สี"
-                                        labelPlacement="outside"
-                                        placeholder="ตั้งสีของคุณ"
-                                        isInvalid={!!errorsColor.name}
-                                        errorMessage={errorsColor.name?.message}
-                                    />
-                                )}
-                            />
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button color="danger" variant="light" onPress={onClose}>
-                                ปิด
-                            </Button>
-                            <Button disabled={isSubmittingColor} color="primary" type="submit">
-                                เพิ่มสี
-                            </Button>
-                        </ModalFooter>
-                    </form>
+    //                 <ModalHeader className="flex flex-col gap-1">เพิ่มสีสินค้า</ModalHeader>
+    //                 <form onSubmit={handleSubmitColor(onColorSubmit)} >
+    //                     <ModalBody className="flex flex-col gap-3">
+    //                         <Controller
+    //                             name="name"
+    //                             control={controlColor}
+    //                             render={({ field }) => (
+    //                                 <Input
+    //                                     {...field}
+    //                                     label="สี"
+    //                                     labelPlacement="outside"
+    //                                     placeholder="ตั้งสีของคุณ"
+    //                                     isInvalid={!!errorsColor.name}
+    //                                     errorMessage={errorsColor.name?.message}
+    //                                 />
+    //                             )}
+    //                         />
+    //                     </ModalBody>
+    //                     <ModalFooter>
+    //                         <Button color="danger" variant="light" onPress={onClose}>
+    //                             ปิด
+    //                         </Button>
+    //                         <Button disabled={isSubmittingColor} color="primary" type="submit">
+    //                             เพิ่มสี
+    //                         </Button>
+    //                     </ModalFooter>
+    //                 </form>
 
-                </ModalContent>
-            </Modal>
-        )
-    }, [closeModal, controlColor, errorsColor.name, handleSubmitColor, isModalAddColorOpen, isSubmittingColor, onClose, onColorSubmit, onOpenChange])
+    //             </ModalContent>
+    //         </Modal>
+    //     )
+    // }, [closeModal, controlColor, errorsColor.name, handleSubmitColor, isModalAddColorOpen, isSubmittingColor, onClose, onColorSubmit, onOpenChange])
 
-    const renderModalEditColor = useCallback(() => {
-        return (
-            <p>กำลังพัฒนา</p>
-        )
-    }, [])
+    // const renderModalEditColor = useCallback(() => {
+    //     return (
+    //         <p>กำลังพัฒนา</p>
+    //     )
+    // }, [])
 
-    const renderModalDeleteColor = useCallback(() => {
-        return (
-            <p>กำลังพัฒนา</p>
-        )
-    }, [])
+    // const renderModalDeleteColor = useCallback(() => {
+    //     return (
+    //         <p>กำลังพัฒนา</p>
+    //     )
+    // }, [])
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. เพิ่มสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦
 
@@ -423,9 +423,7 @@ export default function CartProductList() {
         formState: { errors: errorsProduct, isSubmitting: isSubmittingProduct },
     } = useForm<SchemaProduct>({
         resolver: zodResolver(schemaProduct),
-        defaultValues: {
-            categories: []
-        },
+        
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -433,7 +431,7 @@ export default function CartProductList() {
         try {
             const payload = {
                 ...product,
-                categories: product.categories ?? [],
+                
                 image: productImageSrc,
             };
             await axios.post("/api/product", payload);
@@ -510,7 +508,7 @@ export default function CartProductList() {
                                     />
                                 )}
                             />
-                            <Controller
+                            {/* <Controller
                                 name="categories"
                                 control={controlProduct}
                                 render={({ field }) => (
@@ -530,7 +528,7 @@ export default function CartProductList() {
                                         ))}
                                     </Select>
                                 )}
-                            />
+                            /> */}
                             <Controller
                                 name="price"
                                 control={controlProduct}
@@ -580,7 +578,7 @@ export default function CartProductList() {
                 </ModalContent>
             </Modal>
         )
-    }, [isModalAddProductOpen, onOpenChange, closeModal, handleSubmitProduct, onProductSubmit, productImageSrc, controlProduct, isSubmittingProduct, errorsProduct.product_name, errorsProduct.description, errorsProduct.price, errorsProduct.stock, categories])
+    }, [isModalAddProductOpen, onOpenChange, closeModal, handleSubmitProduct, onProductSubmit, productImageSrc, controlProduct, isSubmittingProduct, errorsProduct.product_name, errorsProduct.description, errorsProduct.price, errorsProduct.stock])
     
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. แก้ไขสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦
@@ -601,10 +599,10 @@ export default function CartProductList() {
         try {
             const payload = {
                 ...product,
-                category: product.categories ?? [],
+                // category: product.categories ?? [],
                 image: productImageSrc,
             };
-            console.log(product.categories);
+            // console.log(product.categories);
             await axios.put(`/api/product/${productEditId}`, payload);
             await fetchProducts()
             closeModal()
@@ -624,10 +622,10 @@ export default function CartProductList() {
         setValueEditProduct("product_name", product.product_name);
         setValueEditProduct("description", product.description);
 
-        const categoryNames = product.category.map((category: any) => category.category_name);
-        console.log(categoryNames);
-        setValues(new Set(categoryNames));
-        setValueEditProduct("categories", categoryNames);
+        // const categoryNames = product.category.map((category: any) => category.category_name);
+        // console.log(categoryNames);
+        // setValues(new Set(categoryNames));
+        // setValueEditProduct("categories", categoryNames);
 
         setValueEditProduct("price", product.price);
         setValueEditProduct("stock", product.stock);
@@ -695,7 +693,7 @@ export default function CartProductList() {
                                     />
                                 )}
                             />
-                            <Controller
+                            {/* <Controller
                                 name="categories"
                                 control={controlEditProduct}
                                 render={({ field }) => (
@@ -719,7 +717,7 @@ export default function CartProductList() {
                                         ))}
                                     </Select>
                                 )}
-                            />
+                            /> */}
                             <Controller
                                 name="price"
                                 control={controlEditProduct}
@@ -769,7 +767,7 @@ export default function CartProductList() {
                 </ModalContent>
             </Modal>
         )
-    }, [isModalEditProductOpen, onOpenChange, closeModal, handleSubmitEditProduct, onEditProductSubmit, productImageSrc, controlEditProduct, onClose, isSubmittingEditProduct, errorsEditProduct.product_name, errorsEditProduct.description, errorsEditProduct.price, errorsEditProduct.stock, categories])
+    }, [isModalEditProductOpen, onOpenChange, closeModal, handleSubmitEditProduct, onEditProductSubmit, productImageSrc, controlEditProduct, onClose, isSubmittingEditProduct, errorsEditProduct.product_name, errorsEditProduct.description, errorsEditProduct.price, errorsEditProduct.stock])
 
     const handleImageChange = () => {
         const input = document.createElement("input");

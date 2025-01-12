@@ -4,21 +4,21 @@ import { prisma } from '@/lib/prisma'
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     return NextResponse.json(await prisma.product.findUnique({
         where: { product_id: Number(params.id) },
-        include: { category: true }
+        
     }))
 }
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
     try {
-        const { image, product_name, description, category, price, stock } = await req.json()
-        console.log(category);
+        const { image, product_name, description, price, stock } = await req.json()
+        
         const editproduct = await prisma.product.update({
             where: { product_id: Number(params.id) },
             data: { 
                 image, 
                 product_name, 
                 description, 
-                category: { connect: category.map((category1: any) => ({ category_name: category1 })) }, 
+                
                 price, 
                 stock 
             }

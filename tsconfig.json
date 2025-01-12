@@ -12,6 +12,9 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "target": "esnext",
+  
+    "allowSyntheticDefaultImports": true,
     "plugins": [
       {
         "name": "next"
