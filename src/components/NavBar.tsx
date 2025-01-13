@@ -162,10 +162,10 @@ export default function Component(props: NavbarProps) {
                                     />
                                 </DropdownTrigger>
                                 <DropdownMenu aria-label="User Actions" variant="flat">
-                                    <DropdownItem key="settings" href="/profile">
+                                    <DropdownItem key="profile" href="/profile">
                                         จัดการบัญชี
                                     </DropdownItem>
-                                    <DropdownItem key="settings" href="/password">
+                                    <DropdownItem key="password" href="/password">
                                         เปลี่ยนรหัสผ่าน
                                     </DropdownItem>
                                     <DropdownItem key="logout" color="danger" onPress={() => signOut({ callbackUrl: '/' })}>
@@ -176,6 +176,7 @@ export default function Component(props: NavbarProps) {
                         </>
                     ) : (
                         <>
+                            <ThemeSwitch type={2} />
                             <Button className="text-default-500" as={Link} href="/signin" radius="full" variant="light">
                                 เข้าสู่ระบบ
                             </Button>
@@ -214,7 +215,7 @@ export default function Component(props: NavbarProps) {
 
                     </>
                 ) : (
-                    <>
+                    <>  
                         <NavbarMenuItem>
                             <Button fullWidth as={Link} href="/signin" variant="faded">
                                 เข้าสู่ระบบ
