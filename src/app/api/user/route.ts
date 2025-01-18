@@ -1,10 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import bcryptjs from "bcryptjs";
-import { NextResponse } from "next/server";
-import { redirect } from 'next/navigation'
+import { NextResponse, type NextRequest } from "next/server";
 
-export async function GET() {
-    return NextResponse.json(await prisma.user.findMany())
+export async function GET(req: NextRequest) {
+    const users = await prisma.user.findMany(); // ตัวอย่าง query
+    return NextResponse.json(users)
 }
 
 export async function PUT(req: Request) {
