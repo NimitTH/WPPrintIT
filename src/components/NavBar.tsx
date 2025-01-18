@@ -1,6 +1,6 @@
 "use client";
 
-import type { NavbarProps } from "@nextui-org/react";
+import type { NavbarProps } from "@heroui/react";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -17,9 +17,9 @@ import {
     Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, User,
     Badge,
     Input,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { cn } from "@nextui-org/react";
+import { cn } from "@heroui/react";
 import { ThemeSwitch } from "./ThemeSwitcher";
 import { AcmeLogo } from "@/components/AcmeLogo";
 import { signOut } from "next-auth/react"
@@ -30,9 +30,6 @@ import { CartIcon, SearchIcon, HomeIcon, ProfileIcon, OrderIcon, PasswordIcon } 
 
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
-
-
-
 
 export default function Component(props: NavbarProps) {
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);

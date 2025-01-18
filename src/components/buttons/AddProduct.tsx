@@ -19,7 +19,7 @@
 //     Select, SelectItem,
 //     Avatar,
 //     Link
-// } from "@nextui-org/react";
+// } from "@heroui/react";
 
 // import { PlusIcon, VerticalDotsIcon, SearchIcon1, ChevronDownIcon, EditIcon, DeleteIcon } from "@/components/Icon";
 // import NavBar from "@/components/NavBar";

@@ -3,7 +3,7 @@
 import React from "react";
 
 import NavBar from '@/components/NavBar'
-import ProductListItem1 from "@/components/ProductList";
+import ProductListItem1 from "@/components/ListProduct";
 
 import { usePathname } from 'next/navigation'
 

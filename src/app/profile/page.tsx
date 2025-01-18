@@ -8,7 +8,6 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
 import axios from "axios";
-
 import {
   Avatar, Badge, Button, Input, User, useDisclosure,
   Modal,
@@ -16,7 +15,7 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Icon } from "@iconify/react";
 import NavBar from "@/components/NavBar";
 
@@ -42,7 +41,7 @@ export default function SignUpForm() {
   const [errorMessage, setErrorMessage] = useState(null);
 
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  
+
   // const [imageFile, setImageFile] = useState<File | null>("");
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -66,11 +65,9 @@ export default function SignUpForm() {
       setProfileImage(session.user.image || "");
       console.log(session.user.image);
       console.log(profileImage);
-      
-      
     }
 
-  }, [profileImage, session, setValue]);
+  }, [session, setValue, profileImage]);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
@@ -124,7 +121,7 @@ export default function SignUpForm() {
             onSubmit={handleSubmit(onSubmit)}
           >
             <div className="flex flex-col items-center gap-4">
-              <div className="relative group w-40 h-40">  
+              <div className="relative group w-40 h-40">
                 <Avatar
                   key={profileImage}
                   size="lg"
@@ -239,20 +236,22 @@ export default function SignUpForm() {
                 />
               )}
             />
-            <Controller
-              name="address"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="ที่อยู่"
-                  labelPlacement="outside"
-                  placeholder="กรอกที่อยู่ของคุณ"
-                  isInvalid={!!errors.address}
-                  errorMessage={errors.address?.message}
-                />
-              )}
-            />
+            {session?.user.role == "USER" && (
+              <Controller
+                name="address"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    label="ที่อยู่"
+                    labelPlacement="outside"
+                    placeholder="กรอกที่อยู่ของคุณ"
+                    isInvalid={!!errors.address}
+                    errorMessage={errors.address?.message}
+                  />
+                )}
+              />
+            )}
             <Button disabled={isSubmitting} color="primary" type="submit">
               บันทีก
             </Button>

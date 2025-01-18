@@ -4,10 +4,10 @@ const nextConfig = {
     images: {
         domains: ['lh3.googleusercontent.com'], // โดเมนของ Google
     },
-    experimental: {
-        esmExternals: true, // เปิดใช้งานการรองรับไฟล์ .mjs
-        appDir: true, // หากคุณใช้ App Router
-    },
+    // experimental: {
+    //     esmExternals: true, // เปิดใช้งานการรองรับไฟล์ .mjs
+    //     appDir: true, // หากคุณใช้ App Router
+    // },
 };
 
 

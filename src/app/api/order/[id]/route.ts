@@ -15,7 +15,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
             include: { 
                 orderitem: true && {
                     include: {
-                        product: true
+                        product: true,
+                        screened_images: true
                     }
                 }
             },

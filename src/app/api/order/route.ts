@@ -78,8 +78,7 @@
 //     }
 // }
 
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+
 
 // export async function GET(req: NextRequest) {
 //     try {
@@ -94,7 +93,7 @@ import { prisma } from "@/lib/prisma";
 //             include: { orderitem: { include: { product: true } } },
 //             orderBy: { order_date: "desc" },
 //         });
-        
+
 //         return NextResponse.json(orders);
 //     } catch (error) {
 //         console.log(error);
@@ -102,13 +101,16 @@ import { prisma } from "@/lib/prisma";
 //     }
 // }
 
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
 export async function GET(req: NextRequest) {
     try {
         const orders = await prisma.order.findMany({
-            include: { orderitem: { include: { product: true } }, user: true },
+            include: { orderitem: { include: { product: true, screened_images: true } }, user: true },
             orderBy: { order_date: "desc" },
         });
-        
+
         return NextResponse.json(orders);
     } catch (error) {
         console.log(error);
@@ -123,20 +125,18 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "No items selected" }, { status: 400 });
         }
 
-        // ดึงข้อมูลสินค้าเฉพาะที่เลือกใน Cart
         const cartItems = await prisma.cartitem.findMany({
             where: {
-                cart_item_id: { in: selectedItems }, // ดึงเฉพาะ ID ที่เลือก
+                cart_item_id: { in: selectedItems },
                 cart: { userId: userId },
             },
-            include: { product: true },
+            include: { product: true, screened_images: true, },
         });
 
         if (cartItems.length === 0) {
             return NextResponse.json({ error: "No valid cart items found" }, { status: 400 });
         }
 
-        // คำนวณราคาทั้งหมด
         const totalAmount = cartItems.reduce((sum, item: any) => {
             return sum + item.product.price * item.quantity;
         }, 0);
@@ -145,7 +145,6 @@ export async function POST(req: NextRequest) {
             return sum + item.quantity;
         }, 0);
 
-        // สร้าง Order
         const order = await prisma.order.create({
             data: {
                 userId: userId,
@@ -153,6 +152,12 @@ export async function POST(req: NextRequest) {
                     create: cartItems.map((item) => ({
                         productId: item.productId,
                         screened_image: item.screened_image,
+                        screened_images: {
+                            create: item.screened_images.map((image) => ({
+                                screened_image_url: image.screened_image_url,
+                            })),
+                        },
+                        additional: item.additional,
                         quantity: item.quantity,
                         price: item.product.price,
                         total_price: item.product.price * item.quantity,
@@ -168,7 +173,16 @@ export async function POST(req: NextRequest) {
             },
         });
 
-        // ลบ CartItem เฉพาะสินค้าที่เลือก (ถ้าต้องการ)
+        // Update stock for each product
+        for (const item of cartItems) {
+            await prisma.product.update({
+                where: { product_id: item.productId },
+                data: {
+                    stock: item.product.stock as number - item.quantity,
+                },
+            });
+        }
+
         await prisma.cartitem.deleteMany({
             where: { cart_item_id: { in: selectedItems } },
         });

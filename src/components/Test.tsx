@@ -1,5 +1,3 @@
-
-
 "use client"
 import React from "react";
 import {
@@ -12,7 +10,7 @@ import {
     NavbarMenuItem,
     Link,
     Button,
-} from "@nextui-org/react";
+} from "@heroui/react";
 
 export const AcmeLogo = () => {
     return (

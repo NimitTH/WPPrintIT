@@ -9,17 +9,17 @@ export async function POST(req: NextRequest) {
         const { orderId, items, total, user } = body;
 
         const fontPath = path.join(process.cwd(), 'public', 'font', 'Sarabun-Regular.ttf');
-        // Create PDF with explicit font configuration
+        
         const pdfStream = new PDFDocument({
             autoFirstPage: true,
             size: 'A4',
-            font: fontPath // Prevent automatic font loading
+            font: fontPath 
         });
-        // Load and use custom font only after PDF creation
+        
         if (fs.existsSync(fontPath)) {
             pdfStream.font(fontPath);
         } else {
-            // Fallback to built-in font if custom font not found
+            
             pdfStream.font('Courier');
         }
 
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
         pdfStream.text('WPPrintIT', { align: 'center', });
         pdfStream.text('ใบเสร็จ / Receipt', { align: 'center', });
         pdfStream.moveDown();
-    
+
         pdfStream.text(`Order ID: ${orderId}`);
         pdfStream.text(`ผู้สั่งซื้อ: ${user.name}`);
         pdfStream.text(`อีเมล: ${user.email}`);
@@ -40,40 +40,52 @@ export async function POST(req: NextRequest) {
         pdfStream.moveDown();
 
         pdfStream.text('รายการสินค้าที่สั่งซื้อ', { align: 'center', });
-        pdfStream.moveDown();
 
-        // Define table columns
         const tableStartX = 50;
         const tableEndX = 550;
-        
+
         const productNameColumn = 60;
-        const priceColumn = 370;
-        const quantityColumn = 450;
+        const priceColumn = 300;
+        const quantityColumn = 470;
         let currentY = pdfStream.y;
 
-        // Draw column headers
-        pdfStream.text('ชื่อสินค้า', productNameColumn, currentY);
-        pdfStream.text('ราคา', priceColumn, currentY);
-        pdfStream.text('จำนวน', quantityColumn, currentY);
-        pdfStream.moveDown();
+        const lineHeight = 20;
 
-        // Draw separator line
-        currentY = pdfStream.y;
+        currentY += lineHeight;
+
+        pdfStream.text('ชื่อสินค้า', productNameColumn, currentY);
+        pdfStream.text('ราคา', priceColumn, currentY, { align: 'center'});
+        pdfStream.text('จำนวน', quantityColumn, currentY, { align: 'right' });
+        
+
+        currentY += lineHeight;
+
         pdfStream.moveTo(tableStartX, currentY)
             .lineTo(tableEndX, currentY)
             .stroke();
-        pdfStream.moveDown();
+
         
-         // Populate table rows
-         items.forEach((item: any) => {
-            pdfStream.text(item.productName, productNameColumn, pdfStream.y);
-            pdfStream.text(`฿${item.price.toFixed(2)}`, -250, pdfStream.y, { align: 'right' });
-            pdfStream.text(item.quantity.toString(), -150, pdfStream.y, { align: 'right' });
+
+        currentY += 5;
+
+        items.forEach((item: any) => {
+            pdfStream.text(item.productName, productNameColumn, currentY);
+            pdfStream.text(`฿${item.price.toFixed(2)}`, 280, currentY, { align: 'center' });
+            pdfStream.text(item.quantity.toString(), quantityColumn, currentY, { align: 'right' });
             pdfStream.moveDown();
+
+            currentY += lineHeight;
         });
+
+        currentY += lineHeight;
+
         
-        pdfStream.moveDown();
-        pdfStream.text(`รวมทั้งหมด: ${new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(total)}`, 400, pdfStream.y, { align: 'right', underline: true });
+        pdfStream.text(
+            `รวมทั้งหมด: ${new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(total)}`,
+            priceColumn,
+            currentY,
+            { align: 'right', underline: true }
+        );
         pdfStream.end();
 
         const pdf = await new Promise<Buffer>((resolve, reject) => {

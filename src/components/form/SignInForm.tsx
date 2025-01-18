@@ -8,7 +8,7 @@ import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { signIn, useSession } from "next-auth/react";
 
-import { Button, Input, Checkbox, Link, Divider } from "@nextui-org/react";
+import { Button, Input, Checkbox, Link, Divider } from "@heroui/react";
 import { Icon } from "@iconify/react";
 
 const schema = z.object({
@@ -39,16 +39,19 @@ export default function SignUpForm() {
     } = useForm<Schema>({
         resolver: zodResolver(schema),
     });
+    const { data: session } = useSession();
 
     const onSubmit: SubmitHandler<Schema> = async (data: Schema) => {
         try {
-            // eslint-disable-next-line react-hooks/rules-of-hooks
-            const { data: session } = useSession();
+            console.log(data);
+
             const user: any = await signIn("credentials", {
                 redirect: false,
                 email: data.email,
                 password: data.password
             })
+
+            console.log(user);
 
             if (user.error) {
                 console.error(user.error)

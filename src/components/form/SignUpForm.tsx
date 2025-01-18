@@ -22,7 +22,7 @@ import {
     ModalHeader,
     ModalBody,
     ModalFooter,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Icon } from "@iconify/react";
 
 const schema = z.object({

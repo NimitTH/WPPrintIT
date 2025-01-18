@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
     try {
         const userId = req.nextUrl.searchParams.get("userId");
@@ -10,7 +12,7 @@ export async function GET(req: NextRequest) {
 
         const order = await prisma.order.findFirst({
             where: { userId: Number(userId) },
-            include: { orderitem: { include: { product: true } } },
+            include: { orderitem: { include: { product: true, } } },
             orderBy: { order_date: "desc" },
         });
 

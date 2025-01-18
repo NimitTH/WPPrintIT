@@ -2,8 +2,8 @@
 import React from 'react'
 import {
     Link,
-} from "@nextui-org/react";
-import NavBar from "@/components/NavbarAdmin";
+} from "@heroui/react";
+import NavBar from "@/components/NavBar";
 
 
 export default function page() {

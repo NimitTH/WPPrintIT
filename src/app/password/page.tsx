@@ -16,7 +16,7 @@ import {
     ModalHeader,
     ModalBody,
     ModalFooter,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Icon } from "@iconify/react";
 import Navbar from '@/components/NavBar'
 

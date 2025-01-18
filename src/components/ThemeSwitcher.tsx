@@ -2,12 +2,11 @@
 
 import { FC } from "react";
 import { VisuallyHidden } from "@react-aria/visually-hidden";
-import { SwitchProps, useSwitch } from "@nextui-org/switch";
+import { SwitchProps, useSwitch } from "@heroui/switch";
 import { useTheme } from "next-themes";
 import { useIsSSR } from "@react-aria/ssr";
 import clsx from "clsx";
-
-import { Icon } from "@iconify/react";
+// import { Icon } from "@iconify/react";
 import { SunFilledIcon, MoonFilledIcon } from '@/components/Icon'
 
 export interface ThemeSwitchProps {
@@ -45,7 +44,7 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
     });
 
     return (
-        <Component
+        (<Component
             {...getBaseProps({
                 className: clsx(
                     "px-px transition-opacity hover:opacity-80 cursor-pointer",
@@ -78,8 +77,7 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
             >
                 {!isSelected || isSSR ? (
                     // <Icon icon="solar:sun-bold" width={24} height={24}  />
-                    <>
-
+                    (<>
                         {type == 1 ? (
                             <div className="flex gap-2 mt-4">
                                 <SunFilledIcon size={24} />
@@ -89,10 +87,10 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
                         ) : (
                             <SunFilledIcon size={24} />
                         )}
-                    </>
+                    </>)
                 ) : (
                     // <Icon icon="solar:moon-bold" width={24} height={24} />
-                    <>
+                    (<>
                         {type == 1 ? (
                             <div className="flex gap-2 mt-4">
                                 <MoonFilledIcon size={24} />
@@ -102,13 +100,10 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
                         ) : (
                             <MoonFilledIcon size={24} />
                         )}
-
-
-
-                    </>
+                    </>)
                 )}
 
             </div>
-        </Component>
+        </Component>)
     );
 };

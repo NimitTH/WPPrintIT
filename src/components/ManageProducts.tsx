@@ -5,76 +5,53 @@ import { useForm, Controller, type SubmitHandler } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-    schemaProduct,
-    SchemaProduct,
+    schemaProduct, schemaCategory,
+    SchemaProduct, SchemaCategory,
 } from "@/types";
 import axios from "axios";
-import Link from "next/link";
 import {
     Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
-    Dropdown, DropdownTrigger, DropdownItem, DropdownMenu,
     Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
+    Dropdown, DropdownTrigger, DropdownItem, DropdownMenu,
     Popover, PopoverTrigger, PopoverContent,
     Card, CardHeader, CardBody, CardFooter,
-    Input,
     Button, ButtonGroup,
+    Avatar, AvatarGroup,
+    Select, SelectItem,
     Chip, ChipProps,
-    User,
-    Pagination,
     type Selection,
     SortDescriptor,
-    Image,
     useDisclosure,
-    Avatar, AvatarGroup,
-    Select, SelectItem
-} from "@nextui-org/react";
-import { PlusIcon, VerticalDotsIcon, SearchIcon1, ChevronDownIcon, EditIcon, DeleteIcon, DeleteIcon1 } from "@/components/Icon";
-import ListManage from "./ListManage";
-import { IconSvgProps } from "@/types";
+    Pagination,
+    Image,
+    Input,
+    User,
+} from "@heroui/react";
+import { PlusIcon, VerticalDotsIcon, SearchIcon1, ChevronDownIcon, EditIcon, DeleteIcon, DeleteIcon1, FilterIcon, Cancel } from "@/components/Icon";
+import { Icon } from "@iconify/react/dist/iconify.js";
+import ListManage from "./ListBoxManage";
 
 export function capitalize(s: string) {
     return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
 }
-
-import { EditDocumentIcon } from "./Icon";
-import { Icon } from "@iconify/react/dist/iconify.js";
-
-export const Cancel = ({ size = 24, width, height, ...otherProps }: IconSvgProps) => {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-            fill="none"
-            focusable="false"
-            role="presentation"
-            width={size || width}
-            height={size || height}
-            viewBox="0 0 24 24"
-            {...otherProps}
-        >
-            <path
-                fill="currentColor"
-                d="m12 13.4l2.9 2.9q.275.275.7.275t.7-.275t.275-.7t-.275-.7L13.4 12l2.9-2.9q.275-.275.275-.7t-.275-.7t-.7-.275t-.7.275L12 10.6L9.1 7.7q-.275-.275-.7-.275t-.7.275t-.275.7t.275.7l2.9 2.9l-2.9 2.9q-.275.275-.275.7t.275.7t.7.275t.7-.275zm0 8.6q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22"></path>
-        </svg>
-    );
-};
 
 export const columns = [
     { name: "ID", uid: "product_id", sortable: true },
     { name: "รูปสินค้า", uid: "image" },
     { name: "ชื่อสินค้า", uid: "product_name", },
     { name: "รายละเอียด", uid: "description" },
-    // { name: "หมวดหมู่", uid: "category" },
+    { name: "หมวดหมู่", uid: "category" },
     // { name: "ขนาด", uid: "size" },
     { name: "ราคา", uid: "price", sortable: true },
     { name: "จำนวนสินค้า", uid: "stock", sortable: true },
     { name: "actions", uid: "actions" },
 ];
 
-const INITIAL_VISIBLE_COLUMNS = ["product_id", "image", "product_name", "price", "stock", "actions"];
+const INITIAL_VISIBLE_COLUMNS = ["product_id", "image", "product_name", "description", "category", "price", "stock", "actions"];
 
 export default function CartProductList() {
     const [products, setProducts] = useState<any[]>([]);
-    // const [categories, setCategories] = useState<any[]>([]);
+    const [categories, setCategories] = useState<any[]>([]);
 
     type Product = (typeof products)[0];
 
@@ -87,41 +64,57 @@ export default function CartProductList() {
         }
     }
 
-    // const fetchCategories = async () => {
-    //     try {
-    //         const res = await axios.get("/api/product/category");
-    //         setCategories(res.data);
-    //     } catch (error) {
-    //         console.error(error);
-    //     }
-    // };
+    const fetchCategories = async () => {
+        try {
+            const res = await axios.get("/api/product/category");
+            setCategories(res.data);
+            setEditCategories(res.data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     useEffect(() => {
         fetchProducts();
-        // fetchCategories();
+        fetchCategories();
     }, [])
 
     const [productImageSrc, setProductImageSrc] = useState<string | null>(null);
 
-
     const [selectedOption, setSelectedOption] = useState<Selection>(new Set(["addproduct"]));
     const selectedOptionValue = Array.from(selectedOption)[0];
 
-    const labelsMap: Record<string, string> = {
-        addproduct: "เพิ่มสินค้า",
-        category: "หมวดหมู่",
-        addcategory: "เพิ่มหมวดหมู่",
-        editcategory: "แก้ไข้หมวดหมู่",
-        deletecategory: "ลบหมวดหมู่",
-        size: "ขนาด",
-        addsize: "เพิ่มขนาด",
-        editsize: "แก้ไขขนาด",
-        deletesize: "ลบขนาด",
-        color: "สี",
-        addcolor: "เพิ่มสี",
-        editcolor: "แก้ไขสี",
-        deletecolor: "ลบสี",
-    };
+    const labelsMap: Record<string, string> = useMemo(() => {
+        return {
+            addproduct: "เพิ่มสินค้า",
+            category: "หมวดหมู่",
+            addcategory: "เพิ่มหมวดหมู่",
+            editcategory: "แก้ไข้หมวดหมู่",
+            deletecategory: "ลบหมวดหมู่",
+            size: "ขนาด",
+            addsize: "เพิ่มขนาด",
+            editsize: "แก้ไขขนาด",
+            deletesize: "ลบขนาด",
+            color: "สี",
+            addcolor: "เพิ่มสี",
+            editcolor: "แก้ไขสี",
+            deletecolor: "ลบสี",
+        }
+    }, []);
+
+    const [filterValue, setFilterValue] = useState("");
+    const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
+    const [visibleColumns, setVisibleColumns] = useState<Selection>(
+        new Set(INITIAL_VISIBLE_COLUMNS),
+    );
+    const [statusFilter, setStatusFilter] = useState<Selection>("all");
+
+    const normalizedSelectedKeys = React.useMemo(() => {
+        if (selectedKeys === "all") {
+            return new Set(products.map((product) => String(product.product_id)));
+        }
+        return selectedKeys;
+    }, [selectedKeys, products]);
 
     const handleDropdownSelection = (key: string) => {
         switch (key) {
@@ -133,30 +126,41 @@ export default function CartProductList() {
         }
     };
 
-    // const handleSelection = (key: string) => {
-    //     switch (key) {
-    //         case "addcategory":
-    //             setModalAddCategoryOpen(true);
-    //             break;
-    //         case "addsize":
-    //             setModalAddSizeOpen(true);
-    //             break;
-    //         case "addcolor":
-    //             setModalAddColorOpen(true);
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    // };
+    const handleSelection = (key: string) => {
+        console.log(key);
+        switch (key) {
+            case "addcategory":
+                setModalAddCategoryOpen(true);
+                break;
+            case "editcategory":
+                setModalEditCategoryOpen(true);
+                break;
+            case "deletecategory":
+                setModalDeleteCategoryOpen(true);
+                break;
+            case "addsize":
+                // setModalAddSizeOpen(true);
+                break;
+            case "addcolor":
+                // setModalAddColorOpen(true);
+                break;
+            default:
+                break;
+        }
+    };
 
     const { onOpenChange, onClose } = useDisclosure()
 
     const closeModal = useCallback(() => {
         setProductImageSrc(null);
+
         setModalEditProductOpen(false);
         setModalDeleteProductOpen(false)
         setModalAddProductOpen(false);
-        // setModalAddCategoryOpen(false);
+
+        setModalAddCategoryOpen(false);
+        setModalEditCategoryOpen(false);
+        setModalDeleteCategoryOpen(false);
         // setModalAddSizeOpen(false);
         // setModalAddColorOpen(false);
     }, []);
@@ -164,87 +168,222 @@ export default function CartProductList() {
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. หมวดหมู่สินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦
 
-    // const {
-    //     control: controlCategory,
-    //     handleSubmit: handleSubmitCategory,
-    //     reset: resetCategory,
-    //     formState: { errors: errorsCategory, isSubmitting: isSubmittingCategory },
-    // } = useForm<SchemaCategory>({
-    //     resolver: zodResolver(schemaCategory),
-    // });
+    const {
+        control: controlCategory,
+        handleSubmit: handleSubmitCategory,
+        reset: resetCategory,
+        formState: { errors: errorsCategory, isSubmitting: isSubmittingCategory },
+    } = useForm<SchemaCategory>({
+        resolver: zodResolver(schemaCategory),
+    });
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    // const onCategorySubmit: SubmitHandler<SchemaCategory> = async (category: SchemaCategory) => {
-    //     try {
-    //         await axios.post("/api/product/category", { category_name: category.name });
-    //         closeModal()
-    //         // await fetchCategories();
-    //         resetCategory()
-    //     } catch (error) {
-    //         console.error(error);
-    //     }
-    // };
+    const onCategorySubmit: SubmitHandler<SchemaCategory> = useCallback(async (category: SchemaCategory) => {
+        try {
+            await axios.post("/api/product/category", { category_name: category.category_name });
+            closeModal()
+            await fetchCategories();
+            resetCategory()
+        } catch (error) {
+            console.error(error);
+        }
+    }, [closeModal, resetCategory]);
 
-    // const [isModalAddCategoryOpen, setModalAddCategoryOpen] = useState(false);
-    // const [isModalEditCategoryOpen, setModalEditCategoryOpen] = useState(false);
-    // const [isModalDeleteCategoryOpen, setModalDeleteCategoryOpen] = useState(false);
+    const [isModalAddCategoryOpen, setModalAddCategoryOpen] = useState(false);
+    const [isModalEditCategoryOpen, setModalEditCategoryOpen] = useState(false);
+    const [isModalDeleteCategoryOpen, setModalDeleteCategoryOpen] = useState(false);
 
-    // const renderModalAddCategory = useCallback(() => {
-    //     return (
-    //         <Modal
-    //             isKeyboardDismissDisabled={true}
-    //             isOpen={isModalAddCategoryOpen}
-    //             onOpenChange={onOpenChange}
-    //             onClose={closeModal}
-    //             classNames={{
-    //                 base: "border-1 border-default-200"
-    //             }}
-    //         >
-    //             <ModalContent>
-    //                 <ModalHeader className="flex flex-col gap-1">เพิ่มหมวดหมู่สินค้า</ModalHeader>
-    //                 <form onSubmit={handleSubmitCategory(onCategorySubmit)} >
-    //                     <ModalBody className="flex flex-col gap-3">
-    //                         <Controller
-    //                             name="name"
-    //                             control={controlCategory}
-    //                             render={({ field }) => (
-    //                                 <Input
-    //                                     {...field}
-    //                                     label="ชื่อหมวดหมู่"
-    //                                     labelPlacement="outside"
-    //                                     placeholder="ตั้งชื่อหมวดหมู่"
-    //                                     isInvalid={!!errorsCategory.name}
-    //                                     errorMessage={errorsCategory.name?.message}
-    //                                 />
-    //                             )}
-    //                         />
-    //                     </ModalBody>
-    //                     <ModalFooter>
-    //                         <Button color="danger" variant="light" onPress={onClose}>
-    //                             ปิด
-    //                         </Button>
-    //                         <Button disabled={isSubmittingCategory} color="primary" type="submit">
-    //                             เพิ่มหมวดหมู่สินค้า
-    //                         </Button>
-    //                     </ModalFooter>
-    //                 </form>
-    //             </ModalContent>
-    //         </Modal>
+    const renderModalAddCategory = useCallback(() => {
+        return (
+            <Modal
+                isKeyboardDismissDisabled={true}
+                isOpen={isModalAddCategoryOpen}
+                onOpenChange={onOpenChange}
+                onClose={closeModal}
+                classNames={{
+                    base: "border-1 border-default-200"
+                }}
+            >
+                <ModalContent>
+                    <ModalHeader className="flex flex-col gap-1">เพิ่มหมวดหมู่สินค้า</ModalHeader>
+                    <form onSubmit={handleSubmitCategory(onCategorySubmit)} >
+                        <ModalBody className="flex flex-col gap-3">
+                            <Controller
+                                name="category_name"
+                                control={controlCategory}
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        label="ชื่อหมวดหมู่"
+                                        labelPlacement="outside"
+                                        placeholder="ตั้งชื่อหมวดหมู่"
+                                        isInvalid={!!errorsCategory.category_name}
+                                        errorMessage={errorsCategory.category_name?.message}
+                                    />
+                                )}
+                            />
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button color="danger" variant="light" onPress={onClose}>
+                                ปิด
+                            </Button>
+                            <Button disabled={isSubmittingCategory} color="primary" type="submit">
+                                เพิ่มหมวดหมู่สินค้า
+                            </Button>
+                        </ModalFooter>
+                    </form>
+                </ModalContent>
+            </Modal>
 
-    //     )
-    // }, [closeModal, controlCategory, errorsCategory.name, handleSubmitCategory, isModalAddCategoryOpen, isSubmittingCategory, onCategorySubmit, onClose, onOpenChange])
+        )
+    }, [closeModal, controlCategory, errorsCategory.category_name, handleSubmitCategory, isModalAddCategoryOpen, isSubmittingCategory, onCategorySubmit, onClose, onOpenChange])
 
-    // const renderModalEditCategory = useCallback(() => {
-    //     return (
-    //         <p>กำลังพัฒนา</p>
-    //     )
-    // }, [])
+    const [editCategories, setEditCategories] = useState(categories);
 
-    // const renderModalDeleteCategory = useCallback(() => {
-    //     return (
-    //         <p>กำลังพัฒนา</p>
-    //     )
-    // }, [])
+    const handleCategoryChange = useCallback((index: number, value: string) => {
+        const updatedCategories = [...editCategories];
+        updatedCategories[index].category_name = value;
+        setEditCategories(updatedCategories);
+    }, [editCategories, ]);
+
+    const handleCategorySubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            console.log("Updated categories:", editCategories);
+
+            await axios.put("/api/product/category", { categories: editCategories });
+            closeModal();
+        } catch (error) {
+            console.error("Error updating categories:", error);
+        }
+    }, [closeModal, editCategories]);
+
+    const handleCategoryDelete = useCallback(async (id: any) => {
+        try {
+            console.log(id);
+            await axios.delete(`/api/product/category/${id}`)
+            fetchCategories()
+        } catch (error) {
+            console.error("Error updating categories:", error);
+        }
+
+    }, [])
+
+    const renderModalEditCategory = useCallback(() => {
+        return (
+            <Modal
+                isKeyboardDismissDisabled={true}
+                isOpen={isModalEditCategoryOpen}
+                onOpenChange={onOpenChange}
+                onClose={closeModal}
+                classNames={{
+                    base: "border-1 border-default-200"
+                }}
+            >
+                <ModalContent>
+                    <ModalHeader className="flex flex-col gap-1">แก้ไขหมวดหมู่สินค้า</ModalHeader>
+
+                    <form onSubmit={handleCategorySubmit}>
+                        <ModalBody className="flex flex-col gap-3">
+                            {editCategories.map((category, index) => (
+                                <div key={category.category_id} className="flex flex-row gap-2">
+                                    <Input
+                                        size="sm"
+                                        labelPlacement="outside"
+                                        placeholder="ตั้งชื่อหมวดหมู่"
+                                        value={category.category_name}
+                                        onChange={(e) => handleCategoryChange(index, e.target.value)}
+                                    />
+                                    <Button color="danger" size="sm" onPress={() => handleCategoryDelete(category.category_id)}>
+                                        ลบ
+                                    </Button>
+                                </div>
+                            ))}
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button color="danger" variant="light" onPress={closeModal}>
+                                ปิด
+                            </Button>
+                            <Button color="primary" type="submit">
+                                แก้ไขหมวดหมู่สินค้า
+                            </Button>
+                        </ModalFooter>
+
+                    </form>
+
+                </ModalContent>
+            </Modal >
+        )
+    }, [closeModal, isModalEditCategoryOpen, onOpenChange, editCategories, handleCategoryChange, handleCategoryDelete, handleCategorySubmit])
+
+    const {
+        control: controlCategoryDelete,
+        handleSubmit: handleSubmitCategoryDelete,
+        reset: resetCategoryDelete,
+        formState: { errors: errorsCategoryDelete, isSubmitting: isSubmittingCategoryDelete },
+    } = useForm<SchemaCategory>({
+        resolver: zodResolver(schemaCategory),
+    });
+
+    const onCategoryDeleteSubmit: SubmitHandler<SchemaCategory> = useCallback(async (category: SchemaCategory) => {
+        try {
+            await axios.delete(`/api/product/category/${category.category_id}`);
+            closeModal()
+            await fetchCategories();
+            resetCategoryDelete()
+        } catch (error) {
+            console.error(error);
+        }
+    }, [closeModal, resetCategoryDelete]);
+
+    const renderModalDeleteCategory = useCallback(() => {
+        return (
+            <Modal
+                isKeyboardDismissDisabled={true}
+                isOpen={isModalDeleteCategoryOpen}
+                onOpenChange={onOpenChange}
+                onClose={closeModal}
+                classNames={{
+                    base: "border-1 border-default-200"
+                }}
+            >
+                <ModalContent>
+                    <ModalHeader className="flex flex-col gap-1">ลบหมวดหมู่สินค้า</ModalHeader>
+                    <form onSubmit={handleSubmitCategoryDelete(onCategoryDeleteSubmit)} >
+                        <ModalBody className="flex flex-col gap-3">
+                            <Controller
+                                name="category_name"
+                                control={controlCategoryDelete}
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        label="ชื่อหมวดหมู่"
+                                        labelPlacement="outside"
+                                        placeholder="ตั้งชื่อหมวดหมู่"
+                                        isInvalid={!!errorsCategoryDelete.category_name}
+                                        errorMessage={errorsCategoryDelete.category_name?.message}
+                                    />
+                                )}
+                            />
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button color="danger" variant="light" onPress={onClose}>
+                                ปิด
+                            </Button>
+                            <Button disabled={isSubmittingCategoryDelete} color="primary" type="submit">
+                                ลบหมวดหมู่สินค้า
+                            </Button>
+                        </ModalFooter>
+                    </form>
+                </ModalContent>
+            </Modal>
+        )
+    }, [
+        closeModal,
+        isModalDeleteCategoryOpen,
+        onClose,
+        onOpenChange,
+        controlCategoryDelete, errorsCategoryDelete, handleSubmitCategoryDelete, isSubmittingCategoryDelete, onCategoryDeleteSubmit
+    ])
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. ── ✦. ขนาดสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦ ── .✦
 
@@ -423,17 +562,17 @@ export default function CartProductList() {
         formState: { errors: errorsProduct, isSubmitting: isSubmittingProduct },
     } = useForm<SchemaProduct>({
         resolver: zodResolver(schemaProduct),
-        
+
     });
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const onProductSubmit: SubmitHandler<SchemaProduct> = async (product: SchemaProduct) => {
+    const onProductSubmit: SubmitHandler<SchemaProduct> = useCallback(async (product: SchemaProduct) => {
         try {
             const payload = {
                 ...product,
-                
                 image: productImageSrc,
+                category: product.category,
             };
+            console.log(payload);
             await axios.post("/api/product", payload);
             resetProduct()
             await fetchProducts()
@@ -441,7 +580,7 @@ export default function CartProductList() {
         } catch (error) {
             console.error(error);
         }
-    };
+    }, [closeModal, productImageSrc, resetProduct]);
 
     const [isModalAddProductOpen, setModalAddProductOpen] = useState(false);
 
@@ -508,8 +647,8 @@ export default function CartProductList() {
                                     />
                                 )}
                             />
-                            {/* <Controller
-                                name="categories"
+                            <Controller
+                                name="category"
                                 control={controlProduct}
                                 render={({ field }) => (
                                     <Select
@@ -522,13 +661,13 @@ export default function CartProductList() {
                                         fullWidth
                                     >
                                         {categories.map((category: any) => (
-                                            <SelectItem key={category.category_id} value={category.category_name}>
+                                            <SelectItem key={category.category_name} value={category.category_name}>
                                                 {category.category_name}
                                             </SelectItem>
                                         ))}
                                     </Select>
                                 )}
-                            /> */}
+                            />
                             <Controller
                                 name="price"
                                 control={controlProduct}
@@ -578,8 +717,8 @@ export default function CartProductList() {
                 </ModalContent>
             </Modal>
         )
-    }, [isModalAddProductOpen, onOpenChange, closeModal, handleSubmitProduct, onProductSubmit, productImageSrc, controlProduct, isSubmittingProduct, errorsProduct.product_name, errorsProduct.description, errorsProduct.price, errorsProduct.stock])
-    
+    }, [categories, isModalAddProductOpen, onOpenChange, closeModal, handleSubmitProduct, onProductSubmit, productImageSrc, controlProduct, isSubmittingProduct, errorsProduct.product_name, errorsProduct.description, errorsProduct.price, errorsProduct.stock])
+
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. แก้ไขสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦
 
@@ -592,45 +731,43 @@ export default function CartProductList() {
         resolver: zodResolver(schemaProduct),
     });
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const onEditProductSubmit: SubmitHandler<SchemaProduct> = async (product: SchemaProduct) => {
-        console.log(product);
+    const [values, setValues] = useState<Selection>(new Set([]));
+    const [productEditId, setProductEditId] = useState<number>(0)
+
+    const onEditProductSubmit: SubmitHandler<SchemaProduct> = useCallback(async (product: SchemaProduct) => {
 
         try {
             const payload = {
                 ...product,
-                // category: product.categories ?? [],
+                category: product.category,
                 image: productImageSrc,
             };
-            // console.log(product.categories);
+            console.log(payload);
             await axios.put(`/api/product/${productEditId}`, payload);
             await fetchProducts()
             closeModal()
         } catch (error) {
             console.error(error);
         }
-    };
+    }, [closeModal, productEditId, productImageSrc]);
 
-    const [values, setValues] = useState<Selection>(new Set([]));
-    const [productEditId, setProductEditId] = useState<number>(0)
+    
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const onSubmitEditProduct = (product: Product) => {
+    const onSubmitEditProduct = useCallback((product: Product) => {
         setModalEditProductOpen(true);
 
         setProductEditId(product.product_id)
         setValueEditProduct("product_name", product.product_name);
         setValueEditProduct("description", product.description);
 
-        // const categoryNames = product.category.map((category: any) => category.category_name);
-        // console.log(categoryNames);
-        // setValues(new Set(categoryNames));
-        // setValueEditProduct("categories", categoryNames);
+        const categoryNames = product.category.map((category: any) => category.category_name);
+        setValues(new Set(categoryNames));
+        setValueEditProduct("category", categoryNames);
 
         setValueEditProduct("price", product.price);
         setValueEditProduct("stock", product.stock);
         setProductImageSrc(product.image);
-    }
+    }, [setValueEditProduct])
 
     const [isModalEditProductOpen, setModalEditProductOpen] = useState(false);
 
@@ -643,7 +780,7 @@ export default function CartProductList() {
                 onClose={closeModal}
             >
                 <ModalContent>
-                    <ModalHeader className="flex flex-col gap-1">แก้ไข้สินค้า</ModalHeader>
+                    <ModalHeader className="flex flex-col gap-1">แก้ไขสินค้า</ModalHeader>
                     <form onSubmit={handleSubmitEditProduct(onEditProductSubmit)} >
                         <ModalBody className="flex flex-col gap-3">
 
@@ -693,8 +830,8 @@ export default function CartProductList() {
                                     />
                                 )}
                             />
-                            {/* <Controller
-                                name="categories"
+                            <Controller
+                                name="category"
                                 control={controlEditProduct}
                                 render={({ field }) => (
                                     <Select
@@ -703,11 +840,12 @@ export default function CartProductList() {
                                         labelPlacement="outside"
                                         placeholder="เลือกหมวดหมู่สินค้าของคุณ"
                                         selectionMode="multiple"
-                                        selectedKeys={field.value || []} // ใช้ array ว่างแทน undefined
+                                        selectedKeys={field.value || []}
                                         onSelectionChange={(keys) => {
-                                            console.log("Selected keys:", Array.from(keys));
-                                            setValues(new Set(keys));
-                                            field.onChange(Array.from(keys) as string[]);
+                                            const selectedKeys = Array.from(keys);
+                                            console.log("Selected keys:", selectedKeys);
+                                            setValues(new Set(selectedKeys));
+                                            field.onChange(selectedKeys as string[]);
                                         }}
                                     >
                                         {categories.map((category) => (
@@ -717,7 +855,7 @@ export default function CartProductList() {
                                         ))}
                                     </Select>
                                 )}
-                            /> */}
+                            />
                             <Controller
                                 name="price"
                                 control={controlEditProduct}
@@ -767,7 +905,20 @@ export default function CartProductList() {
                 </ModalContent>
             </Modal>
         )
-    }, [isModalEditProductOpen, onOpenChange, closeModal, handleSubmitEditProduct, onEditProductSubmit, productImageSrc, controlEditProduct, onClose, isSubmittingEditProduct, errorsEditProduct.product_name, errorsEditProduct.description, errorsEditProduct.price, errorsEditProduct.stock])
+    }, [
+        categories,
+        isModalEditProductOpen,
+        onOpenChange, closeModal,
+        handleSubmitEditProduct,
+        onEditProductSubmit,
+        productImageSrc,
+        controlEditProduct,
+        onClose, isSubmittingEditProduct,
+        errorsEditProduct.product_name,
+        errorsEditProduct.description,
+        errorsEditProduct.price,
+        errorsEditProduct.stock
+    ])
 
     const handleImageChange = () => {
         const input = document.createElement("input");
@@ -801,8 +952,7 @@ export default function CartProductList() {
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. ลบสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const handleDeleteProduct = async (id?: number) => {
+    const handleDeleteProduct = useCallback(async (id?: number) => {
         try {
             if (id) {
                 await axios.delete(`/api/product/${id}`);
@@ -827,7 +977,7 @@ export default function CartProductList() {
         } catch (error) {
             console.error("Error deleting selected items:", error);
         }
-    }
+    }, [closeModal, normalizedSelectedKeys])
 
     const [DeleteProductId, setDeleteProductId] = useState<number>(0)
 
@@ -878,12 +1028,8 @@ export default function CartProductList() {
     // ꧁𓊈𒆜 ──────────────────────────────────── ไม่เกี่ยว ──────────────────────────────────── 𒆜𓊉꧂
 
 
-    const [filterValue, setFilterValue] = useState("");
-    const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
-    const [visibleColumns, setVisibleColumns] = useState<Selection>(
-        new Set(INITIAL_VISIBLE_COLUMNS),
-    );
-    const [statusFilter, setStatusFilter] = useState<Selection>("all");
+    
+
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
         column: "product_id",
@@ -902,16 +1048,30 @@ export default function CartProductList() {
         return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
     }, [visibleColumns]);
 
+    const categoryOptions = categories.map((category: any) => ({
+        name: category.category_name,
+        uid: category.category_name,
+    }));
+
     const filteredItems = React.useMemo(() => {
-        let filteredUsers = [...products];
+        let filteredProducts = [...products];
 
         if (hasSearchFilter) {
-            filteredUsers = filteredUsers.filter((product) =>
+            filteredProducts = filteredProducts.filter((product) =>
                 product.product_name.toLowerCase().includes(filterValue.toLowerCase()),
             );
         }
-        return filteredUsers;
-    }, [products, hasSearchFilter, filterValue]);
+
+
+        if (statusFilter !== "all" && Array.from(statusFilter).length !== categoryOptions.length) {
+            const selectedCategories = Array.from(statusFilter);
+            filteredProducts = filteredProducts.filter((product: any) =>
+                selectedCategories.some((category: any) => product.category.some((c: any) => c.category_name === category))
+            );
+        }
+
+        return filteredProducts;
+    }, [products, hasSearchFilter, filterValue, statusFilter, categoryOptions]);
 
     const items = React.useMemo(() => {
         const start = (page - 1) * rowsPerPage;
@@ -935,11 +1095,11 @@ export default function CartProductList() {
         });
     }, [sortDescriptor, items]);
 
-    
+
 
     const renderCell = React.useCallback((product: Product, columnKey: React.Key) => {
         const cellValue = product[columnKey as keyof Product];
-        console.log(product);
+
         switch (columnKey) {
             case "image":
                 return (
@@ -954,12 +1114,39 @@ export default function CartProductList() {
                 return (
                     <div className="max-w-48">
                         {product.category.map((category: any) => (
-                            <Chip key={category.category_id} radius="full" size="sm" className="mr-1 mb-1">
+                            <Chip key={category.category_id} radius="full" variant="flat" color="default" size="sm" className="mr-1 mb-1">
                                 {category.category_name}
                             </Chip>
                         ))}
                     </div>
                 );
+
+            case "price":
+                return (
+                    <div className="flex">
+                        <span>{new Intl.NumberFormat(
+                            "th-TH",
+                            {
+                                style: "decimal",
+                                minimumFractionDigits: 2,
+                            }
+                        ).format(product.price)}</span>
+                    </div>
+                );
+
+            case "quantity":
+                return (
+                    <div className="flex">
+                        <span>{new Intl.NumberFormat(
+                            "th-TH",
+                            {
+                                style: "decimal",
+                                minimumFractionDigits: 0,
+                            }
+                        ).format(product.quantity)}</span>
+                    </div>
+                );
+
             case "actions":
                 return (
                     <div className="relative flex justify-end items-center gap-2">
@@ -1032,11 +1219,33 @@ export default function CartProductList() {
                     />
                     <div className="flex gap-3">
 
-                        <Button size="sm" variant="flat" onPress={() => setModalAddProductOpen(true)} startContent={<PlusIcon />}>
-                            เพิ่มสินค้า
-                        </Button>
+                        <Dropdown>
+                            <DropdownTrigger className="hidden sm:flex">
+                                <Button
+                                    startContent={<FilterIcon className="text-small" />}
+                                    size="sm"
+                                    variant="flat"
+                                >
+                                    หมวดหมู่สินค้า
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu
+                                disallowEmptySelection
+                                aria-label="Table Columns"
+                                closeOnSelect={false}
+                                selectedKeys={statusFilter}
+                                selectionMode="multiple"
+                                onSelectionChange={setStatusFilter}
+                            >
+                                {categoryOptions.map((category: any) => (
+                                    <DropdownItem key={category.uid} className="capitalize">
+                                        {capitalize(category.name)}
+                                    </DropdownItem>
+                                ))}
+                            </DropdownMenu>
+                        </Dropdown>
 
-                        {/* <ButtonGroup size="sm" variant="flat" className="bg-background" >
+                        <ButtonGroup size="sm" variant="flat" className="bg-background" >
                             <Button onPress={() => handleDropdownSelection(selectedOptionValue as string)} startContent={<PlusIcon />}>
                                 {
                                     selectedOptionValue === "category" ? (
@@ -1112,14 +1321,14 @@ export default function CartProductList() {
                                 >
                                     <DropdownItem key="addproduct">เพิ่มสินค้า</DropdownItem>
                                     <DropdownItem key="category">หมวดหมู่สินค้า</DropdownItem>
-                                    <DropdownItem key="size" >ขนาด</DropdownItem>
-                                    <DropdownItem key="color">สี</DropdownItem>
+                                    {/* <DropdownItem key="size" >ขนาด</DropdownItem>
+                                    <DropdownItem key="color">สี</DropdownItem> */}
                                 </DropdownMenu>
                             </Dropdown>
 
-                        </ButtonGroup> */}
+                        </ButtonGroup>
 
-                        <Dropdown className="border-1 border-default-200">
+                        {/* <Dropdown className="border-1 border-default-200">
                             <DropdownTrigger className="">
                                 <Button
                                     endContent={<ChevronDownIcon className="text-small" />}
@@ -1143,7 +1352,7 @@ export default function CartProductList() {
                                     </DropdownItem>
                                 ))}
                             </DropdownMenu>
-                        </Dropdown>
+                        </Dropdown> */}
                     </div>
                 </div>
                 <div className="flex justify-between items-center">
@@ -1162,14 +1371,9 @@ export default function CartProductList() {
                 </div>
             </div>
         );
-    }, [filterValue, visibleColumns, onSearchChange, onRowsPerPageChange, products.length]);
+    }, [filterValue, /* visibleColumns, */ onSearchChange, onRowsPerPageChange, products.length, selectedOption, labelsMap, selectedOptionValue, statusFilter, categoryOptions]);
 
-    const normalizedSelectedKeys = React.useMemo(() => {
-        if (selectedKeys === "all") {
-            return new Set(products.map((product) => String(product.product_id)));
-        }
-        return selectedKeys;
-    }, [selectedKeys, products]);
+    
 
     const selectedIds = Array.from(normalizedSelectedKeys).map((id: any) => parseInt(id, 10));
 
@@ -1279,10 +1483,10 @@ export default function CartProductList() {
             {renderEditProduct()}
             {renderDeleteSelectedProducts()}
 
-            {/* {renderModalAddCategory()}
+            {renderModalAddCategory()}
             {renderModalEditCategory()}
             {renderModalDeleteCategory()}
-            {renderModalAddSize()}
+            {/* {renderModalAddSize()}
             {renderModalEditSize()}
             {renderModalDeleteSize()}
             {renderModalAddColor()}

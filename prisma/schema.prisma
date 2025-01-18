@@ -40,17 +40,37 @@ model cart {
   @@index([userId], map: "Cart_userId_fkey")
 }
 
+model screenedimages {
+  screened_image_id  Int       @id @default(autoincrement())
+  screened_image_url String?
+  cartitemId         Int?
+  cartitem           cartitem? @relation(fields: [cartitemId], references: [cart_item_id], onDelete: Cascade, map: "ScreenedImage_cartitemId_fkey")
+
+  @@index([cartitemId], map: "ScreenedImage_cartitemId_fkey")
+}
+
+model orderscreenedimages {
+  screened_image_id  Int        @id @default(autoincrement())
+  screened_image_url String?
+  orderItemId        Int?
+  orderitem          orderitem? @relation(fields: [orderItemId], references: [order_item_id], onDelete: Cascade, map: "OrderScreenedImage_orderItemId_fkey")
+
+  @@index([orderItemId], map: "OrderScreenedImage_orderItemId_fkey")
+}
+
 model cartitem {
-  cart_item_id   Int     @id @default(autoincrement())
-  screened_image String?
-  quantity       Int
-  userId         Int
-  cartId         Int
-  productId      Int
-  total_price    Float
-  cart           cart    @relation(fields: [cartId], references: [cart_id], map: "CartItem_cartId_fkey")
-  product        product @relation(fields: [productId], references: [product_id], onDelete: Cascade, map: "CartItem_productId_fkey")
-  user           user    @relation(fields: [userId], references: [id], map: "CartItem_userId_fkey")
+  cart_item_id    Int              @id @default(autoincrement())
+  screened_image  String?
+  quantity        Int
+  userId          Int
+  cartId          Int
+  productId       Int
+  total_price     Float
+  additional      String?
+  cart            cart             @relation(fields: [cartId], references: [cart_id], map: "CartItem_cartId_fkey")
+  product         product          @relation(fields: [productId], references: [product_id], onDelete: Cascade, map: "CartItem_productId_fkey")
+  user            user             @relation(fields: [userId], references: [id], map: "CartItem_userId_fkey")
+  screened_images screenedimages[]
 
   @@index([cartId], map: "CartItem_cartId_fkey")
   @@index([productId], map: "CartItem_productId_fkey")
@@ -58,12 +78,12 @@ model cartitem {
 }
 
 model category {
-  category_id   Int      @id @default(autoincrement())
-  createdAt     DateTime @default(now())
-  category_name String
-  updatedAt     DateTime @updatedAt
-
-  productcategory productcategory[] @relation(map: "ProductCategory_categoryId_fkey")
+  category_id     Int               @id @default(autoincrement())
+  category_name   String            @unique
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  productcategory productcategory[]
+  product         product[]         @relation("productcategory")
 }
 
 model history {
@@ -87,6 +107,8 @@ model order {
   userId         Int
   updatedAt      DateTime    @updatedAt
   total_quantity Int
+  received_date  DateTime?
+  additional     String?
   history        history[]
   user           user        @relation(fields: [userId], references: [id], map: "Order_userId_fkey")
   orderitem      orderitem[]
@@ -96,38 +118,39 @@ model order {
 }
 
 model orderitem {
-  order_item_id  Int      @id @default(autoincrement())
-  screened_image String?
-  price          Float
-  quantity       Int
-  productId      Int
-  orderId        Int
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  total_price    Float
-  order          order    @relation(fields: [orderId], references: [order_id], map: "OrderItem_orderId_fkey")
-  product        product  @relation(fields: [productId], references: [product_id], onDelete: Cascade, map: "OrderItem_productId_fkey")
+  order_item_id   Int                   @id @default(autoincrement())
+  screened_image  String?
+  price           Float
+  quantity        Int
+  productId       Int
+  orderId         Int
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  total_price     Float
+  additional      String?
+  order           order                 @relation(fields: [orderId], references: [order_id], map: "OrderItem_orderId_fkey")
+  product         product               @relation(fields: [productId], references: [product_id], onDelete: Cascade, map: "OrderItem_productId_fkey")
+  screened_images orderscreenedimages[]
 
   @@index([orderId], map: "OrderItem_orderId_fkey")
   @@index([productId], map: "OrderItem_productId_fkey")
 }
 
 model product {
-  product_id   Int         @id @default(autoincrement())
-  product_name String
-  description  String?
-  price        Float
-  image        String?
-  stock        Int?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  cartitem     cartitem[]
-  orderitem    orderitem[]
-  review       review[]
-
-  productcategory productcategory[] @relation(map: "ProductCategory_productId_fkey")
+  product_id      Int               @id @default(autoincrement())
+  product_name    String
+  description     String?
+  price           Float
+  image           String?
+  stock           Int?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  cartitem        cartitem[]
+  orderitem       orderitem[]
+  productcategory productcategory[]
+  review          review[]
+  category        category[]        @relation("productcategory")
 }
-
 
 model productcolor {
   color_id   Int      @id @default(autoincrement())
