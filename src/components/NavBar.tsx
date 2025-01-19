@@ -26,7 +26,7 @@ import { signOut } from "next-auth/react"
 import { useSession } from "next-auth/react";
 import axios from "axios";
 
-import { CartIcon, SearchIcon, HomeIcon, ProfileIcon, OrderIcon, PasswordIcon } from "@/components/Icon"
+import { CartIcon, SearchIcon, ProductIcon, ProfileIcon, OrderIcon, PasswordIcon } from "@/components/Icon"
 
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
@@ -60,7 +60,7 @@ export default function Component(props: NavbarProps) {
     const isActive = (href: string) => pathname === href;
 
     const menuItems = [
-        { name: "บ้าน", href: "/home", icon: <HomeIcon /> },
+        { name: "สินค้า", href: "/products", icon: <ProductIcon /> },
         {
             name: "รถเข็น",
             href: "/cart",
