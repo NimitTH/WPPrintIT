@@ -10,8 +10,8 @@ export async function middleware(req: Request) {
 
   // หน้าที่ต้องการให้ล็อกอินก่อนเข้าถึง
   const protectedPaths = [
-    '/admin', '/admin/users', '/admin/products', '/admin/order', 
-    '/home', '/cart', '/order', '/profile', 'password'
+    '/admin', '/admin/users', '/admin/products', '/admin/order',
+    '/products', '/cart', '/order', '/profile', 'password'
   ];
 
   // หน้าที่ต้องการให้เฉพาะ admin เข้าถึง
@@ -19,13 +19,17 @@ export async function middleware(req: Request) {
   const isProtectedPath = protectedPaths.some((path) => req.url.includes(path));
   const isAdminPath = adminPaths.some((path) => req.url.includes(path));
 
+  console.log("Request URL:", req.url);
+  console.log("Token:", token);
+  console.log("Protected path:", isProtectedPath);
+  console.log("Admin path:", isAdminPath);
 
   if (isSuspended) {
     return NextResponse.redirect(new URL('/suspended', req.url));
   }
-  
+
   if (isAdminPath && !isAdmin) {
-    return NextResponse.redirect(new URL('/home', req.url));
+    return NextResponse.redirect(new URL('/products', req.url));
   }
 
   if (isProtectedPath && !token) {
@@ -38,14 +42,14 @@ export async function middleware(req: Request) {
 // กำหนดว่า middleware นี้จะทำงานกับทุก path
 export const config = {
   matcher: [
-    '/',
-    '/admin/:path*',
-    '/products/:path*',
-    '/home',
-    '/cart',
-    '/order',
-    '/profile',
-    '/password',
-    '/api/user/password',
+    '/:path*',
+    // '/admin/:path*',
+    // '/products/:path*',
+    // '/home',
+    // '/cart',
+    // '/order',
+    // '/profile',
+    // '/password',
+    // '/api/user/password',
   ],
 };
