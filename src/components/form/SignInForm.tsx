@@ -123,7 +123,7 @@ export default function SignUpForm() {
             </div>
             <div className="flex flex-col gap-2">
                 <Button
-                    onPress={() => signIn('google', { redirectTo: "/home"} )}
+                    onPress={() => signIn('google', { callbackUrl: "/home" } )}
                     startContent={<Icon icon="flat-color-icons:google" width={24} />}
                     variant="bordered"
                 >
@@ -131,7 +131,7 @@ export default function SignUpForm() {
                 </Button>
                 <Button
                     startContent={<Icon className="text-default-500" icon="logos:facebook" width={24} />}
-                    onPress={() => signIn('facebook', { redirectTo: "/home"} )}
+                    onPress={() => signIn('facebook', { callbackUrl: "/home" } )}
                     type="submit"
                     variant="bordered"
                 >

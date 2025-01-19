@@ -43,7 +43,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 });
 
                 if (existingUser && String(existingUser.id) !== user.id) {
-                    
+
                     await prisma.account.update({
                         where: { userId: existingUser.id },
                         data: { provider: account.provider, providerAccountId: account.providerAccountId },
@@ -52,9 +52,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 }
             }
             return true;
-        },
-        async redirect({ url, baseUrl }) {
-            return url.startsWith(baseUrl) ? url : baseUrl + "/home";
         },
 
         async jwt({ token, user }: { token: JWT; user: User }) {
@@ -98,6 +95,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
             return session;
         },
+
+        async redirect({ url, baseUrl }) {
+            const isAuthPage = url.startsWith(baseUrl + '/signin');
+            if (isAuthPage) return baseUrl + '/home'; // เปลี่ยนไปหน้า Home
+            return url; // Redirect ตาม URL ปัจจุบัน
+        },
     },
-    // debug: true
+    debug: true
 })
