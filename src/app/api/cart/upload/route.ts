@@ -2,8 +2,9 @@ import { type NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
 import { prisma } from "@/lib/prisma"
+import { put } from "@vercel/blob";
 
-const UPLOAD_DIR = path.resolve(process.cwd() ?? "" , "public/cart/images")
+// const UPLOAD_DIR = path.resolve(process.cwd() ?? "" , "public/cart/images")
 
 export async function POST(req: NextRequest) {
     const formData = await req.formData();
@@ -13,25 +14,46 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, message: "No files uploaded" });
     }
 
-    if (!fs.existsSync(UPLOAD_DIR)) {
-        fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-    }
+    // if (!fs.existsSync(UPLOAD_DIR)) {
+    //     fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+    // }
 
     const urls: string[] = [];
-    for (const file of files) {
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const filePath = path.resolve(UPLOAD_DIR, file.name);
-        fs.writeFileSync(filePath, buffer);
 
-        urls.push(`/cart/images/${file.name}`);
+    try {
+        for (const file of files) {
+            const blob = await put(`cart/images/${file.name}`, await file.arrayBuffer(), {
+                access: "public", // ให้ไฟล์เข้าถึงได้ผ่าน URL
+                contentType: file.type, // ระบุประเภทไฟล์ (MIME Type)
+            });
+
+            urls.push(blob.url); // เก็บ URL ของไฟล์ที่อัปโหลด
+        }
+
+        console.log("Uploaded files:", urls);
+
+        return NextResponse.json({
+            success: true,
+            urls, // ส่งกลับ URL ของภาพทั้งหมด
+        });
+    } catch (error) {
+        console.error("Upload failed:", error);
+        return NextResponse.json({ success: false, message: "Upload failed" });
     }
+    // for (const file of files) {
+    //     const buffer = Buffer.from(await file.arrayBuffer());
+    //     const filePath = path.resolve(UPLOAD_DIR, file.name);
+    //     fs.writeFileSync(filePath, buffer);
 
-    console.log("Uploaded files:", urls);
+    //     urls.push(`/cart/images/${file.name}`);
+    // }
 
-    return NextResponse.json({
-        success: true,
-        urls, // ส่ง URL ของภาพทั้งหมดกลับ
-    });
+    // console.log("Uploaded files:", urls);
+
+    // return NextResponse.json({
+    //     success: true,
+    //     urls, // ส่ง URL ของภาพทั้งหมดกลับ
+    // });
 }
 
 
