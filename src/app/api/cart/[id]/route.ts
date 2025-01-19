@@ -6,7 +6,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
         const cart = await prisma.cartitem.findMany({
             where: { userId: Number(params.id) },
-            include: { product: true, screened_images: true },
+            include: { product: true, screenedimages: true },
         });
 
         return NextResponse.json(cart);

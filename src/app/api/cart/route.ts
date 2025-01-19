@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 
         const cart = await prisma.cartitem.findMany({
             where: { userId: Number(userId) },
-            include: { product: true, screened_images: true },
+            include: { product: true, screenedimages: true },
         })
 
         return NextResponse.json(cart);
@@ -54,14 +54,14 @@ export async function POST(req: NextRequest) {
                 cartId: cart.cart_id,
                 productId: product_id,
                 quantity: quantity,
-                screened_images: {
+                screenedimages: {
                     create: screened_images.map((url: string) => ({ screened_image_url: url })), // สร้างภาพหลายภาพในตาราง ScreenedImage
                 },
                 total_price: total_price,
                 additional: additional
             },
             include: {
-                screened_images: true, // ดึงข้อมูลภาพกลับมาด้วย
+                screenedimages: true, // ดึงข้อมูลภาพกลับมาด้วย
             },
         });
 

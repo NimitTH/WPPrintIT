@@ -18,7 +18,10 @@ export async function POST(req: NextRequest) {
                 return await prisma.category.upsert({
                     where: { category_name: categoryName },
                     update: { },
-                    create: { category_name: categoryName },
+                    create: { 
+                        category_name: categoryName,
+                        updatedAt: new Date()
+                    },
                 });
             })
         );
@@ -59,7 +62,10 @@ export async function PUT(req: NextRequest) {
                 return await prisma.category.upsert({
                     where: { category_name: categoryName },
                     update: { },
-                    create: { category_name: categoryName },
+                    create: { 
+                        category_name: categoryName,
+                        updatedAt: new Date()
+                    },
                 });
             })
         );

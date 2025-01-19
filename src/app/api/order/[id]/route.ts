@@ -16,9 +16,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
                 orderitem: true && {
                     include: {
                         product: true,
-                        screened_images: true
+                        // screenedimages: true,
                     }
-                }
+                },
+                
             },
             orderBy: { order_date: "desc" },
         });

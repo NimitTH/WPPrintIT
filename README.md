@@ -1,3 +1,6 @@
+
+อันนี้เขียนให้ตัวเองเข้าใจเฉยๆ
+
 ตัวอย่าง
 
       ตั้งค่าโครงการ Prisma ใหม่
@@ -32,3 +35,13 @@
 
       แสดงข้อมูลการดีบัก Prisma
       npx prisma debug
+      
+
+      เพิ่มไฟล์ที่ต้องการ commit:
+      git add .
+
+      ทำการ commit
+      git commit -m "Your commit message here"
+
+      Push การเปลี่ยนแปลงไปยัง remote repository
+      git push origin <branch-name>
