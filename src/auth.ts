@@ -43,7 +43,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 });
 
                 if (existingUser && String(existingUser.id) !== user.id) {
-                    // เชื่อมโยงบัญชี
+                    
                     await prisma.account.update({
                         where: { userId: existingUser.id },
                         data: { provider: account.provider, providerAccountId: account.providerAccountId },
@@ -51,11 +51,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     return true;
                 }
             }
-            return true; // อนุญาตให้ล็อกอิน
+            return true;
         },
         async redirect({ url, baseUrl }) {
-            // กำหนดให้รีไดเรกต์ไปที่ /home โดยตรง
-            return `${baseUrl}/home`;
+            return url.startsWith(baseUrl) ? url : baseUrl + "/home";
         },
 
         async jwt({ token, user }: { token: JWT; user: User }) {
