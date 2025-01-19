@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
     try {
         // อัปโหลดไฟล์ไปยัง Vercel Blob
-        const blob = await put(`image/product/${file.name}`, await file.arrayBuffer(), {
+        const blob = await put(`image/user/${file.name}`, await file.arrayBuffer(), {
             access: "public", // ให้ URL สามารถเข้าถึงได้
             contentType: file.type, // ระบุ Content-Type
         });

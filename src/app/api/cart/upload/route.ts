@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
     try {
         for (const file of files) {
-            const blob = await put(`cart/images/${file.name}`, await file.arrayBuffer(), {
+            const blob = await put(`image/cart/${file.name}`, await file.arrayBuffer(), {
                 access: "public", // ให้ไฟล์เข้าถึงได้ผ่าน URL
                 contentType: file.type, // ระบุประเภทไฟล์ (MIME Type)
             });
