@@ -83,7 +83,6 @@ export default function Component(props: NavbarProps) {
         { name: "จัดการรหัสผ่าน", href: "/password", icon: <PasswordIcon /> },
     ];
 
-
     return (
         <Navbar
             {...props}

@@ -24,15 +24,17 @@ export async function middleware(req: Request) {
   console.log("Protected path:", isProtectedPath);
   console.log("Admin path:", isAdminPath);
 
-  if (isSuspended) {
-    return NextResponse.redirect(new URL('/suspended', req.url));
-  }
 
-  if (isAdminPath && !isAdmin) {
-    return NextResponse.redirect(new URL('/products', req.url));
-  }
+
+
 
   if (isProtectedPath && !token) {
+    if (isSuspended) {
+      if (isAdminPath && !isAdmin) {
+        return NextResponse.redirect(new URL('/products', req.url));
+      }
+      return NextResponse.redirect(new URL('/suspended', req.url));
+    }
     return NextResponse.redirect(new URL('/signin', req.url));
   }
 

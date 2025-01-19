@@ -269,14 +269,14 @@ export default function SignUpForm() {
                 </div>
                 <div className="flex flex-col gap-2">
                     <Button
-                        onPress={() => signIn("google", { callbackUrl: "/home" })}
+                        onPress={() => signIn("google", { callbackUrl: "/products" })}
                         startContent={<Icon icon="flat-color-icons:google" width={24} />}
                         variant="bordered"
                     >
                         ลงทะเบียนด้วย Google
                     </Button>
                     <Button
-                        onPress={() => signIn("facebook", { callbackUrl: "/home" })}
+                        onPress={() => signIn("facebook", { callbackUrl: "/products" })}
                         startContent={
                             <Icon
                                 className="text-default-500"
