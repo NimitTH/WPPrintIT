@@ -418,12 +418,10 @@ export default function CartProductList() {
         "suspended": "ระงับการใช้งาน",
     }), []);
 
-    const roleMap: Record<string, string> = useMemo(() => ({
-        "USER": "ผู้ใช้งาน",
-        "ADMIN": "แอดมิน",
-    }), []);
-
-
+    // const roleMap: Record<string, string> = useMemo(() => ({
+    //     "USER": "ผู้ใช้งาน",
+    //     "ADMIN": "แอดมิน",
+    // }), []);
 
     const renderCell = React.useCallback((user: Users, columnKey: React.Key) => {
         
@@ -448,24 +446,24 @@ export default function CartProductList() {
             //         <span>{new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(user.money)}</span>
             //     )
 
-            case "role":
-                return (
-                    <Dropdown
-                        className="border-1 border-default-200"
-                        classNames={{
-                            trigger: "border-none",
-                        }}
-                    >
-                        <DropdownTrigger>
-                            {roleMap[user.role]}
-                        </DropdownTrigger>
-                        <DropdownMenu onAction={(key) => handleRoleChange(key as string, (user as any).id, user.role)}>
-                            <DropdownItem key="USER">ผู้ใช้งาน</DropdownItem>
-                            <DropdownItem key="ADMIN">แอดมิน</DropdownItem>
+            // case "role":
+            //     return (
+            //         <Dropdown
+            //             className="border-1 border-default-200"
+            //             classNames={{
+            //                 trigger: "border-none",
+            //             }}
+            //         >
+            //             <DropdownTrigger>
+            //                 {roleMap[user.role]}
+            //             </DropdownTrigger>
+            //             <DropdownMenu onAction={(key) => handleRoleChange(key as string, (user as any).id, user.role)}>
+            //                 <DropdownItem key="USER">ผู้ใช้งาน</DropdownItem>
+            //                 <DropdownItem key="ADMIN">แอดมิน</DropdownItem>
 
-                        </DropdownMenu>
-                    </Dropdown>
-                );
+            //             </DropdownMenu>
+            //         </Dropdown>
+            //     );
 
             case "status":
                 return (
@@ -476,7 +474,7 @@ export default function CartProductList() {
                         }}
                     >
                         <DropdownTrigger>{statusMap[user.status]}</DropdownTrigger>
-                        <DropdownMenu onAction={(key) => handleStatusChange(key as string, user.id, user.role)}>
+                        <DropdownMenu onAction={(key) => handleStatusChange(key as string, (user as any).id, user.role)}>
                             <DropdownItem key="approve">อนุมัติ</DropdownItem>
                             <DropdownItem key="suspended">ระงับการใช้งาน</DropdownItem>
                         </DropdownMenu>
@@ -514,7 +512,7 @@ export default function CartProductList() {
             default:
                 return <span>{user[columnKey as keyof Users]?.toString() || "ไม่ระบุข้อมูล"}</span>;
         }
-    }, [roleMap, statusMap, handleRoleChange, handleStatusChange, handleEditUser, handleDeleteUser]);
+    }, [/*roleMap*/, statusMap, /*handleRoleChange,*/ handleStatusChange, handleEditUser, handleDeleteUser]);
 
     const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));

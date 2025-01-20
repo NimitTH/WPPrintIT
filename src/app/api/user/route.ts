@@ -14,16 +14,15 @@ export async function PUT(req: NextRequest) {
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
         }
 
-        // อัปเดตข้อมูลผู้ใช้
         const updatedUser = await prisma.user.update({
             where: { email },
             data: {
-                name,
-                username,
-                email,
-                tel,
-                address,
-                image,
+                name: name,
+                username: username,
+                email: email,
+                tel: tel,
+                address: address,
+                image: image,
                 updatedAt: new Date()
             },
         });

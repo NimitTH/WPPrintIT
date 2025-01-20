@@ -7,9 +7,13 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         const { id } = params;
 
         await prisma.user.update({
-            where: { id: parseInt(id) },
+            where: { id: Number(id) },
             data: { status: status }
         });
+
+        console.log(status);
+        console.log(id);
+        
 
         return NextResponse.json({ message: "Status updated successfully" }, { status: 200 });
     } catch (error) {
