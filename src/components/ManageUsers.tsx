@@ -1,5 +1,5 @@
 "use client";
-import React, { SVGProps, useState, useEffect } from "react";
+import React, { SVGProps, useState, useEffect, useMemo, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useForm, Controller } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
@@ -150,8 +150,7 @@ export default function CartProductList() {
 
     const [imageSrc, setImageSrc] = useState<string | any>("");
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const handleImageChange = (id: number) => {
+    const handleImageChange = useCallback((id: number) => {
         const input = document.createElement("input");
         input.type = "file";
         input.accept = "image/*";
@@ -181,10 +180,9 @@ export default function CartProductList() {
             }
         };
         input.click();
-    };
+    }, []);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const handleDeleteUser = async (id: number, role: string) => {
+    const handleDeleteUser = useCallback(async (id: number, role: string) => {
         try {
             if (role === "ADMIN") {
                 alert("แอดมินไม่สามารถลบแอดมินได้");
@@ -195,7 +193,7 @@ export default function CartProductList() {
         } catch (error) {
             console.error("Error deleting user:", error);
         }
-    }
+    }, [])
 
     // const handleDeleteSelected = async () => {
     //     try {
@@ -215,8 +213,7 @@ export default function CartProductList() {
     //     }
     // }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const handleRoleChange = async (key: string, id: number, role: string) => {
+    const handleRoleChange = useCallback(async (key: string, id: number, role: string) => {
         try {
             if (key === "USER" && role === "ADMIN") {
                 alert("แอดมินไม่สามารถเปลี่ยนสิทธิเป็นผู้ใช้งานได้");
@@ -227,10 +224,9 @@ export default function CartProductList() {
         } catch (error) {
             console.error("Error changing role:", error);
         }
-    }
+    }, [])
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const handleStatusChange = async (key: string, id: number, role: string) => {
+    const handleStatusChange = useCallback(async (key: string, id: number, role: string) => {
         console.log(key, id, role);
         try {
             if (key === "suspended" && role === "ADMIN") {
@@ -242,7 +238,7 @@ export default function CartProductList() {
         } catch (error) {
             console.error("Error changing status:", error);
         }
-    }
+    }, [])
 
 
 
@@ -268,8 +264,8 @@ export default function CartProductList() {
     });
 
     const [userId, setUserId] = useState<number>(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const handleEditUser = async (id: number, username: string, name: string, tel: string, email: string, address: string, image: string) => {
+
+    const handleEditUser = useCallback(async (id: number, username: string, name: string, tel: string, email: string, address: string, image: string) => {
         setModalEditUserOpen(true);
         setUserId(id);
         setValue("id", id);
@@ -279,10 +275,9 @@ export default function CartProductList() {
         setValue("email", email);
         setValue("address", address);
         setImageSrc(image);
-    }
+    }, [setValue])
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const onSubmit: SubmitHandler<Schema> = async (data: Schema) => {
+    const onSubmit: SubmitHandler<Schema> = useCallback(async (data: Schema) => {
         try {
             console.log(data);
             await axios.put("/api/user", { ...data });
@@ -292,7 +287,7 @@ export default function CartProductList() {
         } catch (error) {
             console.error(error);
         }
-    };
+    }, []);
 
     const renderModal = React.useCallback(() => {
         return (
@@ -418,17 +413,15 @@ export default function CartProductList() {
         )
     }, [isModalEditUserOpen, onOpenChange, closeModal, handleSubmit, onSubmit, imageSrc, control, isSubmitting, handleImageChange, userId, errors.username, errors.name, errors.tel, errors.email, errors.address]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const statusMap: Record<string, string> = {
+    const statusMap: Record<string, string> = useMemo(() => ({
         "approve": "อนุมัติ",
         "suspended": "ระงับการใช้งาน",
-    };
+    }), []);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const roleMap: Record<string, string> = {
+    const roleMap: Record<string, string> = useMemo(() => ({
         "USER": "ผู้ใช้งาน",
         "ADMIN": "แอดมิน",
-    };
+    }), []);
 
 
 

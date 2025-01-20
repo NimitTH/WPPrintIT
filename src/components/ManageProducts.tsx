@@ -453,14 +453,14 @@ export default function CartProductList() {
     //             </ModalContent>
     //         </Modal>
     //     )
-    // // eslint-disable-next-line react-hooks/exhaustive-deps
+
     // }, [isModalAddSizeOpen])
 
     // const renderModalEditSize = useCallback(() => {
     //     return (
     //         <p>กำลังพัฒนา</p>
     //     )
-    // // eslint-disable-next-line react-hooks/exhaustive-deps
+
     // }, [isModalEditSizeOpen])
 
     // const renderModalDeleteSize = useCallback(() => {
@@ -480,7 +480,6 @@ export default function CartProductList() {
     //     resolver: zodResolver(schemaColor),
     // });
 
-    // // eslint-disable-next-line react-hooks/exhaustive-deps
     // const onColorSubmit: SubmitHandler<SchemaColor> = async (color: SchemaColor) => {
     //     try {
     //         await axios.post("/api/product/color", { color_name: color.name });
