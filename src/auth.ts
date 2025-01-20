@@ -99,9 +99,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         async redirect({ url, baseUrl }) {
             const isAuthPage = url.startsWith(baseUrl + '/signin');
             
-            if (isAuthPage) return baseUrl + '/products'; // เปลี่ยนไปหน้า Home
+            if (isAuthPage) return baseUrl + '/products';
             console.log(isAuthPage);
-            return url; // Redirect ตาม URL ปัจจุบัน
+            return url;
         },
     },
     debug: true

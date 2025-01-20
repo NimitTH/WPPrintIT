@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Schema, schema } from "@/types/index"
 import axios from "axios";
 import ListBox from "./ListBoxManage";
+import { useRouter } from "next/navigation";
 import {
     Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
     Modal, ModalContent, ModalHeader, ModalBody,ModalFooter,
@@ -47,6 +48,11 @@ const INITIAL_VISIBLE_COLUMNS = ["id", "user", "product", "money", /* "role", */
 
 export default function CartProductList() {
     const { data: session } = useSession();
+    const router = useRouter()
+    if (session?.user.role === "USER") {
+        router.push("/products")
+    }
+
     const [users, setUsers] = useState<any[]>([]);
 
     type Users = (typeof users)[0];

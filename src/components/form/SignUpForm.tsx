@@ -85,7 +85,7 @@ export default function SignUpForm() {
 
     const onsubmit: SubmitHandler<Schema> = async (data: Schema) => {
         try {
-            console.log(data);
+            console.log(profileImage);
 
             await axios.post("/api/signup", { ...data, image: profileImage });
 
@@ -97,6 +97,7 @@ export default function SignUpForm() {
 
             if (user.error) {
                 console.error(user.error);
+                alert("อีเมล์อยู่แล้ว")
             } else {
                 router.push("/products");
             }
