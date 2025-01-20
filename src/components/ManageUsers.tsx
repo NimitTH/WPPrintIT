@@ -426,8 +426,7 @@ export default function CartProductList() {
 
 
     const renderCell = React.useCallback((user: Users, columnKey: React.Key) => {
-        const cellValue = user[columnKey as keyof Users];
-
+        
         switch (columnKey) {
             case "user":
                 return (
@@ -460,7 +459,7 @@ export default function CartProductList() {
                         <DropdownTrigger>
                             {roleMap[user.role]}
                         </DropdownTrigger>
-                        <DropdownMenu onAction={(key) => handleRoleChange(key as string, user.id, user.role)}>
+                        <DropdownMenu onAction={(key) => handleRoleChange(key as string, (user as any).id, user.role)}>
                             <DropdownItem key="USER">ผู้ใช้งาน</DropdownItem>
                             <DropdownItem key="ADMIN">แอดมิน</DropdownItem>
 
@@ -513,7 +512,7 @@ export default function CartProductList() {
                     </div>
                 );
             default:
-                return cellValue;
+                return <span>{user[columnKey as keyof Users]?.toString() || "ไม่ระบุข้อมูล"}</span>;
         }
     }, [roleMap, statusMap, handleRoleChange, handleStatusChange, handleEditUser, handleDeleteUser]);
 

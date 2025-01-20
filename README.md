@@ -45,4 +45,4 @@
       git commit -m "Your commit message here"
 
       Push การเปลี่ยนแปลงไปยัง remote repository
-      git push origin <branch-name>
+      git push origin main
