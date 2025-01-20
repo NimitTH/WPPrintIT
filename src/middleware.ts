@@ -3,55 +3,47 @@ import { getToken } from 'next-auth/jwt';
 
 export async function middleware(req: Request) {
   const token = await getToken({ req, secret: process.env.AUTH_SECRET });
-  const status = token?.status;
-  const isSuspended = status === 'suspended';
-  const userRole = token?.role;
-  const isAdmin = userRole === 'ADMIN';
 
-  // หน้าที่ต้องการให้ล็อกอินก่อนเข้าถึง
-  const protectedPaths = [
-    '/admin', '/admin/users', '/admin/products', '/admin/order',
-    '/products', '/cart', '/order', '/profile', 'password'
-  ];
+  // const status = token?.status;
+  // const isSuspended = status === 'suspended';
+  // if (isSuspended) {
+  //   return NextResponse.redirect(new URL('/suspended', req.url));
+  // }
 
-  // หน้าที่ต้องการให้เฉพาะ admin เข้าถึง
-  const adminPaths = ['/admin', '/admin/user', '/admin/product', '/admin/order'];
-  const isProtectedPath = protectedPaths.some((path) => req.url.includes(path));
-  const isAdminPath = adminPaths.some((path) => req.url.includes(path));
+  // const userRole = token?.role;
+  // const isAdmin = userRole === 'ADMIN';
+  // const adminPaths = ['/admin', '/admin/user', '/admin/product', '/admin/order'];
+  // const isAdminPath = adminPaths.some((path) => req.url.includes(path));
+  // if (isAdminPath && !isAdmin) {
+  //   return NextResponse.redirect(new URL('/products', req.url));
+  // }
 
-  console.log("Request URL:", req.url);
+  // const protectedPaths = [
+  //   '/admin', '/admin/users', '/admin/products', '/admin/order',
+  //   '/products', '/cart', '/order', '/profile', 'password'
+  // ];
+  // const isProtectedPath = protectedPaths.some((path) => req.url.includes(path));
+  // if (isProtectedPath && !token) {
+  //   return NextResponse.redirect(new URL('/signin', req.url));
+  // }
+
+  // console.log("Request URL:", req.url);
+  // console.log("Admin path:", isAdminPath);
   console.log("Token:", token);
-  console.log("Protected path:", isProtectedPath);
-  console.log("Admin path:", isAdminPath);
-
-
-
-
-
-  if (isProtectedPath && !token) {
-    if (isSuspended) {
-      if (isAdminPath && !isAdmin) {
-        return NextResponse.redirect(new URL('/products', req.url));
-      }
-      return NextResponse.redirect(new URL('/suspended', req.url));
-    }
-    return NextResponse.redirect(new URL('/signin', req.url));
-  }
+  // console.log("Protected path:", isProtectedPath);
 
   return NextResponse.next();
 }
 
-// กำหนดว่า middleware นี้จะทำงานกับทุก path
 export const config = {
   matcher: [
-    '/:path*',
-    // '/admin/:path*',
-    // '/products/:path*',
-    // '/home',
-    // '/cart',
-    // '/order',
-    // '/profile',
-    // '/password',
-    // '/api/user/password',
+    '/',
+    '/admin/:path*',
+    '/product/:path*',
+    '/products',
+    '/cart',
+    '/order',
+    '/profile',
+    '/password',
   ],
 };

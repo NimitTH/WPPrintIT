@@ -812,9 +812,9 @@ export default function CartProductList() {
             </Table>
 
             {renderModal()}
-            <Button onPress={handleDownloadReceipt} className="text-white" variant="shadow" color="success">
+            {/* <Button onPress={handleDownloadReceipt} className="text-white" variant="shadow" color="success">
                 ดาวน์โหลดใบเสร็จ
-            </Button>
+            </Button> */}
         </>
     );
 }
