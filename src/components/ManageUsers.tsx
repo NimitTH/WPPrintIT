@@ -227,7 +227,6 @@ export default function CartProductList() {
     }, [])
 
     const handleStatusChange = useCallback(async (key: string, id: number, role: string) => {
-        console.log(key, id, role);
         try {
             if (key === "suspended" && role === "ADMIN") {
                 alert("แอดมินไม่สามารถระงับการใช้งานได้");
@@ -235,6 +234,7 @@ export default function CartProductList() {
             }
             await axios.put(`/api/user/status/${id}`, { status: key });
             fetchUsers();
+            console.log(key, id, role);
         } catch (error) {
             console.error("Error changing status:", error);
         }
