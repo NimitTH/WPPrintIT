@@ -4,9 +4,13 @@ import {
     Link,
 } from "@heroui/react";
 import NavBar from "@/components/NavBar";
+import { auth } from "@/auth";
+import { redirect } from 'next/navigation';
 
 
-export default function page() {
+export default async function page() {
+    // const session = await auth();
+    // if (session?.user?.role === "USER") redirect("/products")
     return (
         <div>
             <NavBar />

@@ -20,8 +20,6 @@ declare module "next-auth" {
             address: string;
         } & DefaultSession["user"]
     }
-
-    
 }
 
 declare module "next-auth/jwt" {
