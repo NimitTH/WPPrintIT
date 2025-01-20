@@ -15,6 +15,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         error: '/auth/error'
     },
     callbacks: {
+        authorized: async ({ auth }) => {
+            return auth?.user.role === "USER"
+        },
         async signIn({ user, account, profile }) {
             // if (account?.provider === "facebook") {
             //     const imageUrl = profile?.picture?.data?.url || null;

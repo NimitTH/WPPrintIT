@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+// import { getToken } from 'next-auth/jwt';
 
 
 export async function middleware(req: Request) {
@@ -49,3 +49,6 @@ export const config = {
     '/password',
   ],
 };
+
+// Ref: https://next-auth.js.org/configuration/nextjs#advanced-usage
+

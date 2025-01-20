@@ -48,10 +48,6 @@ const INITIAL_VISIBLE_COLUMNS = ["id", "user", "product", "money", /* "role", */
 
 export default function CartProductList() {
     const { data: session } = useSession();
-    const router = useRouter()
-    if (session?.user?.role === "USER") {
-        router.push("/products")
-    }
     const [users, setUsers] = useState<any[]>([]);
 
     type Users = (typeof users)[0];
