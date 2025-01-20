@@ -64,7 +64,7 @@ export default function Page() {
 
             if (response.data.password) {
                 alert("แก้ไขรหัสผ่านสำเร็จ");
-                router.push("/home");
+                router.push("/products");
             }
 
         } catch (error: any) {

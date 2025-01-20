@@ -12,7 +12,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     try {
         const { image, product_name, description, category, price, stock } = await req.json()
 
-        console.log(category);
+        console.log(image);
         
         const editproduct = await prisma.product.update({
             where: { product_id: Number(params.id) },

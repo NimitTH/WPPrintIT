@@ -107,7 +107,7 @@ import { prisma } from "@/lib/prisma";
 export async function GET(req: NextRequest) {
     try {
         const orders = await prisma.order.findMany({
-            include: { orderitem: { include: { product: true, } }, user: true },
+            include: { orderitem: { include: { product: true, orderscreenedimages: true } }, user: true },
             orderBy: { order_date: "desc" },
         });
 

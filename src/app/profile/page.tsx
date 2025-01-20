@@ -36,10 +36,6 @@ export default function SignUpForm() {
   const { data: session } = useSession();
   const router = useRouter();
 
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [imageUrl, setImageUrl] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
-
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
   // const [imageFile, setImageFile] = useState<File | null>("");
@@ -54,8 +50,6 @@ export default function SignUpForm() {
   } = useForm<Schema>({
     resolver: zodResolver(schema),
   });
-
-  
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
@@ -83,7 +77,6 @@ export default function SignUpForm() {
   const handleImageDelete = async () => {
     try {
       console.log(session?.user.id);
-
       await axios.delete("/api/upload", session?.user.id)
     } catch (error) {
       console.log(error);
@@ -92,9 +85,9 @@ export default function SignUpForm() {
 
   const onSubmit: SubmitHandler<Schema> = async (data: Schema) => {
     try {
-      console.log(data);
       await axios.put("/api/user", { ...data, image: profileImage });
-
+      alert("แก้ไขข้อมูลสำเร็จ")
+      router.push("/products");
     } catch (error) {
       console.error(error);
     }
@@ -119,7 +112,7 @@ export default function SignUpForm() {
       <NavBar />
       <div className="flex h-full w-full items-center justify-center mt-3">
         <div className="flex w-full max-w-lg flex-col gap-4 rounded-large bg-content1 px-8 pb-10 pt-6 shadow-small">
-          <p className="pb-2 text-xl font-medium">แก้ไข้ข้อมูล</p>
+          <p className="pb-2 text-xl font-medium">แก้ไขข้อมูล</p>
           <form
             className="flex flex-col gap-3"
             onSubmit={handleSubmit(onSubmit)}

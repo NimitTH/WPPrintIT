@@ -335,55 +335,55 @@ export default function CartProductList() {
         }
     }, [closeModal, resetCategoryDelete]);
 
-    const renderModalDeleteCategory = useCallback(() => {
-        return (
-            <Modal
-                isKeyboardDismissDisabled={true}
-                isOpen={isModalDeleteCategoryOpen}
-                onOpenChange={onOpenChange}
-                onClose={closeModal}
-                classNames={{
-                    base: "border-1 border-default-200"
-                }}
-            >
-                <ModalContent>
-                    <ModalHeader className="flex flex-col gap-1">ลบหมวดหมู่สินค้า</ModalHeader>
-                    <form onSubmit={handleSubmitCategoryDelete(onCategoryDeleteSubmit)} >
-                        <ModalBody className="flex flex-col gap-3">
-                            <Controller
-                                name="category_name"
-                                control={controlCategoryDelete}
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        label="ชื่อหมวดหมู่"
-                                        labelPlacement="outside"
-                                        placeholder="ตั้งชื่อหมวดหมู่"
-                                        isInvalid={!!errorsCategoryDelete.category_name}
-                                        errorMessage={errorsCategoryDelete.category_name?.message}
-                                    />
-                                )}
-                            />
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button color="danger" variant="light" onPress={onClose}>
-                                ปิด
-                            </Button>
-                            <Button disabled={isSubmittingCategoryDelete} color="primary" type="submit">
-                                ลบหมวดหมู่สินค้า
-                            </Button>
-                        </ModalFooter>
-                    </form>
-                </ModalContent>
-            </Modal>
-        )
-    }, [
-        closeModal,
-        isModalDeleteCategoryOpen,
-        onClose,
-        onOpenChange,
-        controlCategoryDelete, errorsCategoryDelete, handleSubmitCategoryDelete, isSubmittingCategoryDelete, onCategoryDeleteSubmit
-    ])
+    // const renderModalDeleteCategory = useCallback(() => {
+    //     return (
+    //         <Modal
+    //             isKeyboardDismissDisabled={true}
+    //             isOpen={isModalDeleteCategoryOpen}
+    //             onOpenChange={onOpenChange}
+    //             onClose={closeModal}
+    //             classNames={{
+    //                 base: "border-1 border-default-200"
+    //             }}
+    //         >
+    //             <ModalContent>
+    //                 <ModalHeader className="flex flex-col gap-1">ลบหมวดหมู่สินค้า</ModalHeader>
+    //                 <form onSubmit={handleSubmitCategoryDelete(onCategoryDeleteSubmit)} >
+    //                     <ModalBody className="flex flex-col gap-3">
+    //                         <Controller
+    //                             name="category_name"
+    //                             control={controlCategoryDelete}
+    //                             render={({ field }) => (
+    //                                 <Input
+    //                                     {...field}
+    //                                     label="ชื่อหมวดหมู่"
+    //                                     labelPlacement="outside"
+    //                                     placeholder="ตั้งชื่อหมวดหมู่"
+    //                                     isInvalid={!!errorsCategoryDelete.category_name}
+    //                                     errorMessage={errorsCategoryDelete.category_name?.message}
+    //                                 />
+    //                             )}
+    //                         />
+    //                     </ModalBody>
+    //                     <ModalFooter>
+    //                         <Button color="danger" variant="light" onPress={onClose}>
+    //                             ปิด
+    //                         </Button>
+    //                         <Button disabled={isSubmittingCategoryDelete} color="primary" type="submit">
+    //                             ลบหมวดหมู่สินค้า
+    //                         </Button>
+    //                     </ModalFooter>
+    //                 </form>
+    //             </ModalContent>
+    //         </Modal>
+    //     )
+    // }, [
+    //     closeModal,
+    //     isModalDeleteCategoryOpen,
+    //     onClose,
+    //     onOpenChange,
+    //     controlCategoryDelete, errorsCategoryDelete, handleSubmitCategoryDelete, isSubmittingCategoryDelete, onCategoryDeleteSubmit
+    // ])
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. ── ✦. ขนาดสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦ ── .✦
 
@@ -1262,7 +1262,7 @@ export default function CartProductList() {
                                                 >
                                                     <DropdownItem key="addcategory">เพิ่มหมวดหมู่สินค้า</DropdownItem>
                                                     <DropdownItem key="editcategory">แก้ไขหมวดหมู่สินค้า</DropdownItem>
-                                                    <DropdownItem key="deletecategory">ลบหมวดหมู่สินค้า</DropdownItem>
+                                                    {/* <DropdownItem key="deletecategory">ลบหมวดหมู่สินค้า</DropdownItem> */}
                                                 </DropdownMenu>
                                             </Dropdown>
                                         </>
@@ -1485,7 +1485,7 @@ export default function CartProductList() {
 
             {renderModalAddCategory()}
             {renderModalEditCategory()}
-            {renderModalDeleteCategory()}
+            {/* {renderModalDeleteCategory()} */}
             {/* {renderModalAddSize()}
             {renderModalEditSize()}
             {renderModalDeleteSize()}

@@ -55,6 +55,7 @@ export default function SignUpForm() {
 
             if (user.error) {
                 console.error(user.error)
+                alert("อีเมล์หรือรหัสไม่ถูกต้อง")
             } else {
                 router.push('/products')
             }

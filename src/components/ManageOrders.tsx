@@ -1,5 +1,5 @@
 "use client";
-import React, { SVGProps, useState, useEffect, useMemo } from "react";
+import React, { SVGProps, useState, useEffect, useMemo, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 import NextImage from "next/image";
@@ -99,9 +99,6 @@ export default function CartProductList() {
         ]
     }, []);
 
-    console.log(orderItems);
-
-
     const filteredItems = React.useMemo(() => {
         let filteredOrderItems = [...orderItems];
 
@@ -167,57 +164,56 @@ export default function CartProductList() {
     const [imageSrc, setImageSrc] = useState<string | any>("");
     const [imageId, setImageId] = useState(0);
 
-    const handleImageSrc = (src: string, id: number) => {
-        setImageSrc(src)
-        setImageId(id)
-        setModalScreenedImageOpen(true)
-    }
+    // const handleImageSrc = (src: string, id: number) => {
+    //     setImageSrc(src)
+    //     setImageId(id)
+    //     setModalScreenedImageOpen(true)
+    // }
 
-    const handleImageChange = () => {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = "image/*";
-        input.onchange = async (e: Event) => {
-            const target = e.target as HTMLInputElement;
-            if (target.files && target.files[0]) {
-                const file = target.files[0];
+    // const handleImageChange = () => {
+    //     const input = document.createElement("input");
+    //     input.type = "file";
+    //     input.accept = "image/*";
+    //     input.onchange = async (e: Event) => {
+    //         const target = e.target as HTMLInputElement;
+    //         if (target.files && target.files[0]) {
+    //             const file = target.files[0];
 
-                if (file) {
-                    const formData = new FormData();
-                    formData.append("image", file);
+    //             if (file) {
+    //                 const formData = new FormData();
+    //                 formData.append("image", file);
 
-                    try {
-                        const res = await axios.post("/api/cart/upload", formData);
+    //                 try {
+    //                     const res = await axios.post("/api/cart/upload", formData);
 
-                        if (res.data.success) {
-                            setImageSrc(res.data.url);
-                        }
+    //                     if (res.data.success) {
+    //                         setImageSrc(res.data.url);
+    //                     }
 
-                        await axios.put(`/api/cart/${imageId}`, { screened_image: res.data.url });
-                        fetchOrders();
+    //                     await axios.put(`/api/cart/${imageId}`, { screened_image: res.data.url });
+    //                     fetchOrders();
 
-                    } catch (error) {
-                        console.error("Image upload failed:", error);
-                    }
-                }
-            }
-        };
-        input.click();
-    };
+    //                 } catch (error) {
+    //                     console.error("Image upload failed:", error);
+    //                 }
+    //             }
+    //         }
+    //     };
+    //     input.click();
+    // };
 
-    const handleImageDelete = async () => {
-        try {
+    // const handleImageDelete = async () => {
+    //     try {
 
-            await axios.put(`/api/cart/${imageId}`, { screened_image: null });
-            setImageSrc("");
-            fetchOrders();
-        } catch (error) {
-            console.error("Error deleting image:", error);
-        }
-    };
+    //         await axios.put(`/api/cart/${imageId}`, { screened_image: null });
+    //         setImageSrc("");
+    //         fetchOrders();
+    //     } catch (error) {
+    //         console.error("Error deleting image:", error);
+    //     }
+    // };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const handleStatusChange = async (status: string, order_item_id: number) => {
+    const handleStatusChange = useCallback(async (status: string, order_item_id: number) => {
         try {
             console.log(status, order_item_id);
 
@@ -226,17 +222,16 @@ export default function CartProductList() {
         } catch (error) {
             console.error("Error changing status:", error);
         }
-    }
+    }, [])
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const statusMap: Record<string, string> = {
+    const statusMap: Record<string, string> = React.useMemo(() => ({
         "ToBePaid": "ที่ต้องชำระ",
         "ToBeDelivered": "ที่ต้องจัดส่ง",
         "ToBeReceived": "ที่ต้องได้รับ",
         "SuccessfulDelivery": "ส่งสำเร็จ",
         // "Canceled": "ยกเลิก",
         // "RefundAndReturn": "คืนเงิน/คืนสินค้า",
-    };
+    }), []);
 
     // ✦. ── ✦. ── ✦. พวก Modal .✦ ── .✦ ── .✦
 
@@ -276,22 +271,33 @@ export default function CartProductList() {
         )
     }, [isModalScreenedImageOpen, onOpenChange, closeModal, imageSrc]);
 
-    const downloadImage = (url: string) => {
-        console.log(url);
-
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = url.substring(url.lastIndexOf('/') + 1); // ใช้ชื่อไฟล์จาก URL
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    const downloadImage = async (url: string) => {
+        try {
+            const response = await fetch(url, { method: 'GET' });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+    
+            const blob = await response.blob();
+            const link = document.createElement('a');
+            const objectUrl = URL.createObjectURL(blob);
+    
+            link.href = objectUrl;
+            link.download = url.substring(url.lastIndexOf('/') + 1); // ใช้ชื่อไฟล์จาก URL
+            document.body.appendChild(link);
+            link.click();
+    
+            // Cleanup
+            document.body.removeChild(link);
+            URL.revokeObjectURL(objectUrl);
+        } catch (error) {
+            console.error('Error downloading the image:', error);
+        }
     };
+    
 
 
     const renderCell = React.useCallback((order: any, columnKey: React.Key) => {
-        const cellValue = order[columnKey as keyof OrderItems];
-
-
         switch (columnKey) {
             case "user":
                 return (
@@ -309,10 +315,6 @@ export default function CartProductList() {
 
             case "product":
                 return (
-                    // <div className="flex flex-row items-center relative">
-                    //     {order.orderitem.map((item: any, index: number) => (
-                    //     ))}
-                    // </div>
                     <Popover
                         showArrow
                         placement="bottom"
@@ -335,6 +337,7 @@ export default function CartProductList() {
                                                     <p>สินค้า</p>
                                                     <NextImage
                                                         src={item.product.image}
+                                                        
                                                         alt={`Product ${item.productId}`}
                                                         width={100}
                                                         height={100}
@@ -350,8 +353,8 @@ export default function CartProductList() {
                                                     <p>ภาพที่จะสกรีน</p>
                                                     <div className="flex flex-wrap gap-2 relative">
                                                         {
-                                                            item.screened_images.length > 1 ? (
-                                                                item.screened_images.map((image: any) => (
+                                                            item.orderscreenedimages.length > 1 ? (
+                                                                item.orderscreenedimages.map((image: any) => (
                                                                     <NextImage
                                                                         key={image.screened_image_id}
                                                                         src={image.screened_image_url}
@@ -364,9 +367,7 @@ export default function CartProductList() {
                                                                     />
                                                                 ))
                                                             ) : (
-                                                                <p>
-                                                                    ไม่ได้สกรีน
-                                                                </p>
+                                                                <p>ไม่ได้สกรีน</p>
                                                             )
                                                         }
                                                     </div>
@@ -382,19 +383,6 @@ export default function CartProductList() {
                         </PopoverContent>
                     </Popover>
                 );
-            // case "product":
-            //     return (
-            //         <div>
-            //             {order.orderitem.map((item: any, index: number) => (
-            //                 <div key={item.order_item_id} className="p-2 border-b">
-            //                     <p>Product ID: {item.productId}</p>
-            //                     <p>Quantity: {item.quantity}</p>
-            //                     <p>Total Price: {item.total_price}</p>
-            //                     <img src={item.screened_image} alt={`Product ${item.productId}`} className="w-16 h-16" />
-            //                 </div>
-            //             ))}
-            //         </div>
-            //     );
 
             case "total_amount":
                 return (
@@ -407,30 +395,6 @@ export default function CartProductList() {
                     ).format(order.total_amount)}</span>
                 );
 
-            // case "screened_image":
-            //     return (
-            //         <div className="flex">
-            //             <div
-            //                 onClick={() => handleImageSrc(order.screened_image, order.cart_item_id)}
-            //                 className="cursor-pointer"
-            //             >
-            //                 {order.screened_image ? (
-            //                     <Image
-            //                         alt={order.orderitem.product.product_name}
-            //                         classNames={{
-            //                             wrapper: "w-10 h-10",
-            //                             img: "object-cover w-full h-full",
-            //                         }}
-            //                         radius="full"
-            //                         src={order.screened_image}
-            //                     />
-            //                 ) : (
-            //                     <span>ยังไม่มีภาพสกรีน</span>
-            //                 )}
-            //             </div>
-            //         </div>
-            //     );
-
             case "status":
                 return (
                     <Dropdown
@@ -439,7 +403,7 @@ export default function CartProductList() {
                         }}
                     >
                         <DropdownTrigger>
-                            <Button className="bg-transparent">{statusMap[(order as any).status]}</Button>
+                            <Button className="bg-transparent">{statusMap[order.status]}</Button>
                         </DropdownTrigger>
                         <DropdownMenu onAction={(key) => handleStatusChange(key as string, (order as any).order_id)}>
                             <DropdownItem key="ToBePaid">ที่ต้องชำระ</DropdownItem>
@@ -476,7 +440,7 @@ export default function CartProductList() {
             //         </div>
             //     );
             default:
-                return cellValue;
+                return <span>{order[columnKey as keyof OrderItems]?.toString() || "ไม่ระบุข้อมูล"}</span>;
         }
     }, [statusMap, handleStatusChange]);
 
@@ -605,29 +569,29 @@ export default function CartProductList() {
     //     }
     // }
 
-    const normalizedSelectedKeys = React.useMemo(() => {
-        if (selectedKeys === "all") {
-            // สร้าง Set<string> ที่มี cart_item_id ของสินค้าทั้งหมด
-            return new Set(orderItems.map((product: any) => String(product.order_item_id)));
-        }
-        return selectedKeys;
-    }, [selectedKeys, orderItems]);
+    // const normalizedSelectedKeys = React.useMemo(() => {
+    //     if (selectedKeys === "all") {
+    //         // สร้าง Set<string> ที่มี cart_item_id ของสินค้าทั้งหมด
+    //         return new Set(orderItems.map((product: any) => String(product.order_item_id)));
+    //     }
+    //     return selectedKeys;
+    // }, [selectedKeys, orderItems]);
 
-    const selectedIds = Array.from(normalizedSelectedKeys).map((id: any) => parseInt(id, 10));
+    // const selectedIds = Array.from(normalizedSelectedKeys).map((id: any) => parseInt(id, 10));
 
-    const calculateTotalPrice = React.useCallback(() => {
+    // const calculateTotalPrice = React.useCallback(() => {
 
-        const selectedItems = orderItems.filter((product: any) =>
-            selectedIds.includes(product.order_item_id)
-        );
+    //     const selectedItems = orderItems.filter((product: any) =>
+    //         selectedIds.includes(product.order_item_id)
+    //     );
 
-        const totalPrice = selectedItems.reduce(
-            (sum, item: any) => sum + item.product.price * item.quantity,
-            0
-        );
+    //     const totalPrice = selectedItems.reduce(
+    //         (sum, item: any) => sum + item.product.price * item.quantity,
+    //         0
+    //     );
 
-        return totalPrice;
-    }, [orderItems, selectedIds]);
+    //     return totalPrice;
+    // }, [orderItems, selectedIds]);
 
     const bottomContent = React.useMemo(() => {
         // const totalPrice = calculateTotalPrice();
@@ -755,75 +719,7 @@ export default function CartProductList() {
                     </TableBody>
                 </Table>
             </div>
-
-
             {renderModal()}
         </>
     );
 }
-
-
-
-// export const QuantityControl = ({ cartItemId, quantity }: { cartItemId: number; quantity: number }) => {
-//     const [currentQuantity, setCurrentQuantity] = useState(quantity);
-//     const intervalRef = React.useRef<NodeJS.Timeout | null>(null);
-
-//     const updateQuantity = async (newQuantity: number) => {
-//         console.log("cartItemId", cartItemId, "newQuantity", newQuantity);
-
-//         if (newQuantity < 0) return;
-//         setCurrentQuantity(newQuantity);
-
-//         try {
-//             await axios.put(`/api/cart/${cartItemId}`, { quantity: newQuantity });
-//         } catch (error) {
-//             console.error("Error updating quantity:", error);
-//         }
-//     };
-
-//     const handleHold = (operation: "increment" | "decrement") => {
-//         let speed = 500; // เริ่มต้นที่ 500ms
-//         let newQuantity = currentQuantity;
-
-//         const increment = () => {
-//             newQuantity = operation === "increment" ? newQuantity + 1 : newQuantity - 1;
-//             if (newQuantity < 0) return; // ป้องกันค่าติดลบ
-//             setCurrentQuantity(newQuantity);
-//             updateQuantity(newQuantity);
-//             speed = Math.max(50, speed - 50); // ลดเวลาเพิ่มความเร็ว (ต่ำสุด 50ms)
-//             clearInterval(intervalRef.current!);
-//             intervalRef.current = setInterval(increment, speed);
-//         };
-
-//         increment(); // เรียกฟังก์ชันเพิ่ม/ลดครั้งแรก
-//         intervalRef.current = setInterval(increment, speed);
-//     };
-
-//     const handleRelease = () => {
-//         if (intervalRef.current) {
-//             clearInterval(intervalRef.current);
-//             intervalRef.current = null;
-//         }
-//     };
-
-//     return (
-//         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-//             <button
-//                 onMouseDown={() => handleHold("decrement")}
-//                 onMouseUp={handleRelease}
-//                 onMouseLeave={handleRelease}
-//             >
-//                 -
-//             </button>
-//             <span>{new Intl.NumberFormat("th-TH").format(currentQuantity)}</span>
-//             <button
-//                 onMouseDown={() => handleHold("increment")}
-//                 onMouseUp={handleRelease}
-//                 onMouseLeave={handleRelease}
-//             >
-//                 +
-//             </button>
-//         </div>
-//     );
-// };
-

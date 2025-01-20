@@ -25,7 +25,7 @@ export function capitalize(s: string) {
 }
 
 export const columns = [
-    // { name: "ID", uid: "cart_item_id", sortable: true },
+    { name: "ID", uid: "cart_item_id", sortable: true },
     { name: "สินค้า", uid: "product", },
     { name: "ภาพที่สกรีน", uid: "screenedimages", },
     { name: "อยากได้เพิ่มเติม", uid: "additional" },
@@ -106,7 +106,7 @@ export default function CartProductList() {
     // const [statusFilter, setStatusFilter] = useState<Selection>("all");
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
-        column: "price",
+        column: "cart_item_id",
         direction: "ascending",
     });
 

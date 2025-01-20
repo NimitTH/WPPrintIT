@@ -5,6 +5,7 @@ import Facebook from "next-auth/providers/facebook"
 import { prisma } from "./lib/prisma"
 import bcryptjs from "bcryptjs"
 
+
 export default {
     providers: [
         Credentials({
@@ -40,10 +41,12 @@ export default {
                     if (existingUser && existingUser.password) {
 
                         passwordMatch = await bcryptjs.compare(credentials.password as string, existingUser.password);
+                        console.log(passwordMatch);
+                        
                     }
                     if (!passwordMatch) {
                         console.log("Password incorrect");
-                        // throw { error: "Password Incorrect", status: 401 };
+                        throw { error: "Password Incorrect", status: 401, };
                     }
                     console.log("Pass 3 Checked");
                     const user = {

@@ -21,7 +21,7 @@ import {
     Input,
     User,
 } from "@heroui/react";
-import { GalleryIcon, PaymentIcon, CanceledIcon, DeliverIcon, ReceivedIcon, SuccessfulIcon, RefundIcon, PlusIcon, VerticalDotsIcon, SearchIcon, ChevronDownIcon, Cancel  } from "@/components/Icon"
+import { GalleryIcon, PaymentIcon, CanceledIcon, DeliverIcon, ReceivedIcon, SuccessfulIcon, RefundIcon, PlusIcon, VerticalDotsIcon, SearchIcon, ChevronDownIcon, Cancel } from "@/components/Icon"
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
     size?: number;
@@ -33,7 +33,7 @@ export function capitalize(s: string) {
 
 export const columns = [
     { name: "สินค้า", uid: "product" },
-    { name: "ภาพที่สกรีน", uid: "screened_images" },
+    { name: "ภาพที่สกรีน", uid: "orderscreenedimages" },
     { name: "อยากได้เพิ่มเติม", uid: "additional" },
     { name: "จำนวน", uid: "quantity", sortable: true },
     { name: "ราคา", uid: "price", sortable: true },
@@ -41,7 +41,7 @@ export const columns = [
 
 ];
 
-const INITIAL_VISIBLE_COLUMNS = ["product", "screened_images", "additional", "price", "total_price", "quantity"];
+const INITIAL_VISIBLE_COLUMNS = ["product", "orderscreenedimages", "additional", "price", "total_price", "quantity"];
 
 type OrderItems = {
     id: number;
@@ -60,8 +60,8 @@ type OrderItems = {
         image: string;
     };
     screened_image: string;
-    screened_images: {
-        orderItemId: number;
+    orderscreenedimages: {
+        // orderItemId: number;
         screened_image_id: number;
         screened_image_url: string;
     }[];
@@ -178,23 +178,6 @@ export default function CartProductList() {
         }
     }
 
-    // ✦. ── ✦. ── ✦. จัดการสั่งซื้อ .✦ ── .✦ ── .✦
-
-    const handleSubmit = async () => {
-        try {
-            console.log(selectedIds);
-
-            const res = await axios.post("/api/order", { userId: session?.user?.id, selectedItems: selectedIds });
-            console.log("Order created:", res.data);
-            alert("Order created successfully!");
-            fetchOrders(); // รีเฟรชหน้า Cart
-        } catch (error) {
-            console.error("Error creating order:", error);
-            alert("Failed to create order");
-        }
-
-    }
-
     // const handleDeleteSelected = async () => {
     //     try {
     //         const selectedIds = Array.from(normalizedSelectedKeys).map((id: any) => parseInt(id, 10));
@@ -218,43 +201,46 @@ export default function CartProductList() {
     const [imageSrc, setImageSrc] = useState<string>("");
     const [imageId, setImageId] = useState(0);
 
-    const handleImageSrc = (src: string, id: number) => {
+    const handleImageSrc = useCallback((src: string, id: number) => {
         setImageSrc(src)
         setImageId(id)
         setModalScreenedImageOpen(true)
-    }
+    }, [])
 
-    const handleImageChange = () => {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = "image/*";
-        input.onchange = async (e: Event) => {
-            const target = e.target as HTMLInputElement;
-            if (target.files && target.files[0]) {
-                const file = target.files[0];
 
-                if (file) {
-                    const formData = new FormData();
-                    formData.append("image", file);
+    console.log(orderItems);
 
-                    try {
-                        const res = await axios.post("/api/cart/upload", formData);
+    // const handleImageChange = () => {
+    //     const input = document.createElement("input");
+    //     input.type = "file";
+    //     input.accept = "image/*";
+    //     input.onchange = async (e: Event) => {
+    //         const target = e.target as HTMLInputElement;
+    //         if (target.files && target.files[0]) {
+    //             const file = target.files[0];
 
-                        if (res.data.success) {
-                            setImageSrc(res.data.url);
-                        }
+    //             if (file) {
+    //                 const formData = new FormData();
+    //                 formData.append("image", file);
 
-                        await axios.put(`/api/cart/${imageId}`, { screened_image: res.data.url });
-                        fetchOrders();
+    //                 try {
+    //                     const res = await axios.post("/api/cart/upload", formData);
 
-                    } catch (error) {
-                        console.error("Image upload failed:", error);
-                    }
-                }
-            }
-        };
-        input.click();
-    };
+    //                     if (res.data.success) {
+    //                         setImageSrc(res.data.url);
+    //                     }
+
+    //                     await axios.put(`/api/cart/${imageId}`, { screened_image: res.data.url });
+    //                     fetchOrders();
+
+    //                 } catch (error) {
+    //                     console.error("Image upload failed:", error);
+    //                 }
+    //             }
+    //         }
+    //     };
+    //     input.click();
+    // };
 
     // const handleImageDelete = async () => {
     //     try {
@@ -307,16 +293,6 @@ export default function CartProductList() {
 
 
     const renderCell = useCallback((order: OrderItems, columnKey: React.Key) => {
-        // const cellValue = order[columnKey as keyof OrderItems1];
-
-        // if (typeof cellValue === "object" && cellValue !== null) {
-        //     if ("product_name" in cellValue) {
-        //         return <span>{cellValue.product_name}</span>;
-        //     }
-        //     return <span>ข้อมูลไม่รองรับ</span>;
-
-
-        // }
         console.log(order);
 
         switch (columnKey) {
@@ -337,26 +313,25 @@ export default function CartProductList() {
                     </User>
                 );
 
-            case "screened_images":
-                if (!order.screened_images || order.screened_images.length === 0) {
+            case "orderscreenedimages":
+                if (!order.orderscreenedimages || order.orderscreenedimages.length === 0) {
                     return <span>ไม่สกรีนภาพ</span>;
                 }
 
                 return (
 
                     <Popover
-                        isOpen={!!openPopovers[order.order_id]}
+                        isOpen={!!openPopovers[order.order_item_id]}
                         onOpenChange={(open) =>
                             setOpenPopovers((prev) => ({
                                 ...prev,
-                                [order.order_id]: open,
+                                [order.order_item_id]: open,
                             }))
                         }
                         showArrow
                         backdrop="opaque"
                         classNames={{
                             base: [
-                                // arrow color
                                 "before:bg-default-200",
                             ],
                             content: [
@@ -371,9 +346,9 @@ export default function CartProductList() {
                             <AvatarGroup
                                 isBordered
                                 max={2}
-                                total={order.screened_images.length}
+                                total={order.orderscreenedimages.length}
                             >
-                                {order.screened_images.map((image: any) => (
+                                {order.orderscreenedimages.map((image: any) => (
                                     <Avatar
                                         key={image.screened_image_id}
                                         src={image.screened_image_url}
@@ -383,7 +358,7 @@ export default function CartProductList() {
                         </PopoverTrigger>
                         <PopoverContent>
                             <AvatarGroup isGrid max={99}>
-                                {order.screened_images.map((image: any) => (
+                                {order.orderscreenedimages.map((image: any) => (
                                     <Avatar
                                         key={image.screened_image_id}
                                         alt={`Image ${image.screened_image_id}`}
@@ -391,7 +366,7 @@ export default function CartProductList() {
                                             handleImageSrc(image.screened_image_url, image.screened_image_id)
                                             setOpenPopovers((prev) => ({
                                                 ...prev,
-                                                [order.order_id]: false,
+                                                [order.order_item_id]: false,
                                             }));
                                         }}
                                         src={image.screened_image_url}
@@ -403,13 +378,13 @@ export default function CartProductList() {
                     </Popover>
                 );
 
-                case "additional":
-                    if (!order.additional || order.additional === "") {
-                        return <span>ไม่มีเพิ่มเติม</span>;
-                    }
-                    return (
-                        <span>{order.additional}</span>
-                    )
+            case "additional":
+                if (!order.additional || order.additional === "") {
+                    return <span>ไม่มีเพิ่มเติม</span>;
+                }
+                return (
+                    <span>{order.additional}</span>
+                )
 
             case "quantity":
                 return (
@@ -476,7 +451,7 @@ export default function CartProductList() {
             default:
                 return <span>{order[columnKey as keyof OrderItems]?.toString() || "ไม่ระบุข้อมูล"}</span>;
         }
-    }, [openPopovers, setOpenPopovers]);
+    }, [openPopovers, handleImageSrc]);
 
     const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));
@@ -578,29 +553,29 @@ export default function CartProductList() {
     //     }
     // }
 
-    const normalizedSelectedKeys = React.useMemo(() => {
-        if (selectedKeys === "all") {
-            // สร้าง Set<string> ที่มี cart_item_id ของสินค้าทั้งหมด
-            return new Set(orderItems.map((product: OrderItems) => String(product.order_item_id)));
-        }
-        return selectedKeys;
-    }, [selectedKeys, orderItems]);
+    // const normalizedSelectedKeys = React.useMemo(() => {
+    //     if (selectedKeys === "all") {
+    //         // สร้าง Set<string> ที่มี cart_item_id ของสินค้าทั้งหมด
+    //         return new Set(orderItems.map((product: OrderItems) => String(product.order_item_id)));
+    //     }
+    //     return selectedKeys;
+    // }, [selectedKeys, orderItems]);
 
-    const selectedIds = Array.from(normalizedSelectedKeys).map((id: any) => parseInt(id, 10));
+    // const selectedIds = Array.from(normalizedSelectedKeys).map((id: any) => parseInt(id, 10));
 
-    const calculateTotalPrice = React.useCallback(() => {
+    // const calculateTotalPrice = React.useCallback(() => {
 
-        const selectedItems = orderItems.filter((product: OrderItems) =>
-            selectedIds.includes(product.order_item_id)
-        );
+    //     const selectedItems = orderItems.filter((product: OrderItems) =>
+    //         selectedIds.includes(product.order_item_id)
+    //     );
 
-        const totalPrice = selectedItems.reduce(
-            (sum: number, item: OrderItems) => sum + item.product.price * item.quantity,
-            0
-        );
+    //     const totalPrice = selectedItems.reduce(
+    //         (sum: number, item: OrderItems) => sum + item.product.price * item.quantity,
+    //         0
+    //     );
 
-        return totalPrice;
-    }, [orderItems, selectedIds]);
+    //     return totalPrice;
+    // }, [orderItems, selectedIds]);
 
     const bottomContent = React.useMemo(() => {
         // const totalPrice = calculateTotalPrice();
