@@ -55,19 +55,7 @@ export default function SignUpForm() {
     resolver: zodResolver(schema),
   });
 
-  useEffect(() => {
-    if (session?.user) {
-      setValue("username", session.user.username || "");
-      setValue("name", session.user.name || "");
-      setValue("tel", session.user.tel || "");
-      setValue("email", session.user.email || "");
-      setValue("address", session.user.address || "");
-      setProfileImage(session.user.image || "");
-      console.log(session.user.image);
-      console.log(profileImage);
-    }
-
-  }, [session, setValue, profileImage]);
+  
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
@@ -82,8 +70,10 @@ export default function SignUpForm() {
       try {
         const response = await axios.post("/api/upload", formData);
         if (response.data.success) {
+          console.log("Uploaded image URL:", response.data.url);
           setProfileImage(response.data.url);
         }
+        console.log(profileImage);
       } catch (error) {
         console.error("Image upload failed:", error);
       }
@@ -109,6 +99,20 @@ export default function SignUpForm() {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    if (session?.user && profileImage === null) {
+      setValue("username", session.user.username || "");
+      setValue("name", session.user.name || "");
+      setValue("tel", session.user.tel || "");
+      setValue("email", session.user.email || "");
+      setValue("address", session.user.address || "");
+      setProfileImage(session.user.image || "");
+      console.log(session.user.image);
+      console.log("Profile image updated:", profileImage);
+    }
+
+  }, [session, setValue, profileImage]);
 
   return (
     <div>
@@ -146,6 +150,7 @@ export default function SignUpForm() {
                       </ModalHeader>
                       <ModalBody className="w-2xl h-2xl mx-auto">
                         <Avatar
+                          key={profileImage}
                           onClick={onOpen}
                           src={profileImage || ""}
                           alt="Profile Picture"

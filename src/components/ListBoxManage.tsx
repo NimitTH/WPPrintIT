@@ -38,10 +38,10 @@ export default function App() {
                     showDivider
                     as={Link}
                     href="/admin/order"
-                    description="จัดการออร์เดอร์ทั้งหมด!"
+                    description="จัดการออเดอร์ทั้งหมด!"
                     startContent={<EditDocumentIcon className={iconClasses} />}
                 >
-                    จัดการออร์เดอร์
+                    จัดการออเดอร์
                 </ListboxItem>
             </Listbox>
         </ListboxWrapper>

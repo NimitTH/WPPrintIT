@@ -75,6 +75,8 @@ export default function SignUpForm() {
                 if (response.data.success) {
                     setProfileImage(response.data.url);
                 }
+                console.log(setProfileImage);
+                
             } catch (error) {
                 console.error("Image upload failed:", error);
             }
@@ -96,7 +98,7 @@ export default function SignUpForm() {
             if (user.error) {
                 console.error(user.error);
             } else {
-                router.push("/home");
+                router.push("/products");
             }
         } catch (error) {
             console.error(error);

@@ -29,7 +29,7 @@ export async function middleware(req: Request) {
 
   // console.log("Request URL:", req.url);
   // console.log("Admin path:", isAdminPath);
-  console.log("Token:", token);
+  // console.log("Token:", token);
   // console.log("Protected path:", isProtectedPath);
 
   return NextResponse.next();

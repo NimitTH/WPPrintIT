@@ -19,7 +19,7 @@ type Product = {
     quantity: number;
     stock: number;
     image: string;
-    screened_image: string | null;
+    screened_images: any;
     total_price: number;
 }
 
@@ -36,7 +36,7 @@ export default function Product(params: Props) {
         quantity: 0,
         stock: 0,
         image: "",
-        screened_image: "",
+        screened_images: [""],
         total_price: 0
     })
 
@@ -50,16 +50,16 @@ export default function Product(params: Props) {
             
         }
     }
+    const [screenedImage, setScreenedImage] = useState<string[]>([])
 
     useEffect(() => {
         fetchProduct(Number(id))
-    }, [id])
+    }, [id, screenedImage])
 
     const { data: session, status } = useSession()
 
     const [quantity, setQuantity] = useState(1)
 
-    const [screenedImage, setScreenedImage] = useState<string[]>([])
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (status === "unauthenticated") {
@@ -78,9 +78,15 @@ export default function Product(params: Props) {
     
         try {
             const response = await axios.post("/api/cart/upload", formData);
+
+            console.log(response.data.urls);
+            
             if (response.data.success) {
                 setScreenedImage((prev) => [...prev, ...response.data.urls]); // รวม URL ทั้งหมด
             }
+            console.log(screenedImage)
+            
+            
         } catch (error) {
             console.error("Image upload failed:", error);
         }
@@ -104,12 +110,15 @@ export default function Product(params: Props) {
         }
 
         const total_price = product.price * quantity
+
+        console.log(screenedImage);
+        
         try {
             const payload = {
                 id: session?.user?.id,
                 product_id: product.product_id,
                 quantity: quantity,
-                screened_images: screenedImage,
+                screenedimages: screenedImage,
                 total_price: total_price,
                 additional: additionalText
             };

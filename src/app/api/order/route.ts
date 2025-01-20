@@ -107,7 +107,7 @@ import { prisma } from "@/lib/prisma";
 export async function GET(req: NextRequest) {
     try {
         const orders = await prisma.order.findMany({
-            include: { orderitem: { include: { product: true } }, user: true },
+            include: { orderitem: { include: { product: true, } }, user: true },
             orderBy: { order_date: "desc" },
         });
 
@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
         const cartItems = await prisma.cartitem.findMany({
             where: {
                 cart_item_id: { in: selectedItems },
-                cart: { userId: userId },
+                cart: { userId: userId, },
             },
             include: { product: true, screenedimages: true, },
         });
@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
                     create: cartItems.map((item) => ({
                         productId: item.productId,
                         screened_image: item.screened_image,
-                        screened_images: {
+                        orderscreenedimages: {
                             create: item.screenedimages.map((image) => ({
                                 screened_image_url: image.screened_image_url,
                             })),

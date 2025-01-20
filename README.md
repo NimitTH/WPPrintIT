@@ -37,6 +37,7 @@
       npx prisma debug
       
 
+
       เพิ่มไฟล์ที่ต้องการ commit:
       git add .
 

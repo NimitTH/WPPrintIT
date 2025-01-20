@@ -56,10 +56,10 @@ export default function SignUpForm() {
             if (user.error) {
                 console.error(user.error)
             } else {
-                router.push('/home')
+                router.push('/products')
             }
             if (session) {
-                router.push("/home"); // เปลี่ยนเส้นทางไปหน้า Home
+                router.push("/products"); // เปลี่ยนเส้นทางไปหน้า Home
             }
         } catch (error) {
             console.error(error);

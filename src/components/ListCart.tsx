@@ -27,7 +27,7 @@ export function capitalize(s: string) {
 export const columns = [
     // { name: "ID", uid: "cart_item_id", sortable: true },
     { name: "สินค้า", uid: "product", },
-    { name: "ภาพที่สกรีน", uid: "screened_images", },
+    { name: "ภาพที่สกรีน", uid: "screenedimages", },
     { name: "อยากได้เพิ่มเติม", uid: "additional" },
     { name: "ราคาต่อชิ้น", uid: "price", sortable: true },
     { name: "จำนวน", uid: "quantity", sortable: true },
@@ -35,7 +35,7 @@ export const columns = [
     { name: "ACTIONS", uid: "actions" },
 ];
 
-const INITIAL_VISIBLE_COLUMNS = ["product", "screened_images", "additional", "price", "quantity", "total_price", "actions"];
+const INITIAL_VISIBLE_COLUMNS = ["product", "screenedimages", "additional", "price", "quantity", "total_price", "actions"];
 
 export default function CartProductList() {
     const { data: session } = useSession();
@@ -61,7 +61,7 @@ export default function CartProductList() {
     type CartProducts = {
         cart_item_id: number;
         screened_image: string;
-        screened_images: {
+        screenedimages: {
             screened_image_id: number;
             screened_image_url: string;
         }[];
@@ -77,6 +77,8 @@ export default function CartProductList() {
         };
     };
 
+
+
     const fetchCartProducts = useCallback( async () => {
         try {
             if (!session) return; // หยุดถ้า session ยังไม่มีค่า
@@ -87,6 +89,9 @@ export default function CartProductList() {
             console.error("An error occurred while fetching products", error);
         }
     }, [session])
+
+    console.log(cartProducts);
+    
 
     const [openPopovers, setOpenPopovers] = useState<Record<number, boolean>>({});
 
@@ -231,8 +236,8 @@ export default function CartProductList() {
     }, [session?.user?.address, session?.user?.email, session?.user?.id, session?.user.tel, session?.user?.name]);
 
     const handleSubmit = useCallback( async () => {
+
         try {
-            console.log(selectedIds);
 
             if (session?.user.address === "" || session?.user.address === null) {
                 alert("กรุณาใส่ที่อยู่ของคุณก่อน")
@@ -288,48 +293,48 @@ export default function CartProductList() {
         setModalScreenedImageOpen(true)
     }, [])
 
-    const handleImageChange = () => {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = "image/*";
-        input.onchange = async (e: Event) => {
-            const target = e.target as HTMLInputElement;
-            if (target.files && target.files[0]) {
-                const file = target.files[0];
+    // const handleImageChange = () => {
+    //     const input = document.createElement("input");
+    //     input.type = "file";
+    //     input.accept = "image/*";
+    //     input.onchange = async (e: Event) => {
+    //         const target = e.target as HTMLInputElement;
+    //         if (target.files && target.files[0]) {
+    //             const file = target.files[0];
 
-                if (file) {
-                    const formData = new FormData();
-                    formData.append("image", file);
+    //             if (file) {
+    //                 const formData = new FormData();
+    //                 formData.append("image", file);
 
-                    try {
-                        const res = await axios.post("/api/cart/upload", formData);
+    //                 try {
+    //                     const res = await axios.post("/api/cart/upload", formData);
 
-                        if (res.data.success) {
-                            setImageSrc(res.data.url);
-                        }
+    //                     if (res.data.success) {
+    //                         setImageSrc(res.data.url);
+    //                     }
 
-                        await axios.put(`/api/cart/${imageId}`, { screened_image: res.data.url });
-                        fetchCartProducts();
+    //                     await axios.put(`/api/cart/${imageId}`, { screened_image: res.data.url });
+    //                     fetchCartProducts();
 
-                    } catch (error) {
-                        console.error("Image upload failed:", error);
-                    }
-                }
-            }
-        };
-        input.click();
-    };
+    //                 } catch (error) {
+    //                     console.error("Image upload failed:", error);
+    //                 }
+    //             }
+    //         }
+    //     };
+    //     input.click();
+    // };
 
-    const handleImageDelete = async () => {
-        try {
+    // const handleImageDelete = async () => {
+    //     try {
 
-            await axios.put(`/api/cart/${imageId}`, { screened_image: null });
-            setImageSrc("");
-            fetchCartProducts();
-        } catch (error) {
-            console.error("Error deleting image:", error);
-        }
-    };
+    //         await axios.put(`/api/cart/${imageId}`, { screened_image: null });
+    //         setImageSrc("");
+    //         fetchCartProducts();
+    //     } catch (error) {
+    //         console.error("Error deleting image:", error);
+    //     }
+    // };
 
     // ✦. ── ✦. ── ✦. พวก Modal .✦ ── .✦ ── .✦
 
@@ -421,7 +426,10 @@ export default function CartProductList() {
         )
     }, [isModalScreenedImageOpen, onOpenChange, closeModal, imageSrc, /* handleImageChange, handleImageDelete, */ isModalReceiptOpen, handleDownloadReceipt])
 
+    console.log(cartProducts);
+    
     const renderCell = React.useCallback((cartProduct: CartProducts, columnKey: React.Key) => {
+        console.log(cartProduct);
         switch (columnKey) {
             case "product":
                 return (
@@ -439,8 +447,8 @@ export default function CartProductList() {
                     </User>
                 );
 
-            case "screened_images":
-                if (!cartProduct.screened_images || cartProduct.screened_images.length === 0) {
+            case "screenedimages":
+                if (!cartProduct.screenedimages || cartProduct.screenedimages.length === 0) {
                     return <span>ไม่สกรีนภาพ</span>;
                 }
 
@@ -472,9 +480,9 @@ export default function CartProductList() {
                             <AvatarGroup
                                 isBordered
                                 max={2}
-                                total={cartProduct.screened_images.length}
+                                total={cartProduct.screenedimages.length}
                             >
-                                {cartProduct.screened_images.map((image: any) => (
+                                {cartProduct.screenedimages.map((image: any) => (
                                     <Avatar
                                         key={image.screened_image_id}
                                         src={image.screened_image_url}
@@ -484,7 +492,7 @@ export default function CartProductList() {
                         </PopoverTrigger>
                         <PopoverContent>
                             <AvatarGroup isGrid max={99}>
-                                {cartProduct.screened_images.map((image: any) => (
+                                {cartProduct.screenedimages.map((image: any) => (
                                     <Avatar
                                         key={image.screened_image_id}
                                         alt={`Image ${image.screened_image_id}`}

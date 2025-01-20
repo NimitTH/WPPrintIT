@@ -504,7 +504,7 @@ export default function CartProductList() {
                             base: "w-full sm:max-w-[44%]",
                             inputWrapper: "border-1",
                         }}
-                        placeholder="ค้นหาชื่อสินค้าในรถเข็น..."
+                        placeholder="ค้นหาชื่อสินค้า..."
                         size="sm"
                         startContent={<SearchIcon className="text-default-300" />}
                         value={filterValue}
@@ -514,7 +514,7 @@ export default function CartProductList() {
                     />
 
 
-                    <div className="flex gap-3">
+                    {/* <div className="flex gap-3">
                         <Dropdown>
                             <DropdownTrigger className="">
                                 <Button
@@ -540,7 +540,7 @@ export default function CartProductList() {
                                 ))}
                             </DropdownMenu>
                         </Dropdown>
-                    </div>
+                    </div> */}
                 </div>
                 <div className="flex justify-between items-center">
                     <span className="text-default-400 text-small">มีสินค้าทั้งหมด {orderItems.length} รายการ</span>
@@ -558,7 +558,7 @@ export default function CartProductList() {
                 </div>
             </div>
         );
-    }, [filterValue, visibleColumns, onSearchChange, onRowsPerPageChange, orderItems.length]);
+    }, [filterValue, /* visibleColumns, */ onSearchChange, onRowsPerPageChange, orderItems.length]);
 
     // const handleDeleteSelected = async () => {
     //     try {

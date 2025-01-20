@@ -197,7 +197,7 @@ model category {
 
 model orderscreenedimages {
   screened_image_id  Int        @id @default(autoincrement())
-  screened_image_url String?
+  screened_image_url String? @db.VarChar(1234)
   orderItemId        Int?
   orderitem          orderitem? @relation(fields: [orderItemId], references: [order_item_id], onDelete: Cascade, map: "OrderScreenedImage_orderItemId_fkey")
 
@@ -233,7 +233,7 @@ model productsize {
 
 model screenedimages {
   screened_image_id  Int       @id @default(autoincrement())
-  screened_image_url String?
+  screened_image_url String?  @db.VarChar(1234)
   cartitemId         Int?
   cartitem           cartitem? @relation(fields: [cartitemId], references: [cart_item_id], onDelete: Cascade, map: "ScreenedImage_cartitemId_fkey")
 

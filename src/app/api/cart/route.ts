@@ -25,8 +25,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
-        const { id, product_id, quantity, screened_image, total_price, additional, screened_images } = await req.json();
-        console.log(additional);
+        const { id, product_id, quantity, total_price, additional, screenedimages } = await req.json();
 
         if (!id || !product_id || !quantity) {
             return NextResponse.json({ error: 'Please provide all required fields' }, { status: 400 });
@@ -41,7 +40,7 @@ export async function POST(req: NextRequest) {
             cart = await prisma.cart.create({
                 data: {
                     userId: id,
-                    total_amount: 0, // เปลี่ยนด้วย
+                    total_amount: 0,
                     createdAt: new Date(),
                     updatedAt: new Date(),
                 }
@@ -55,13 +54,13 @@ export async function POST(req: NextRequest) {
                 productId: product_id,
                 quantity: quantity,
                 screenedimages: {
-                    create: screened_images.map((url: string) => ({ screened_image_url: url })), // สร้างภาพหลายภาพในตาราง ScreenedImage
+                    create: screenedimages.map((url: string) => ({ screened_image_url: url })),
                 },
                 total_price: total_price,
                 additional: additional
             },
             include: {
-                screenedimages: true, // ดึงข้อมูลภาพกลับมาด้วย
+                screenedimages: true,   
             },
         });
 

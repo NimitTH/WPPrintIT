@@ -506,7 +506,7 @@ export default function CartProductList() {
                             base: "w-full sm:max-w-[44%]",
                             inputWrapper: "border-1",
                         }}
-                        placeholder="ค้นหาออร์เดอร์ที่สั่งซื้อ..."
+                        placeholder="ค้นหาออเดอร์ที่สั่งซื้อ..."
                         size="sm"
                         startContent={<SearchIcon className="text-default-300" />}
                         value={filterValue}
