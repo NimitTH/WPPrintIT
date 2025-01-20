@@ -4,8 +4,10 @@ import { auth } from "@/auth";
 import { redirect } from 'next/navigation';
 
 export default async function OrderPage() {
-    // const session = await auth();
-    // if (session?.user?.role === "USER") redirect("/products")
+    const session = await auth();
+    if (!session) redirect("/signin")
+    if (session.user.status === "suspended") redirect("/suspended")
+    if (session?.user?.role === "USER") redirect("/products")
     return (
         <div>
             <Navbar />

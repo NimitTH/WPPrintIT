@@ -2,10 +2,13 @@
 import React from 'react'
 import CartProductList from '@/components/ListCart'
 import NavBarTest from '@/components/NavBar'
-import Test from '@/components/Test'
+import { auth } from "@/auth";
+import { redirect } from 'next/navigation';
 
-export default function page() {
-
+export default async function page() {
+    const session = await auth();
+    if (!session) redirect("/signin")
+    if (session.user.status === "suspended") redirect("/suspended")
     return (
         <div>
             <NavBarTest />
