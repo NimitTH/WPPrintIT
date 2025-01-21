@@ -1,4 +1,3 @@
-'use client'
 import React from 'react'
 import {
     Link,
@@ -6,7 +5,6 @@ import {
 import NavBar from "@/components/NavBar";
 import { auth } from "@/auth";
 import { redirect } from 'next/navigation';
-
 
 export default async function page() {
     const session = await auth();

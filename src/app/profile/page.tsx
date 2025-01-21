@@ -85,19 +85,7 @@ export default function SignUpForm() {
   const onSubmit: SubmitHandler<Schema> = useCallback(async (data: Schema) => {
     try {
       console.log(data);
-      await axios.put("/api/user", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        data: {
-          name: data.name,
-          username: data.username,
-          email: data.email,
-          tel: data.tel,
-          address: data.address,
-          image: profileImage,
-        },
-      });
+      await axios.put("/api/user", { ...data, image: profileImage });
       alert("แก้ไขข้อมูลสำเร็จ")
       router.push("/products");
     } catch (error) {

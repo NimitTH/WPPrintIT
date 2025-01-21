@@ -7,7 +7,6 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-    console.log('PUT request received:', req);
     try {
         const { name, username, email, tel, address, image } = await req.json();
         console.log(name, username, email, tel, address, image);
