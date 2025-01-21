@@ -6,12 +6,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(users)
 }
 
-export async function PUT(req: NextRequest) {
+
+
+export async function PUT(req: Request) {
     try {
         const { name, username, email, tel, address, image } = await req.json();
-        
+
         if (!email) {
-            return NextResponse.json({ error: "Email is required" }, { status: 400 });
+            return Response.json({ error: "Email is required" }, { status: 400 });
         }
 
         const updatedUser = await prisma.user.update({
@@ -27,14 +29,14 @@ export async function PUT(req: NextRequest) {
             },
         });
 
-        return NextResponse.json({
+        return Response.json({
             message: "User edited successfully",
             user: updatedUser,
         });
     } catch (error: any) {
         console.error("Error updating user:", error);
 
-        return NextResponse.json(
+        return Response.json(
             { error: "User could not be edited", details: error.message },
             { status: 500 }
         )
