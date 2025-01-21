@@ -58,6 +58,3 @@ export const config = {
     '/password',
   ],
 };
-
-// Ref: https://next-auth.js.org/configuration/nextjs#advanced-usage
-

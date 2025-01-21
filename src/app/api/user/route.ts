@@ -9,7 +9,6 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
     try {
         const { name, username, email, tel, address, image } = await req.json();
-        console.log(name, username, email, tel, address, image);
         
         if (!email) {
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
