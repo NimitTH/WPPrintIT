@@ -1,5 +1,5 @@
 "use client";
-
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { HeroUIProvider } from "@heroui/react"
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { useRouter } from "next/navigation";
@@ -17,6 +17,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <HeroUIProvider navigate={router.push} >
       <NextThemesProvider attribute="class" defaultTheme="dark">
         {children}
+        <SpeedInsights />
       </NextThemesProvider>
     </HeroUIProvider>
   )
