@@ -89,7 +89,14 @@ export default function SignUpForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        name: data.name, user: data.username, email: data.email, tel: data.tel, address: data.address, image: profileImage,
+        data: {
+          name: data.name,
+          username: data.username,
+          email: data.email,
+          tel: data.tel,
+          address: data.address,
+          image: profileImage,
+        },
       });
       alert("แก้ไขข้อมูลสำเร็จ")
       router.push("/products");
