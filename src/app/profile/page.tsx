@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
@@ -19,20 +19,20 @@ import {
 import { Icon } from "@iconify/react";
 import NavBar from "@/components/NavBar";
 
-const schema = z.object({
-  username: z.string().min(1, "ต้องมีชื่อผู้ใช้").max(100),
-  name: z.string().max(100),
-  tel: z
-    .string()
-    .min(1, "ต้องมีเบอร์")
-    .min(10, "เบอร์ต้องมีความยาว 10 ตัวขึ้นไป"),
-  email: z.string().min(1, "ต้องมีอีเมล์").email("อีเมล์ไม่ถูกต้อง"),
-  address: z.string().max(100),
-});
-
-type Schema = z.infer<typeof schema>;
 
 export default function SignUpForm() {
+  const schema = z.object({
+    username: z.string().min(1, "ต้องมีชื่อผู้ใช้").max(100),
+    name: z.string().max(100),
+    tel: z
+      .string()
+      .min(1, "ต้องมีเบอร์")
+      .min(10, "เบอร์ต้องมีความยาว 10 ตัวขึ้นไป"),
+    email: z.string().min(1, "ต้องมีอีเมล์").email("อีเมล์ไม่ถูกต้อง"),
+    address: z.string().max(100),
+  });
+
+  type Schema = z.infer<typeof schema>;
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -51,11 +51,10 @@ export default function SignUpForm() {
     resolver: zodResolver(schema),
   });
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
 
     const file = e.target.files?.[0];
     console.log(file);
-
 
     if (file) {
       const formData = new FormData();
@@ -72,26 +71,27 @@ export default function SignUpForm() {
         console.error("Image upload failed:", error);
       }
     }
-  };
+  }, [profileImage]);
 
-  const handleImageDelete = async () => {
+  const handleImageDelete = useCallback(async () => {
     try {
       console.log(session?.user.id);
       await axios.delete("/api/upload", session?.user.id)
     } catch (error) {
       console.log(error);
     }
-  }
+  }, [session])
 
-  const onSubmit: SubmitHandler<Schema> = async (data: Schema) => {
+  const onSubmit: SubmitHandler<Schema> = useCallback(async (data: Schema) => {
     try {
+      console.log(data);
       await axios.put("/api/user", { ...data, image: profileImage });
       alert("แก้ไขข้อมูลสำเร็จ")
       router.push("/products");
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [profileImage, router]);
 
   useEffect(() => {
     if (session?.user && profileImage === null) {
