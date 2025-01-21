@@ -75,7 +75,7 @@ export default function SignUpForm() {
                 if (response.data.success) {
                     setProfileImage(response.data.url);
                 }
-                console.log(setProfileImage);
+                console.log(profileImage);
                 
             } catch (error) {
                 console.error("Image upload failed:", error);

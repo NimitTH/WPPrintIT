@@ -226,15 +226,15 @@ export default function CartProductList() {
         }
     }, [])
 
-    const handleStatusChange = useCallback(async (key: string, id: number, role: string) => {
+    const handleStatusChange = useCallback(async (status: string, id: number, role: string) => {
         try {
-            if (key === "suspended" && role === "ADMIN") {
+            if (status === "suspended" && role === "ADMIN") {
                 alert("แอดมินไม่สามารถระงับการใช้งานได้");
                 return;
             }
-            await axios.put(`/api/user/status/${id}`, { status: key });
+            await axios.put(`/api/user/status/${id}`, { status });
             fetchUsers();
-            console.log(key, id, role);
+            console.log(status, id, role);
         } catch (error) {
             console.error("Error changing status:", error);
         }
