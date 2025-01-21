@@ -24,6 +24,7 @@ export const schema1 = z.object({
         .min(10, "เบอร์ต้องมีความยาว 10 ตัวขึ้นไป"),
     email: z.string().min(1, "ต้องมีอีเมล์").email("อีเมล์ไม่ถูกต้อง"),
     address: z.string().max(100),
+    image: z.string().optional(),
 });
 
 export type Schema1 = z.infer<typeof schema1>;
@@ -97,7 +98,7 @@ export default function Profile() {
                 image: profileImage,
             }
 
-            const response = await axios.post("/api/user", { ...payload, _method: "PUT" });
+            const response = await axios.post(`${process.env.AUTH_URL}/api/user`, payload);
 
             console.log("Response from server:", response.data);
             alert("แก้ไขข้อมูลสำเร็จ");
