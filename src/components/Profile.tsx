@@ -97,7 +97,7 @@ export default function Profile() {
                 image: profileImage,
             }
 
-            const response = await axios.put("/api/user", payload);
+            const response = await axios.post("/api/user", { ...payload, _method: "PUT" });
 
             console.log("Response from server:", response.data);
             alert("แก้ไขข้อมูลสำเร็จ");
