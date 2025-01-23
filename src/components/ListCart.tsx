@@ -221,7 +221,7 @@ export default function CartProductList() {
             fetchCartProducts();
         } catch (error) {
             console.error("Error creating order:", error);
-            alert("Failed to create order");
+            alert("โปรดเลือกสินค้าที่จะสั่งซื้อ");
         }
     }, [fetchCartProducts, selectedIds, session?.user.address, session?.user?.id, session?.user.tel])
 

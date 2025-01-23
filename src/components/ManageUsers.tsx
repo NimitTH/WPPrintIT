@@ -28,6 +28,7 @@ import {
 import ListBox from "./ListBoxManage";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { EditDocumentIcon, VerticalDotsIcon, SearchIcon, ChevronDownIcon, Cancel } from '@/components/Icon';
+import { set } from "zod";
 
 export function capitalize(s: string) {
     return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
@@ -224,8 +225,14 @@ export default function ManageUsers() {
             return;
         }
         try {
-            await axios.put(`/api/user/status/${id}`, { status });
+            const res = await axios.put(`/api/user/status/${id}`, { status });
+
+            if (res.status === 200) {
+                fetchUsers();
+                alert("เปลี่ยนสถานะเรียบร้อย");
+            }
             fetchUsers();
+            alert("เปลี่ยนสถานะเรียบร้อย");
         } catch (error) {
             console.error("Error changing status:", error);
         }
@@ -445,7 +452,7 @@ export default function ManageUsers() {
                         }}
                     >
                         <DropdownTrigger>{statusMap[user.status]}</DropdownTrigger>
-                        <DropdownMenu onAction={(key) => handleStatusChange(key as string, (user as any).id, user.role)}>
+                        <DropdownMenu onAction={(key) => handleStatusChange(key as string, (user as any).id, user.role as string)}>
                             <DropdownItem key="approve">อนุมัติ</DropdownItem>
                             <DropdownItem key="suspended">ระงับการใช้งาน</DropdownItem>
                         </DropdownMenu>
