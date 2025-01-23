@@ -17,5 +17,5 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         console.error("Error updating status:", error);
         return NextResponse.json({ message: "Error updating status" }, { status: 500 });
     }
-   
+
 }

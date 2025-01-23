@@ -58,8 +58,8 @@ export async function POST(req: NextRequest) {
 
 // export async function DELETE(req: Request) {
 //     try {
-//         const test = await req.json()
-//         console.log(test);
+//         // ลบไฟล์จาก Vercel Blob
+
 //         return Response.json({ message: 'fasdf'});
 //     } catch (error) {
 //         console.log(error);

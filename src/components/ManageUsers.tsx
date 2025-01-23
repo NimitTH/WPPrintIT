@@ -146,7 +146,7 @@ export default function ManageUsers() {
                             setImageSrc(res.data.url);
                         }
 
-                        await axios.put(`/api/user/${id}`, { image: res.data.url });
+                        await axios.put(`/api/user/image/${id}`, { image: res.data.url });
                         fetchUsers();
 
                     } catch (error) {
@@ -219,11 +219,11 @@ export default function ManageUsers() {
     }), []);
 
     const handleStatusChange = useCallback(async (status: string, id: number, role: string) => {
+        if (status === "suspended" && role === "ADMIN") {
+            alert("แอดมินไม่สามารถระงับการใช้งานได้");
+            return;
+        }
         try {
-            if (status === "suspended" && role === "ADMIN") {
-                alert("แอดมินไม่สามารถระงับการใช้งานได้");
-                return;
-            }
             await axios.put(`/api/user/status/${id}`, { status });
             fetchUsers();
         } catch (error) {

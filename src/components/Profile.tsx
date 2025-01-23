@@ -13,6 +13,7 @@ import {
     Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { set } from "zod";
 
 export default function Profile() {
     const { data: session } = useSession();
@@ -31,18 +32,6 @@ export default function Profile() {
         resolver: zodResolver(profileSchema),
     });
 
-    useEffect(() => {
-        if (session?.user) {
-            setValue("username", session.user.username || "");
-            setValue("name", session.user.name || "");
-            setValue("tel", session.user.tel || "");
-            setValue("email", session.user.email || "");
-            setValue("address", session.user.address || "");
-            setProfileImage(session.user.image || "");
-        }
-
-    }, [session, setValue, profileImage]);
-
     const handleImageChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
 
@@ -56,21 +45,21 @@ export default function Profile() {
                     console.log("Uploaded image URL:", response.data.url);
                     setProfileImage(response.data.url);
                 }
-                console.log(profileImage);
+                
             } catch (error) {
                 console.error("Image upload failed:", error);
             }
         }
     }, [profileImage]);
 
-    const handleImageDelete = useCallback(async () => {
-        try {
-            console.log(session?.user.id);
-            await axios.delete("/api/upload", session?.user.id)
-        } catch (error) {
-            console.log(error);
-        }
-    }, [session])
+    // const handleImageDelete = useCallback(async () => {
+    //     try {
+            
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }, [session])
+    // console.log(profileImage);
 
     const onSubmit: SubmitHandler<ProfileSchema> = async (edituser: ProfileSchema) => {
         try {
@@ -82,6 +71,8 @@ export default function Profile() {
                 address: edituser.address,
                 image: profileImage
             });
+            console.log(res);
+            
             alert("แก้ไขข้อมูลสำเร็จ");
             router.push("/products");
         } catch (error: any) {
@@ -90,6 +81,18 @@ export default function Profile() {
             alert("เกิดข้อผิดพลาดในการแก้ไขข้อมูล");
         }
     };
+
+    useEffect(() => {
+        if (session?.user && profileImage === null) {
+            setValue("username", session.user.username || "");
+            setValue("name", session.user.name || "");
+            setValue("tel", session.user.tel || "");
+            setValue("email", session.user.email || "");
+            setValue("address", session.user.address || "");
+            setProfileImage(session.user.image || "");
+        }
+    }, [session, setValue, profileImage]);
+
     return (
         <div>
             <div className="flex h-full w-full items-center justify-center mt-3">
@@ -113,7 +116,6 @@ export default function Profile() {
                                 </div>
                             </div>
                             <Modal
-                                backdrop="blur"
                                 placement="center"
                                 isOpen={isOpen}
                                 onOpenChange={onOpenChange}>
@@ -140,14 +142,14 @@ export default function Profile() {
                                         >
                                             เพิ่มภาพ
                                         </Input>
-                                        <Button
+                                        {/* <Button
                                             fullWidth
                                             radius="full"
                                             color="danger"
                                             onPress={handleImageDelete}
                                         >
                                             ลบภาพ
-                                        </Button>
+                                        </Button> */}
                                     </ModalFooter>
                                 </ModalContent>
                             </Modal>

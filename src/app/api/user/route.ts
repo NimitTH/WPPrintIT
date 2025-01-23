@@ -27,9 +27,9 @@ export async function GET(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
     try {
-        const { name, username, email, tel, address, image, id } = await req.json();
+        const { name, username, email, tel, address, image } = await req.json();
 
-        console.log(name, username, email, tel, address, image, id);
+        console.log(name, username, email, tel, address, image);
         
 
         if (!email) {
