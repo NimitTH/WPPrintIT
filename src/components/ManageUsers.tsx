@@ -301,6 +301,7 @@ export default function ManageUsers() {
                                 <div className="flex flex-col items-center gap-4">
                                     <div className="relative group w-40 h-40">
                                         <Avatar
+                                            key={imageSrc}
                                             size="lg"
                                             src={imageSrc || ""}
                                             alt="Profile Picture"
@@ -444,7 +445,7 @@ export default function ManageUsers() {
                         }}
                     >
                         <DropdownTrigger>{statusMap[user.status]}</DropdownTrigger>
-                        <DropdownMenu onAction={(key) => handleStatusChange(key as string, user.id, user.role)}>
+                        <DropdownMenu key={user.id} onAction={(key) => (key as string, user.id, user.role)}>
                             <DropdownItem key="approve">อนุมัติ</DropdownItem>
                             <DropdownItem key="suspended">ระงับการใช้งาน</DropdownItem>
                         </DropdownMenu>
@@ -482,7 +483,7 @@ export default function ManageUsers() {
             default:
                 return <span>{user[columnKey as keyof Users]?.toString() || "ไม่ระบุข้อมูล"}</span>;
         }
-    }, [/*roleMap*/, statusMap, /*handleRoleChange,*/ handleStatusChange, handleEditUser, handleDeleteUser]);
+    }, [/*roleMap*/, statusMap, handleStatusChange /*handleRoleChange,*/ , handleEditUser, handleDeleteUser]);
 
     const onRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));
