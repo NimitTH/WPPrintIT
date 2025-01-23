@@ -90,16 +90,9 @@ export default function Profile() {
 
     const onSubmit: SubmitHandler<Schema1> = async (edituser: Schema1) => {
         try {
-            console.log(edituser);
+            console.log(session?.user.id);
 
-            // const res = await fetch("/api/user", {
-            //     method: "PUT",
-            //     headers: {
-            //         "Content-Type": "application/json",
-            //     },
-            //     body: JSON.stringify({ ...edituser, image: profileImage, id: session?.user.id }),
-            // }).then((res) => res.json());
-            const res = await axios.put(`/api/user`, { ...edituser, image: profileImage });
+            const res = await axios.put(`/api/user/${session?.user.id}`, { ...edituser, image: profileImage });
 
             console.log(res.data);
             alert("แก้ไขข้อมูลสำเร็จ");
