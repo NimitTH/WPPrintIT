@@ -1,33 +1,20 @@
 "use client";
+
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import axios from 'axios'
+import type { ItemProduct, PropsProductId } from "@/types/index"
 import { Image, Button, Input, Textarea } from "@heroui/react";
-import NavBar from "@/components/NavBar"
 import { Icon } from "@iconify/react";
 import { MinusIcon1, PlusIcon1 } from '@/components/Icon'
-import { useRouter } from 'next/navigation';
 
-import { Props } from "@/types/index"
+export default function ProductItem(params: PropsProductId) {
+    const { data: session, status } = useSession();
+    const id = params.productId.id;
+    const router = useRouter();
 
-type Product = {
-    id: number;
-    product_id: number;
-    product_name: string;
-    description: string;
-    price: number;
-    quantity: number;
-    stock: number;
-    image: string;
-    screened_images: any;
-    total_price: number;
-}
-
-export default function Product(params: Props) {
-    const router = useRouter()
-    const id = params.productid.id
-
-    const [product, setProduct] = useState<Product>({
+    const [product, setProduct] = useState<ItemProduct>({
         id: 0,
         product_id: 0,
         product_name: "",
@@ -42,58 +29,51 @@ export default function Product(params: Props) {
 
     const fetchProduct = async (id: number) => {
         try {
-            const response = await axios.get(`/api/product/${id}`)
-            setProduct(response.data)
-
+            const res = await axios.get(`/api/product/${id}`)
+            setProduct(res.data)
         } catch (error) {
             console.error(error);
-            
         }
     }
+
     const [screenedImage, setScreenedImage] = useState<string[]>([])
-
-    useEffect(() => {
-        fetchProduct(Number(id))
-    }, [id, screenedImage])
-
-    const { data: session, status } = useSession()
-
-    const [quantity, setQuantity] = useState(1)
-
-
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (status === "unauthenticated") {
             alert("กรุณาเข้าสู่ระบบก่อนทำรายการ");
             router.push("/signin");
             return;
         }
-    
+
         const files = e.target.files;
         if (!files) return;
-    
+
         const formData = new FormData();
         Array.from(files).forEach((file) => {
             formData.append("images", file);
         });
-    
-        try {
-            const response = await axios.post("/api/cart/upload", formData);
 
-            console.log(response.data.urls);
-            
-            if (response.data.success) {
-                setScreenedImage((prev) => [...prev, ...response.data.urls]); // รวม URL ทั้งหมด
+        try {
+            const res = await axios.post("/api/cart/upload", formData);
+            if (res.data.success) {
+                setScreenedImage((prev) => [...prev, ...res.data.urls]);
             }
-            console.log(screenedImage)
-            
-            
+
         } catch (error) {
             console.error("Image upload failed:", error);
         }
     };
-    
+
+    useEffect(() => {
+        fetchProduct(Number(id))
+    }, [id, screenedImage])
 
     const [additionalText, setAdditionalText] = useState<string | null>(null)
+
+    const [quantity, setQuantity] = useState(1);
+    const updateQuantity = (quantity: number) => {
+        if (quantity < 0) { return }
+        setQuantity(quantity)
+    }
 
     const handleSubmitCart = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -109,11 +89,9 @@ export default function Product(params: Props) {
             return;
         }
 
-        const total_price = product.price * quantity
-
-        console.log(screenedImage);
-        
         try {
+            const total_price = product.price * quantity;
+
             const payload = {
                 id: session?.user?.id,
                 product_id: product.product_id,
@@ -122,23 +100,16 @@ export default function Product(params: Props) {
                 total_price: total_price,
                 additional: additionalText
             };
-            
+
             const res = await axios.post('/api/cart', payload)
             alert("เพิ่มสินค้าลงในตะกร้าเรียบร้อย")
             console.log(res.data)
         } catch (error) {
             console.error(error);
-        }
-    }
-
-    const updateQuantity = (quantity: number) => {
-        if (quantity < 0) { return }
-        setQuantity(quantity)
-    }
-
+        };
+    };
     return (
         <div>
-            <NavBar />
             <div className='mx-auto max-w-screen-lg'>
                 <form className='mt-4 p-4 flex flex-wrap' onSubmit={handleSubmitCart}>
                     <Image
@@ -188,7 +159,7 @@ export default function Product(params: Props) {
                                 onChange={handleImageUpload}
                             >
                                 เพิ่มภาพ
-                            </Input>           
+                            </Input>
                         </div>
                         <div>
                             <Textarea
@@ -224,7 +195,6 @@ export default function Product(params: Props) {
                             radius="lg"
                             fullWidth
                             className='flex'
-                            
                             variant="solid"
                             startContent={<Icon icon="vaadin:cart" width={24} ></Icon>}
                             type='submit'

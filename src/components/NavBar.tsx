@@ -1,42 +1,29 @@
 "use client";
 
-import type { NavbarProps } from "@heroui/react";
-
 import React, { useEffect, useState } from "react";
-import {
-    Navbar,
-    NavbarBrand,
-    NavbarContent,
-    NavbarItem,
-    NavbarMenu,
-    NavbarMenuItem,
-    NavbarMenuToggle,
-    Link,
-    Button,
-    Divider,
-    Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, User,
-    Badge,
-    Input,
-} from "@heroui/react";
-import { Icon } from "@iconify/react";
-import { cn } from "@heroui/react";
-import { ThemeSwitch } from "./ThemeSwitcher";
-import { AcmeLogo } from "@/components/AcmeLogo";
+import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react"
 import { useSession } from "next-auth/react";
 import axios from "axios";
+import type { NavbarProps } from "@heroui/react";
+import { cn } from "@heroui/react";
+import {
+    Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenu, NavbarMenuItem, NavbarMenuToggle,
+    Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, User,
+    Divider,
+    Button,
+    Badge,
+    Link,
+} from "@heroui/react";
+import { Icon } from "@iconify/react";
+import { ThemeSwitch } from "./ThemeSwitcher";
+import { AcmeLogo } from "@/components/Icon";
+import { CartIcon, SearchIcon, ProductIcon, ProfileIcon, OrderIcon, PasswordIcon, SignOut } from "@/components/Icon"
 
-import { CartIcon, SearchIcon, ProductIcon, ProfileIcon, OrderIcon, PasswordIcon } from "@/components/Icon"
-
-import { useTheme } from "next-themes";
-import { usePathname } from "next/navigation";
-
-export default function Component(props: NavbarProps) {
-    const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+export default function NavBar(props: NavbarProps) {
     const { data: session, status } = useSession()
-
     const [cart, setCart] = useState<any[]>([])
-    
+
     useEffect(() => {
         const fetchCart = async () => {
             try {
@@ -55,15 +42,17 @@ export default function Component(props: NavbarProps) {
             window.history.replaceState(null, "", window.location.pathname);
         }
     }, [session]);
-    const [isInvisible, setIsInvisible] = React.useState<boolean>();
+
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isInvisible, setIsInvisible] = useState<boolean>();
+
     const pathname = usePathname();
     const isActive = (href: string) => pathname === href;
 
     const menuItems = [
         { name: "สินค้า", href: "/products", icon: <ProductIcon /> },
         {
-            name: "รถเข็น",
-            href: "/cart",
+            name: "รถเข็น", href: "/cart",
             icon: <Badge
                 content={cart.length}
                 shape="circle"
@@ -75,14 +64,10 @@ export default function Component(props: NavbarProps) {
                 <CartIcon />
             </Badge>
         },
-        {
-            name: "รายการสั่งซื้อ", href: "/order", icon:
-                <OrderIcon />
-        },
+        { name: "รายการสั่งซื้อ", href: "/order", icon: <OrderIcon /> },
         { name: "จัดการบัญชี", href: "/profile", icon: <ProfileIcon /> },
         { name: "จัดการรหัสผ่าน", href: "/password", icon: <PasswordIcon /> },
     ];
-
     return (
         <Navbar
             {...props}
@@ -103,15 +88,10 @@ export default function Component(props: NavbarProps) {
                 <div className="rounded-full bg-foreground text-background">
                     <AcmeLogo />
                 </div>
-                {/* <p className="font-semibold mr-2">ITPrintScreen</p> */}
                 <p className="font-semibold mr-2">WPPrintIT</p>
-                {/* <span className="font-medium">|</span> */}
-                {/* <span className="font-medium">รถเข็น</span> */}
-
             </NavbarBrand>
 
             {/* Center Content */}
-
             <NavbarContent justify="center" className=" hidden md:flex">
                 {menuItems.slice(0, 3).map((item, index) => (
                     <NavbarItem key={index}>
@@ -127,20 +107,17 @@ export default function Component(props: NavbarProps) {
                         >
                             <span className="mr-2">{item.icon}</span>
                             {item.name}
-
                         </Link>
                     </NavbarItem>
                 ))}
             </NavbarContent>
 
             {/* Right Content */}
-
             <NavbarContent className="hidden md:flex" justify="end">
                 <NavbarItem className="ml-2 !flex gap-2">
                     {status === 'authenticated' && session.user ? (
                         <>
                             <ThemeSwitch />
-
                             <Dropdown>
                                 <DropdownTrigger>
                                     <User
@@ -192,43 +169,54 @@ export default function Component(props: NavbarProps) {
             </NavbarContent>
 
             <NavbarMenuToggle className="text-default-400 md:hidden" />
-
-            <NavbarMenu className="top-[calc(var(--navbar-height)_-_1px)] max-h-fit bg-default-200/50 pb-6 pt-6 shadow-medium backdrop-blur-md backdrop-saturate-200 dark:bg-default-100/50">
+            <NavbarMenu
+                className="top-[calc(var(--navbar-height)_-_1px)] max-h-fit bg-default-200/50 pb-6 pt-6 
+                shadow-medium backdrop-blur-sm backdrop-saturate-200 
+                dark:bg-default-100/90"
+            >
                 {status === 'authenticated' && session.user ? (
-                    <>
+                    <NavbarMenuItem >
                         {menuItems.map((item, index) => (
-                            <NavbarMenuItem key={`${item}-${index}`} className="">
+                            <div key={`${item}-${index}`}>
                                 <Link
-                                    className={isActive(item.href) ? "mb-2 w-full text-background" : "mb-2 w-full text-default-500"}
-                                    href={item.href} size="md">
-                                    <span className="mr-2">{item.icon}</span> {/* แสดงไอคอน */}
+                                    className={isActive(item.href) ? "my-2 w-full text-background" : "my-2 w-full text-default-500"}
+                                    href={item.href}
+                                    size="md"
+                                >
+                                    <span className="mr-2">{item.icon}</span>
                                     {item.name}
                                 </Link>
                                 {index < menuItems.length - 1 && <Divider className="opacity-50" />}
-
-                            </NavbarMenuItem>
+                            </div>
                         ))}
-
-                    </>
+                        <Divider className="opacity-50" />
+                        <div
+                            onClick={() => signOut({ callbackUrl: '/' })}
+                            className="mt-2 flex items-center gap-2 text-medium text-danger-500 cursor-pointer"
+                        >
+                            <SignOut />
+                            ออกจากระบบ
+                        </div>
+                    </NavbarMenuItem>
                 ) : (
-                    <>  
+                    <>
                         <NavbarMenuItem>
                             <Button fullWidth as={Link} href="/signin" variant="faded">
                                 เข้าสู่ระบบ
                             </Button>
                         </NavbarMenuItem>
-                        <NavbarMenuItem className="mb-4">
+                        <NavbarMenuItem >
                             <Button fullWidth as={Link} className="bg-foreground text-background" href="/signup">
                                 ลงทะเบียน
                             </Button>
                         </NavbarMenuItem>
                     </>
                 )}
-                <NavbarMenuItem className="">
+                <NavbarMenuItem>
                     <Divider className="opacity-50" />
                     <ThemeSwitch type={1} />
                 </NavbarMenuItem>
             </NavbarMenu>
         </Navbar>
     );
-}
+};

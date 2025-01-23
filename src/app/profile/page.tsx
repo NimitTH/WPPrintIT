@@ -1,8 +1,8 @@
-import React from 'react'
-import Profile from '@/components/Profile'
-import NavBar from '@/components/NavBar'
+import React from 'react';
 import { auth } from "@/auth";
 import { redirect } from 'next/navigation';
+import NavBar from '@/components/NavBar'
+import Profile from '@/components/Profile'
 
 export default async function ProfilePage() {
   const session = await auth();

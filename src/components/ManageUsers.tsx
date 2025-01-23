@@ -1,19 +1,16 @@
 "use client";
-import React, { SVGProps, useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useForm, Controller } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
-import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Schema, schema } from "@/types/index"
 import axios from "axios";
-import ListBox from "./ListBoxManage";
-import { useRouter } from "next/navigation";
 import {
     Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
-    Modal, ModalContent, ModalHeader, ModalBody,ModalFooter,
+    Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
     DropdownTrigger, Dropdown, DropdownMenu, DropdownItem,
-    Popover, PopoverTrigger, PopoverContent, 
+    Popover, PopoverTrigger, PopoverContent,
     Card, CardHeader, CardBody, CardFooter,
     Avatar, AvatarGroup,
     SortDescriptor,
@@ -21,15 +18,16 @@ import {
     Pagination,
     Selection,
     ChipProps,
-    Tabs, Tab, 
+    Tabs, Tab,
     Button,
     Input,
     Image,
     Chip,
     User,
 } from "@heroui/react";
-import { PlusIcon, EditDocumentIcon, VerticalDotsIcon, SearchIcon, ChevronDownIcon, Cancel } from '@/components/Icon';
+import ListBox from "./ListBoxManage";
 import { Icon } from "@iconify/react/dist/iconify.js";
+import { EditDocumentIcon, VerticalDotsIcon, SearchIcon, ChevronDownIcon, Cancel } from '@/components/Icon';
 
 export function capitalize(s: string) {
     return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
@@ -43,10 +41,9 @@ export const columns = [
     { name: "สถานะ", uid: "status" },
     { name: "ACTIONS", uid: "actions" },
 ];
-
 const INITIAL_VISIBLE_COLUMNS = ["id", "user", "product", "money", /* "role", */ "status", "actions"];
 
-export default function CartProductList() {
+export default function ManageUsers() {
     const { data: session } = useSession();
     const [users, setUsers] = useState<any[]>([]);
 
@@ -86,13 +83,13 @@ export default function CartProductList() {
 
     const hasSearchFilter = Boolean(filterValue);
 
-    const headerColumns = React.useMemo(() => {
+    const headerColumns = useMemo(() => {
         if (visibleColumns === "all") return columns;
 
         return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
     }, [visibleColumns]);
 
-    const filteredItems = React.useMemo(() => {
+    const filteredItems = useMemo(() => {
         let filteredUsers = [...users];
 
         if (hasSearchFilter) {
@@ -103,14 +100,14 @@ export default function CartProductList() {
         return filteredUsers;
     }, [users, hasSearchFilter, filterValue]);
 
-    const items = React.useMemo(() => {
+    const items = useMemo(() => {
         const start = (page - 1) * rowsPerPage;
         const end = start + rowsPerPage;
 
         return filteredItems.slice(start, end);
     }, [page, filteredItems, rowsPerPage]);
 
-    const sortedItems = React.useMemo(() => {
+    const sortedItems = useMemo(() => {
 
         return [...items].sort((a: Users, b: Users) => {
 
@@ -124,27 +121,6 @@ export default function CartProductList() {
             return sortDescriptor.direction === "descending" ? -cmp : cmp;
         });
     }, [sortDescriptor, items]);
-
-
-    // ✦. ── ✦. ── ✦. ลบสินค้าออกจากรถเข็น .✦ ── .✦ ── .✦
-
-    // const deleteCartItem = async (cartItemId: number) => {
-    //     try {
-    //         console.log("cartItemId", cartItemId);
-
-    //         await axios.delete(`/api/cart/${cartItemId}`);
-    //         setUsers((prevProducts) =>
-    //             prevProducts.filter((product) => product.order_item_id !== cartItemId)
-    //         );
-    //     } catch (error) {
-    //         console.error("Error deleting cart item:", error);
-    //     }
-    // }
-
-    // ✦. ── ✦. ── ✦. จัดการสั่งซื้อ .✦ ── .✦ ── .✦
-
-
-    
 
     // ✦. ── ✦. ── ✦. จัดการภาพ .✦ ── .✦ ── .✦
 
@@ -182,6 +158,8 @@ export default function CartProductList() {
         input.click();
     }, []);
 
+    // ✦. ── ✦. ── ✦. ลบผู้ใช้ .✦ ── .✦ ── .✦
+
     const handleDeleteUser = useCallback(async (id: number, role: string) => {
         try {
             if (role === "ADMIN") {
@@ -213,18 +191,32 @@ export default function CartProductList() {
     //     }
     // }
 
-    const handleRoleChange = useCallback(async (key: string, id: number, role: string) => {
-        try {
-            if (key === "USER" && role === "ADMIN") {
-                alert("แอดมินไม่สามารถเปลี่ยนสิทธิเป็นผู้ใช้งานได้");
-                return;
-            }
-            await axios.put(`/api/user/role/${id}`, { role: key });
-            fetchUsers();
-        } catch (error) {
-            console.error("Error changing role:", error);
-        }
-    }, [])
+    // ✦. ── ✦. ── ✦. เปลี่ยนบทบาท .✦ ── .✦ ── .✦
+
+    // const roleMap: Record<string, string> = useMemo(() => ({
+    //     "USER": "ผู้ใช้งาน",
+    //     "ADMIN": "แอดมิน",
+    // }), []);
+
+    // const handleRoleChange = useCallback(async (key: string, id: number, role: string) => {
+    //     try {
+    //         if (key === "USER" && role === "ADMIN") {
+    //             alert("แอดมินไม่สามารถเปลี่ยนสิทธิเป็นผู้ใช้งานได้");
+    //             return;
+    //         }
+    //         await axios.put(`/api/user/role/${id}`, { role: key });
+    //         fetchUsers();
+    //     } catch (error) {
+    //         console.error("Error changing role:", error);
+    //     }
+    // }, []);
+
+    // ✦. ── ✦. ── ✦. เปลี่ยนสถานะ .✦ ── .✦ ── .✦
+
+    const statusMap: Record<string, string> = useMemo(() => ({
+        "approve": "อนุมัติ",
+        "suspended": "ระงับการใช้งาน",
+    }), []);
 
     const handleStatusChange = useCallback(async (status: string, id: number, role: string) => {
         try {
@@ -234,25 +226,12 @@ export default function CartProductList() {
             }
             await axios.put(`/api/user/status/${id}`, { status });
             fetchUsers();
-            console.log(status, id, role);
         } catch (error) {
             console.error("Error changing status:", error);
         }
-    }, [])
-
-
+    }, []);
 
     // ✦. ── ✦. ── ✦. พวก Modal .✦ ── .✦ ── .✦
-
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [isModalScreenedImageOpen, setModalScreenedImageOpen] = useState(false);
-
-    const [isModalEditUserOpen, setModalEditUserOpen] = useState(false);
-
-    const closeModal = React.useCallback(() => {
-        setModalScreenedImageOpen(false)
-        setModalEditUserOpen(false)
-    }, []);
 
     const {
         control,
@@ -289,7 +268,14 @@ export default function CartProductList() {
         }
     }, []);
 
-    const renderModal = React.useCallback(() => {
+    const { onOpenChange } = useDisclosure();
+    const [isModalEditUserOpen, setModalEditUserOpen] = useState(false);
+
+    const closeModal = useCallback(() => {
+        setModalEditUserOpen(false);
+    }, []);
+
+    const renderModal = useCallback(() => {
         return (
             <>
                 <Modal
@@ -312,7 +298,6 @@ export default function CartProductList() {
                             onSubmit={handleSubmit(onSubmit)}
                         >
                             <ModalBody className="w-full">
-
                                 <div className="flex flex-col items-center gap-4">
                                     <div className="relative group w-40 h-40">
                                         <Avatar
@@ -325,9 +310,7 @@ export default function CartProductList() {
                                             <Icon icon="mingcute:pencil-fill" width="24" height="24" className="text-xl text-white"></Icon>
                                         </div>
                                     </div>
-
                                 </div>
-
                                 <Controller
                                     name="username"
                                     control={control}
@@ -408,31 +391,18 @@ export default function CartProductList() {
                         </form>
                     </ModalContent>
                 </Modal>
-
             </>
         )
     }, [isModalEditUserOpen, onOpenChange, closeModal, handleSubmit, onSubmit, imageSrc, control, isSubmitting, handleImageChange, userId, errors.username, errors.name, errors.tel, errors.email, errors.address]);
 
-    const statusMap: Record<string, string> = useMemo(() => ({
-        "approve": "อนุมัติ",
-        "suspended": "ระงับการใช้งาน",
-    }), []);
-
-    // const roleMap: Record<string, string> = useMemo(() => ({
-    //     "USER": "ผู้ใช้งาน",
-    //     "ADMIN": "แอดมิน",
-    // }), []);
-
-    const renderCell = React.useCallback((user: Users, columnKey: React.Key) => {
-        
+    const renderCell = useCallback((user: Users, columnKey: React.Key) => {
         switch (columnKey) {
             case "user":
                 return (
                     <User
                         avatarProps={{ radius: "full", size: "sm", src: user.image }}
                         classNames={{
-                            description: "text-default-500 line-clamp-1 w-[100px]",
-
+                            description: "text-default-500 line-clamp-1 w-[100px]"
                         }}
                         description={user.email}
                         name={user.name}
@@ -514,15 +484,13 @@ export default function CartProductList() {
         }
     }, [/*roleMap*/, statusMap, /*handleRoleChange,*/ handleStatusChange, handleEditUser, handleDeleteUser]);
 
-    const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const onRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));
         setPage(1);
     }, []);
 
-    const onSearchChange = React.useCallback((value?: string) => {
+    const onSearchChange = useCallback((value?: string) => {
         if (value) {
-            console.log("value", value);
-
             setFilterValue(value);
             setPage(1);
         } else {
@@ -530,7 +498,7 @@ export default function CartProductList() {
         }
     }, []);
 
-    const topContent = React.useMemo(() => {
+    const topContent = useMemo(() => {
         return (
             <div className="flex flex-col gap-4">
                 <div className="flex justify-between gap-3 items-end">
@@ -548,8 +516,6 @@ export default function CartProductList() {
                         onClear={() => setFilterValue("")}
                         onValueChange={onSearchChange}
                     />
-
-
                     {/* <div className="flex gap-3">
                         <Dropdown>
                             <DropdownTrigger className="">
@@ -614,41 +580,23 @@ export default function CartProductList() {
     //     }
     // }
 
-    const normalizedSelectedKeys = React.useMemo(() => {
-        if (selectedKeys === "all") {
-            // สร้าง Set<string> ที่มี cart_item_id ของสินค้าทั้งหมด
-            return new Set(users.map((user) => String(user.order_item_id)));
-        }
-        return selectedKeys;
-    }, [selectedKeys, users]);
+    // const normalizedSelectedKeys = useMemo(() => {
+    //     if (selectedKeys === "all") {
+    //         return new Set(users.map((user) => String(user.order_item_id)));
+    //     }
+    //     return selectedKeys;
+    // }, [selectedKeys, users]);
 
-    const selectedIds = Array.from(normalizedSelectedKeys).map((id: any) => parseInt(id, 10));
-
-    // const calculateTotalPrice = React.useCallback(() => {
-
-    //     const selectedItems = users.filter((user) =>
-    //         selectedIds.includes(product.order_item_id)
-    //     );
-
-    //     const totalPrice = selectedItems.reduce(
-    //         (sum, item) => sum + item.product.price * item.quantity,
-    //         0
-    //     );
-
-    //     return totalPrice;
-    // }, [orderItems, selectedKeys]);
-
-    const bottomContent = React.useMemo(() => {
-        // const totalPrice = calculateTotalPrice();
-
+    const bottomContent = useMemo(() => {
         return (
             <div className="py-2 px-2 flex max-sm:flex-col justify-between items-center">
                 <div className="max-sm:mb-2">
-                    <span className="mr-2 text-small text-default-400">เลือก ({selectedKeys === "all" ? users.length : selectedKeys.size} ผู้ใช้งาน) </span>
+                    <span className="mr-2 text-small text-default-400">
+                        เลือก ({selectedKeys === "all" ? users.length : selectedKeys.size} ผู้ใช้งาน)
+                    </span>
                 </div>
                 <Pagination
                     showControls
-
                     classNames={{
                         cursor: "bg-foreground-100/100 text-background",
                         base: "flex flex-start"
@@ -670,12 +618,11 @@ export default function CartProductList() {
         );
     }, [selectedKeys, users.length, hasSearchFilter, page, pages]);
 
-    const deleteUser = async (id: number) => {
-        console.log("deleteUser");
-    }
+    // const deleteUser = async (id: number) => {
+    //     console.log("deleteUser");
+    // }
 
-
-    const classNames = React.useMemo(
+    const classNames = useMemo(
         () => ({
             wrapper: ["max-h-full", "max-w-full", "shadow-none", "bg-background"],
             th: ["bg-transparent", "text-default-500", "border-b", "border-divider"],
@@ -690,10 +637,8 @@ export default function CartProductList() {
                 "group-data-[last=true]/tr:first:before:rounded-none",
                 "group-data-[last=true]/tr:last:before:rounded-none",
             ],
-        }),
-        [],
+        }), []
     );
-
     return (
         <>
             <div className="mt-5 mx-auto max-w-screen-xl flex">
@@ -703,7 +648,6 @@ export default function CartProductList() {
                     aria-label="Example table with custom cells, pagination and sorting"
                     bottomContent={bottomContent}
                     bottomContentPlacement="outside"
-
                     checkboxesProps={{
                         classNames: {
                             wrapper: "after:bg-foreground after:text-background text-background",
@@ -738,8 +682,6 @@ export default function CartProductList() {
                     </TableBody>
                 </Table>
             </div>
-
-
             {renderModal()}
         </>
     );

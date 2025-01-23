@@ -1,8 +1,9 @@
 "use client";
-import React, { SVGProps, useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
-import axios from "axios";
 import Link from "next/link";
+import axios from "axios";
+import type { CartProducts } from "@/types/index";
 import {
     Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
     Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
@@ -18,7 +19,7 @@ import {
     Input,
     User,
 } from "@heroui/react"
-import { PlusIcon, VerticalDotsIcon, SearchIcon, ChevronDownIcon, Cancel } from "@/components/Icon"
+import { VerticalDotsIcon, SearchIcon, Cancel } from "@/components/Icon"
 
 export function capitalize(s: string) {
     return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
@@ -34,12 +35,13 @@ export const columns = [
     { name: "ราคารวม", uid: "total_price", sortable: true },
     { name: "ACTIONS", uid: "actions" },
 ];
-
 const INITIAL_VISIBLE_COLUMNS = ["product", "screenedimages", "additional", "price", "quantity", "total_price", "actions"];
 
 export default function CartProductList() {
     const { data: session } = useSession();
     const [cartProducts, setCartProducts] = useState<CartProducts[]>([]);
+
+    const [openPopovers, setOpenPopovers] = useState<Record<number, boolean>>({});
 
     const [filterValue, setFilterValue] = useState("");
     const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
@@ -47,63 +49,6 @@ export default function CartProductList() {
         new Set(INITIAL_VISIBLE_COLUMNS),
     );
 
-    const normalizedSelectedKeys = React.useMemo(() => {
-        if (selectedKeys === "all") {
-            // สร้าง Set<string> ที่มี cart_item_id ของสินค้าทั้งหมด
-            return new Set(cartProducts.map((product) => String(product.cart_item_id)));
-        }
-        return selectedKeys;
-    }, [selectedKeys, cartProducts]);
-    const selectedIds = Array.from(normalizedSelectedKeys).map((id: any) => parseInt(id, 10));
-
-    // type CartProducts = (typeof cartProducts);
-
-    type CartProducts = {
-        cart_item_id: number;
-        screened_image: string;
-        screenedimages: {
-            screened_image_id: number;
-            screened_image_url: string;
-        }[];
-        additional: string;
-        quantity: number;
-        total_price: number;
-        product: {
-            product_id: number;
-            product_name: string;
-            price: number;
-            image: string;
-            description: string;
-        };
-    };
-
-
-
-    const fetchCartProducts = useCallback( async () => {
-        try {
-            if (!session) return; // หยุดถ้า session ยังไม่มีค่า
-            const res = await axios.get('/api/cart', { headers: { userId: session?.user.id } });
-            const data: CartProducts[] = res.data;
-            setCartProducts(data)
-        } catch (error) {
-            console.error("An error occurred while fetching products", error);
-        }
-    }, [session])
-
-    console.log(cartProducts);
-    
-
-    const [openPopovers, setOpenPopovers] = useState<Record<number, boolean>>({});
-
-    useEffect(() => {
-        fetchCartProducts();
-        if (session) {
-            fetchCartProducts();
-        }
-    }, [session, openPopovers, fetchCartProducts])
-
-    
-    // const [statusFilter, setStatusFilter] = useState<Selection>("all");
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
         column: "cart_item_id",
@@ -116,13 +61,13 @@ export default function CartProductList() {
 
     const hasSearchFilter = Boolean(filterValue);
 
-    const headerColumns = React.useMemo(() => {
+    const headerColumns = useMemo(() => {
         if (visibleColumns === "all") return columns;
 
         return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
     }, [visibleColumns]);
 
-    const filteredItems = React.useMemo(() => {
+    const filteredItems = useMemo(() => {
         let filteredCartProducts = [...cartProducts];
 
         if (hasSearchFilter) {
@@ -133,14 +78,14 @@ export default function CartProductList() {
         return filteredCartProducts;
     }, [cartProducts, filterValue, hasSearchFilter]);
 
-    const items = React.useMemo(() => {
+    const items = useMemo(() => {
         const start = (page - 1) * rowsPerPage;
         const end = start + rowsPerPage;
 
         return filteredItems.slice(start, end);
     }, [page, filteredItems, rowsPerPage]);
 
-    const sortedItems = React.useMemo(() => {
+    const sortedItems = useMemo(() => {
 
         return [...items].sort((a: CartProducts, b: CartProducts) => {
 
@@ -155,7 +100,32 @@ export default function CartProductList() {
         });
     }, [sortDescriptor, items]);
 
+    const normalizedSelectedKeys = useMemo(() => {
+        if (selectedKeys === "all") {
+            // สร้าง Set<string> ที่มี cart_item_id ของสินค้าทั้งหมด
+            return new Set(cartProducts.map((product) => String(product.cart_item_id)));
+        }
+        return selectedKeys;
+    }, [selectedKeys, cartProducts]);
+    const selectedIds = Array.from(normalizedSelectedKeys).map((id: any) => parseInt(id, 10));
 
+    const fetchCartProducts = useCallback(async () => {
+        try {
+            if (!session) return;
+            const res = await axios.get('/api/cart', { headers: { userId: session?.user.id } });
+            const data: CartProducts[] = res.data;
+            setCartProducts(data)
+        } catch (error) {
+            console.error("An error occurred while fetching products", error);
+        }
+    }, [session])
+
+    useEffect(() => {
+        fetchCartProducts();
+        if (session) {
+            fetchCartProducts();
+        }
+    }, [session, openPopovers, fetchCartProducts])
 
     // ✦. ── ✦. ── ✦. อัพเดทค่าจำนวน .✦ ── .✦ ── .✦
 
@@ -175,7 +145,6 @@ export default function CartProductList() {
         } catch (error) {
             console.error("Error updating quantity:", error);
         }
-
         fetchCartProducts();
     }, [fetchCartProducts]);
 
@@ -183,8 +152,6 @@ export default function CartProductList() {
 
     const deleteCartItem = async (cartItemId: number) => {
         try {
-            console.log("cartItemId", cartItemId);
-
             await axios.delete(`/api/cart/${cartItemId}`);
             setCartProducts((prevProducts) =>
                 prevProducts.filter((product) => product.cart_item_id !== cartItemId)
@@ -194,9 +161,9 @@ export default function CartProductList() {
         }
     }
 
-    // ✦. ── ✦. ── ✦. จัดการสั่งซื้อ .✦ ── .✦ ── .✦
+    // ✦. ── ✦. ── ✦. สลีป .✦ ── .✦ ── .✦
 
-    const handleDownloadReceipt =  useCallback(async () => {
+    const handleDownloadReceipt = useCallback(async () => {
         try {
             const res = await axios.get("/api/order/latest", { params: { userId: session?.user?.id } });
             const { order } = res.data;
@@ -235,26 +202,23 @@ export default function CartProductList() {
         }
     }, [session?.user?.address, session?.user?.email, session?.user?.id, session?.user.tel, session?.user?.name]);
 
-    const handleSubmit = useCallback( async () => {
+    // ✦. ── ✦. ── ✦. จัดการสั่งซื้อ .✦ ── .✦ ── .✦
 
+    const handleSubmit = useCallback(async () => {
+        if (session?.user.address === "" || session?.user.address === null) {
+            alert("กรุณาใส่ที่อยู่ของคุณก่อน")
+            return;
+        }
+
+        if (session?.user.tel === "" || session?.user.tel === null) {
+            alert("กรุณาใส่เบอร์ของคุณก่อน")
+            return;
+        }
         try {
-
-            if (session?.user.address === "" || session?.user.address === null) {
-                alert("กรุณาใส่ที่อยู่ของคุณก่อน")
-                return;
-            }
-
-            if (session?.user.tel === "" || session?.user.tel === null) {
-                alert("กรุณาใส่เบอร์ของคุณก่อน")
-                return;
-            }
-
             const res = await axios.post("/api/order", { userId: session?.user?.id, selectedItems: selectedIds });
-            console.log("Order created:", res.data);
-            // alert("Order created successfully!");
-            setModalReceiptOpen(true);
 
-            fetchCartProducts(); // รีเฟรชหน้า Cart
+            setModalReceiptOpen(true);
+            fetchCartProducts();
         } catch (error) {
             console.error("Error creating order:", error);
             alert("Failed to create order");
@@ -284,12 +248,9 @@ export default function CartProductList() {
     const [imageSrc, setImageSrc] = useState<string>("");
     const [imageId, setImageId] = useState(0);
 
-
-
     const handleImageSrc = useCallback((src: string, id: number) => {
-
-        setImageSrc(src)
         setImageId(id)
+        setImageSrc(src)
         setModalScreenedImageOpen(true)
     }, [])
 
@@ -342,12 +303,12 @@ export default function CartProductList() {
     const [isModalScreenedImageOpen, setModalScreenedImageOpen] = useState(false);
     const [isModalReceiptOpen, setModalReceiptOpen] = useState(false);
 
-    const closeModal = React.useCallback(() => {
+    const closeModal = useCallback(() => {
         setModalScreenedImageOpen(false)
         setModalReceiptOpen(false)
     }, []);
 
-    const renderModal = React.useCallback(() => {
+    const renderModal = useCallback(() => {
         return (
             <>
                 <Modal
@@ -394,7 +355,6 @@ export default function CartProductList() {
                     </ModalContent>
                 </Modal>
                 <Modal
-
                     backdrop="opaque"
                     placement="center"
                     classNames={{
@@ -424,12 +384,9 @@ export default function CartProductList() {
                 </Modal>
             </>
         )
-    }, [isModalScreenedImageOpen, onOpenChange, closeModal, imageSrc, /* handleImageChange, handleImageDelete, */ isModalReceiptOpen, handleDownloadReceipt])
+    }, [isModalScreenedImageOpen, onOpenChange, closeModal, imageSrc, /* handleImageChange, handleImageDelete, */ isModalReceiptOpen, handleDownloadReceipt]);
 
-    console.log(cartProducts);
-    
-    const renderCell = React.useCallback((cartProduct: CartProducts, columnKey: React.Key) => {
-        console.log(cartProduct);
+    const renderCell = useCallback((cartProduct: CartProducts, columnKey: React.Key) => {
         switch (columnKey) {
             case "product":
                 return (
@@ -451,9 +408,7 @@ export default function CartProductList() {
                 if (!cartProduct.screenedimages || cartProduct.screenedimages.length === 0) {
                     return <span>ไม่สกรีนภาพ</span>;
                 }
-
                 return (
-
                     <Popover
                         isOpen={!!openPopovers[cartProduct.product.product_id]}
                         onOpenChange={(open) =>
@@ -577,12 +532,12 @@ export default function CartProductList() {
         }
     }, [updateQuantity, openPopovers, handleImageSrc]);
 
-    const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const onRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));
         setPage(1);
     }, []);
 
-    const onSearchChange = React.useCallback((value?: string) => {
+    const onSearchChange = useCallback((value?: string) => {
         if (value) {
             console.log("value", value);
 
@@ -593,7 +548,7 @@ export default function CartProductList() {
         }
     }, []);
 
-    const topContent = React.useMemo(() => {
+    const topContent = useMemo(() => {
         return (
             <div className="flex flex-col gap-4">
                 <div className="flex justify-between gap-3 items-end">
@@ -657,9 +612,7 @@ export default function CartProductList() {
         );
     }, [filterValue, /* visibleColumns, */ onSearchChange, onRowsPerPageChange, cartProducts.length]);
 
-    
-
-    const handleDeleteSelected = useCallback( async () => {
+    const handleDeleteSelected = useCallback(async () => {
         try {
             const selectedIds = Array.from(normalizedSelectedKeys).map((id: any) => parseInt(id, 10));
 
@@ -677,12 +630,7 @@ export default function CartProductList() {
         }
     }, [normalizedSelectedKeys])
 
-    
-
-    
-
-    const calculateTotalPrice = React.useCallback(() => {
-
+    const calculateTotalPrice = useCallback(() => {
         const selectedItems = cartProducts.filter((product) =>
             selectedIds.includes(product.cart_item_id)
         );
@@ -695,9 +643,8 @@ export default function CartProductList() {
         return totalPrice;
     }, [cartProducts, selectedIds]);
 
-    const bottomContent = React.useMemo(() => {
+    const bottomContent = useMemo(() => {
         const totalPrice = calculateTotalPrice();
-
         return (
             <div className="py-2 px-2 flex max-sm:flex-col justify-between items-center">
                 <div className="max-sm:mb-2">
@@ -755,9 +702,7 @@ export default function CartProductList() {
         );
     }, [calculateTotalPrice, selectedKeys, cartProducts.length, hasSearchFilter, page, pages, handleDeleteSelected, handleSubmit]);
 
-
-
-    const classNames = React.useMemo(
+    const classNames = useMemo(
         () => ({
             wrapper: ["max-h-full", "max-w-full", "shadow-none", "bg-background"],
             th: ["bg-transparent", "text-default-500", "border-b", "border-divider"],
@@ -772,13 +717,10 @@ export default function CartProductList() {
                 "group-data-[last=true]/tr:first:before:rounded-none",
                 "group-data-[last=true]/tr:last:before:rounded-none",
             ],
-        }),
-        [],
+        }), [],
     );
-
     return (
         <>
-
             <Table
                 isCompact
                 aria-label="Example table with custom cells, pagination and sorting"
@@ -825,68 +767,4 @@ export default function CartProductList() {
             </Button> */}
         </>
     );
-}
-
-// export const QuantityControl = ({ cartItemId, quantity }: { cartItemId: number; quantity: number }) => {
-//     const [currentQuantity, setCurrentQuantity] = useState(quantity);
-//     const intervalRef = React.useRef<NodeJS.Timeout | null>(null);
-
-//     const updateQuantity = async (newQuantity: number) => {
-//         console.log("cartItemId", cartItemId, "newQuantity", newQuantity);
-
-//         if (newQuantity < 0) return;
-//         setCurrentQuantity(newQuantity);
-
-//         try {
-//             await axios.put(`/api/cart/${cartItemId}`, { quantity: newQuantity });
-//         } catch (error) {
-//             console.error("Error updating quantity:", error);
-//         }
-//     };
-
-//     const handleHold = (operation: "increment" | "decrement") => {
-//         let speed = 500; // เริ่มต้นที่ 500ms
-//         let newQuantity = currentQuantity;
-
-//         const increment = () => {
-//             newQuantity = operation === "increment" ? newQuantity + 1 : newQuantity - 1;
-//             if (newQuantity < 0) return; // ป้องกันค่าติดลบ
-//             setCurrentQuantity(newQuantity);
-//             updateQuantity(newQuantity);
-//             speed = Math.max(50, speed - 50); // ลดเวลาเพิ่มความเร็ว (ต่ำสุด 50ms)
-//             clearInterval(intervalRef.current!);
-//             intervalRef.current = setInterval(increment, speed);
-//         };
-
-//         increment(); // เรียกฟังก์ชันเพิ่ม/ลดครั้งแรก
-//         intervalRef.current = setInterval(increment, speed);
-//     };
-
-//     const handleRelease = () => {
-//         if (intervalRef.current) {
-//             clearInterval(intervalRef.current);
-//             intervalRef.current = null;
-//         }
-//     };
-
-//     return (
-//         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-//             <button
-//                 onMouseDown={() => handleHold("decrement")}
-//                 onMouseUp={handleRelease}
-//                 onMouseLeave={handleRelease}
-//             >
-//                 -
-//             </button>
-//             <span>{new Intl.NumberFormat("th-TH").format(currentQuantity)}</span>
-//             <button
-//                 onMouseDown={() => handleHold("increment")}
-//                 onMouseUp={handleRelease}
-//                 onMouseLeave={handleRelease}
-//             >
-//                 +
-//             </button>
-//         </div>
-//     );
-// };
-
+};

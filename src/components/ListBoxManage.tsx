@@ -1,5 +1,6 @@
-import { Listbox, ListboxItem, cn } from "@heroui/react";
+import React from "react";
 import Link from "next/link";
+import { Listbox, ListboxItem } from "@heroui/react";
 import { EditDocumentIcon, AddNoteIcon, CopyDocumentIcon } from "./Icon";
 
 export const ListboxWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -8,9 +9,8 @@ export const ListboxWrapper = ({ children }: { children: React.ReactNode }) => (
     </div>
 );
 
-export default function App() {
+export default function ListBoxManage() {
     const iconClasses = "text-xl text-default-500 pointer-events-none flex-shrink-0";
-
     return (
         <ListboxWrapper>
             <Listbox aria-label="Listbox menu with descriptions" variant="flat">

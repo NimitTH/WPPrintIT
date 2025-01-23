@@ -1,21 +1,19 @@
-import React from 'react'
-import ProductItem from '@/components/ItemProduct'
-
+import React from 'react';
 import { auth } from "@/auth";
 import { redirect } from 'next/navigation';
-type Props = {
-    params: {
-        id: string
-    }
-}
+import NavBar from '@/components/NavBar';
+import ProductItem from '@/components/ItemProduct';
 
-export default async function page({ params }: Props) {
+type Props = { params: { id: string } };
+
+export default async function ProductItemPage({ params }: Props) {
     const session = await auth();
     if (!session) redirect("/signin")
     if (session.user.status === "suspended") redirect("/suspended")
     return (
         <div>
-            <ProductItem productid={params} />
+            <NavBar />
+            <ProductItem productId={params} />
         </div>
     )
 }

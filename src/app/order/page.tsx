@@ -1,6 +1,6 @@
-import React from 'react'
-import OrderList from '@/components/ListOrder'
+import React from 'react';
 import NavBar from '@/components/NavBar'
+import OrderList from '@/components/ListOrder'
 import { auth } from "@/auth";
 import { redirect } from 'next/navigation';
 

@@ -1,13 +1,9 @@
 "use client";
 
-import React, { SVGProps, useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useForm, Controller, type SubmitHandler } from "react-hook-form";
-import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-    schemaProduct, schemaCategory,
-    SchemaProduct, SchemaCategory,
-} from "@/types";
+import { schemaProduct, schemaCategory, SchemaProduct, SchemaCategory } from "@/types/schemas";
 import axios from "axios";
 import {
     Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
@@ -49,7 +45,7 @@ export const columns = [
 
 const INITIAL_VISIBLE_COLUMNS = ["product_id", "image", "product_name", "description", "category", "price", "stock", "actions"];
 
-export default function CartProductList() {
+export default function ManageProducts() {
     const [products, setProducts] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
 
@@ -77,10 +73,9 @@ export default function CartProductList() {
     useEffect(() => {
         fetchProducts();
         fetchCategories();
-    }, [])
+    }, []);
 
     const [productImageSrc, setProductImageSrc] = useState<string | null>(null);
-
     const [selectedOption, setSelectedOption] = useState<Selection>(new Set(["addproduct"]));
     const selectedOptionValue = Array.from(selectedOption)[0];
 
@@ -109,12 +104,78 @@ export default function CartProductList() {
     );
     const [statusFilter, setStatusFilter] = useState<Selection>("all");
 
-    const normalizedSelectedKeys = React.useMemo(() => {
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
+        column: "product_id",
+        direction: "ascending",
+    });
+
+    const [page, setPage] = useState(1);
+
+    const pages = Math.ceil(products.length / rowsPerPage);
+
+    const hasSearchFilter = Boolean(filterValue);
+
+    const headerColumns = useMemo(() => {
+        if (visibleColumns === "all") return columns;
+
+        return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
+    }, [visibleColumns]);
+
+    const categoryOptions = categories.map((category: any) => ({
+        name: category.category_name,
+        cid: category.category_name,
+    }));
+
+    const filteredItems = useMemo(() => {
+        let filteredProducts = [...products];
+
+        if (hasSearchFilter) {
+            filteredProducts = filteredProducts.filter((product) =>
+                product.product_name.toLowerCase().includes(filterValue.toLowerCase()),
+            );
+        }
+
+        if (statusFilter !== "all" && Array.from(statusFilter).length !== categoryOptions.length) {
+            const selectedCategories = Array.from(statusFilter);
+            filteredProducts = filteredProducts.filter((product: any) =>
+                selectedCategories.some((category: any) => product.category.some((c: any) => c.category_name === category))
+            );
+        }
+
+        return filteredProducts;
+    }, [products, hasSearchFilter, filterValue, statusFilter, categoryOptions]);
+
+    const items = useMemo(() => {
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        return filteredItems.slice(start, end);
+    }, [page, filteredItems, rowsPerPage]);
+
+    const sortedItems = useMemo(() => {
+
+        return [...items].sort((a: Product, b: Product) => {
+
+            const first = sortDescriptor.column === "price"
+                ? a.price : a[sortDescriptor.column as keyof Product];
+
+            const second = sortDescriptor.column === "price"
+                ? b.price : b[sortDescriptor.column as keyof Product];
+            const cmp = first < second ? -1 : first > second ? 1 : 0;
+
+            return sortDescriptor.direction === "descending" ? -cmp : cmp;
+        });
+    }, [sortDescriptor, items]);
+
+    const normalizedSelectedKeys = useMemo(() => {
         if (selectedKeys === "all") {
             return new Set(products.map((product) => String(product.product_id)));
         }
         return selectedKeys;
     }, [selectedKeys, products]);
+
+    const selectedIds = Array.from(normalizedSelectedKeys).map((id: any) => parseInt(id, 10));
 
     const handleDropdownSelection = (key: string) => {
         switch (key) {
@@ -135,15 +196,15 @@ export default function CartProductList() {
             case "editcategory":
                 setModalEditCategoryOpen(true);
                 break;
-            case "deletecategory":
-                setModalDeleteCategoryOpen(true);
-                break;
-            case "addsize":
-                // setModalAddSizeOpen(true);
-                break;
-            case "addcolor":
-                // setModalAddColorOpen(true);
-                break;
+            // case "deletecategory":
+            //     setModalDeleteCategoryOpen(true);
+            //     break;
+            // case "addsize":
+            // setModalAddSizeOpen(true);
+            //     break;
+            // case "addcolor":
+            // setModalAddColorOpen(true);
+            // break;
             default:
                 break;
         }
@@ -154,13 +215,13 @@ export default function CartProductList() {
     const closeModal = useCallback(() => {
         setProductImageSrc(null);
 
+        setModalAddProductOpen(false);
         setModalEditProductOpen(false);
         setModalDeleteProductOpen(false)
-        setModalAddProductOpen(false);
 
         setModalAddCategoryOpen(false);
         setModalEditCategoryOpen(false);
-        setModalDeleteCategoryOpen(false);
+        // setModalDeleteCategoryOpen(false);
         // setModalAddSizeOpen(false);
         // setModalAddColorOpen(false);
     }, []);
@@ -190,7 +251,7 @@ export default function CartProductList() {
 
     const [isModalAddCategoryOpen, setModalAddCategoryOpen] = useState(false);
     const [isModalEditCategoryOpen, setModalEditCategoryOpen] = useState(false);
-    const [isModalDeleteCategoryOpen, setModalDeleteCategoryOpen] = useState(false);
+    // const [isModalDeleteCategoryOpen, setModalDeleteCategoryOpen] = useState(false);
 
     const renderModalAddCategory = useCallback(() => {
         return (
@@ -233,23 +294,40 @@ export default function CartProductList() {
                     </form>
                 </ModalContent>
             </Modal>
-
         )
     }, [closeModal, controlCategory, errorsCategory.category_name, handleSubmitCategory, isModalAddCategoryOpen, isSubmittingCategory, onCategorySubmit, onClose, onOpenChange])
 
     const [editCategories, setEditCategories] = useState(categories);
 
+    const {
+        control: controlCategoryDelete,
+        handleSubmit: handleSubmitCategoryDelete,
+        reset: resetCategoryDelete,
+        formState: { errors: errorsCategoryDelete, isSubmitting: isSubmittingCategoryDelete },
+    } = useForm<SchemaCategory>({
+        resolver: zodResolver(schemaCategory),
+    });
+
+    const onCategoryDeleteSubmit: SubmitHandler<SchemaCategory> = useCallback(async (category: SchemaCategory) => {
+        try {
+            await axios.delete(`/api/product/category/${category.category_id}`);
+            closeModal()
+            await fetchCategories();
+            resetCategoryDelete()
+        } catch (error) {
+            console.error(error);
+        }
+    }, [closeModal, resetCategoryDelete]);
+
     const handleCategoryChange = useCallback((index: number, value: string) => {
         const updatedCategories = [...editCategories];
         updatedCategories[index].category_name = value;
         setEditCategories(updatedCategories);
-    }, [editCategories, ]);
+    }, [editCategories,]);
 
     const handleCategorySubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
-            console.log("Updated categories:", editCategories);
-
             await axios.put("/api/product/category", { categories: editCategories });
             closeModal();
         } catch (error) {
@@ -265,7 +343,6 @@ export default function CartProductList() {
         } catch (error) {
             console.error("Error updating categories:", error);
         }
-
     }, [])
 
     const renderModalEditCategory = useCallback(() => {
@@ -307,33 +384,11 @@ export default function CartProductList() {
                                 แก้ไขหมวดหมู่สินค้า
                             </Button>
                         </ModalFooter>
-
                     </form>
-
                 </ModalContent>
             </Modal >
         )
     }, [closeModal, isModalEditCategoryOpen, onOpenChange, editCategories, handleCategoryChange, handleCategoryDelete, handleCategorySubmit])
-
-    const {
-        control: controlCategoryDelete,
-        handleSubmit: handleSubmitCategoryDelete,
-        reset: resetCategoryDelete,
-        formState: { errors: errorsCategoryDelete, isSubmitting: isSubmittingCategoryDelete },
-    } = useForm<SchemaCategory>({
-        resolver: zodResolver(schemaCategory),
-    });
-
-    const onCategoryDeleteSubmit: SubmitHandler<SchemaCategory> = useCallback(async (category: SchemaCategory) => {
-        try {
-            await axios.delete(`/api/product/category/${category.category_id}`);
-            closeModal()
-            await fetchCategories();
-            resetCategoryDelete()
-        } catch (error) {
-            console.error(error);
-        }
-    }, [closeModal, resetCategoryDelete]);
 
     // const renderModalDeleteCategory = useCallback(() => {
     //     return (
@@ -552,6 +607,37 @@ export default function CartProductList() {
     //     )
     // }, [])
 
+    // ✦. ── ✦. ── ✦. ── ✦. ── ✦. จัดการภาพ .✦ ── .✦ ── .✦ ── .✦ ── .✦
+
+    const handleImageChange = () => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        input.onchange = async (e: Event) => {
+            const target = e.target as HTMLInputElement;
+            if (target.files && target.files[0]) {
+                const file = target.files[0];
+
+                if (file) {
+                    const formData = new FormData();
+                    formData.append("image", file);
+
+                    try {
+                        const res = await axios.post("/api/product/upload", formData);
+                        console.log(res);
+
+                        if (res.data.success) {
+                            setProductImageSrc(res.data.url);
+                        }
+                    } catch (error) {
+                        console.error("Image upload failed:", error);
+                    }
+                }
+            }
+        };
+        input.click();
+    }
+
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. เพิ่มสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦
 
     const {
@@ -561,7 +647,6 @@ export default function CartProductList() {
         formState: { errors: errorsProduct, isSubmitting: isSubmittingProduct },
     } = useForm<SchemaProduct>({
         resolver: zodResolver(schemaProduct),
-
     });
 
     const onProductSubmit: SubmitHandler<SchemaProduct> = useCallback(async (product: SchemaProduct) => {
@@ -571,7 +656,6 @@ export default function CartProductList() {
                 image: productImageSrc,
                 category: product.category,
             };
-            console.log(payload);
             await axios.post("/api/product", payload);
             resetProduct()
             await fetchProducts()
@@ -595,11 +679,9 @@ export default function CartProductList() {
                 }}
             >
                 <ModalContent>
-
                     <ModalHeader className="flex flex-col gap-1">เพิ่มสินค้า</ModalHeader>
                     <form onSubmit={handleSubmitProduct(onProductSubmit)} >
                         <ModalBody className="flex flex-col gap-3">
-
                             <div className="flex flex-col items-center gap-4">
                                 <div className="relative group w-40 h-40">
                                     <Avatar
@@ -701,7 +783,6 @@ export default function CartProductList() {
                                     />
                                 )}
                             />
-
                         </ModalBody>
                         <ModalFooter>
                             <Button color="danger" variant="light" onPress={closeModal}>
@@ -718,8 +799,10 @@ export default function CartProductList() {
         )
     }, [categories, isModalAddProductOpen, onOpenChange, closeModal, handleSubmitProduct, onProductSubmit, productImageSrc, controlProduct, isSubmittingProduct, errorsProduct.product_name, errorsProduct.description, errorsProduct.price, errorsProduct.stock])
 
-
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. แก้ไขสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦
+
+    const [values, setValues] = useState<Selection>(new Set([]));
+    const [productEditId, setProductEditId] = useState<number>(0)
 
     const {
         control: controlEditProduct,
@@ -730,18 +813,13 @@ export default function CartProductList() {
         resolver: zodResolver(schemaProduct),
     });
 
-    const [values, setValues] = useState<Selection>(new Set([]));
-    const [productEditId, setProductEditId] = useState<number>(0)
-
     const onEditProductSubmit: SubmitHandler<SchemaProduct> = useCallback(async (product: SchemaProduct) => {
-
         try {
             const payload = {
                 ...product,
                 category: product.category,
                 image: productImageSrc,
             };
-            console.log(payload);
             await axios.put(`/api/product/${productEditId}`, payload);
             await fetchProducts()
             closeModal()
@@ -749,8 +827,6 @@ export default function CartProductList() {
             console.error(error);
         }
     }, [closeModal, productEditId, productImageSrc]);
-
-    
 
     const onSubmitEditProduct = useCallback((product: Product) => {
         setModalEditProductOpen(true);
@@ -769,7 +845,6 @@ export default function CartProductList() {
     }, [setValueEditProduct])
 
     const [isModalEditProductOpen, setModalEditProductOpen] = useState(false);
-
     const renderEditProduct = useCallback(() => {
         return (
             <Modal
@@ -782,7 +857,6 @@ export default function CartProductList() {
                     <ModalHeader className="flex flex-col gap-1">แก้ไขสินค้า</ModalHeader>
                     <form onSubmit={handleSubmitEditProduct(onEditProductSubmit)} >
                         <ModalBody className="flex flex-col gap-3">
-
                             <div className="flex flex-col items-center gap-4">
                                 <div className="relative group w-40 h-40">
                                     <Avatar
@@ -800,7 +874,6 @@ export default function CartProductList() {
                                     </div>
                                 </div>
                             </div>
-
                             <Controller
                                 name="product_name"
                                 control={controlEditProduct}
@@ -899,8 +972,6 @@ export default function CartProductList() {
                             </Button>
                         </ModalFooter>
                     </form>
-
-
                 </ModalContent>
             </Modal>
         )
@@ -913,41 +984,8 @@ export default function CartProductList() {
         productImageSrc,
         controlEditProduct,
         onClose, isSubmittingEditProduct,
-        errorsEditProduct.product_name,
-        errorsEditProduct.description,
-        errorsEditProduct.price,
-        errorsEditProduct.stock
+        errorsEditProduct.product_name, errorsEditProduct.description, errorsEditProduct.price, errorsEditProduct.stock
     ])
-
-    const handleImageChange = () => {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = "image/*";
-        input.onchange = async (e: Event) => {
-            const target = e.target as HTMLInputElement;
-            if (target.files && target.files[0]) {
-                const file = target.files[0];
-                // console.log("Selected file:", file);
-
-                if (file) {
-                    const formData = new FormData();
-                    formData.append("image", file);
-
-                    try {
-                        const res = await axios.post("/api/product/upload", formData);
-                        console.log(res);
-
-                        if (res.data.success) {
-                            setProductImageSrc(res.data.url);
-                        }
-                    } catch (error) {
-                        console.error("Image upload failed:", error);
-                    }
-                }
-            }
-        };
-        input.click();
-    }
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. ลบสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦
 
@@ -979,7 +1017,6 @@ export default function CartProductList() {
     }, [closeModal, normalizedSelectedKeys])
 
     const [DeleteProductId, setDeleteProductId] = useState<number>(0)
-
     const onSubmitDeleteProductId = async (id?: number) => {
         if (id) {
             setDeleteProductId(id)
@@ -990,7 +1027,6 @@ export default function CartProductList() {
     }
 
     const [isModalDeleteProductOpen, setModalDeleteProductOpen] = useState(false);
-
     const renderDeleteSelectedProducts = useCallback(() => {
         return (
             <Modal
@@ -1000,13 +1036,9 @@ export default function CartProductList() {
                 onClose={closeModal}
             >
                 <ModalContent>
-
-
                     <ModalHeader className="flex flex-col gap-1">ยืนยันลบสินค้า</ModalHeader>
                     <ModalBody className="flex flex-row gap-3">
-                        <p>
-                            คุณต้องการลบสินค้าชิ้นนี้
-                        </p>
+                        คุณต้องการลบสินค้าชิ้นนี้ใช่หรือไม่?
                     </ModalBody>
                     <ModalFooter>
                         <Button color="danger" variant="light" onPress={closeModal}>
@@ -1024,81 +1056,8 @@ export default function CartProductList() {
         )
     }, [DeleteProductId, closeModal, handleDeleteProduct, isModalDeleteProductOpen, onOpenChange])
 
-    // ꧁𓊈𒆜 ──────────────────────────────────── ไม่เกี่ยว ──────────────────────────────────── 𒆜𓊉꧂
-
-
-    
-
-    const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
-        column: "product_id",
-        direction: "ascending",
-    });
-
-    const [page, setPage] = useState(1);
-
-    const pages = Math.ceil(products.length / rowsPerPage);
-
-    const hasSearchFilter = Boolean(filterValue);
-
-    const headerColumns = React.useMemo(() => {
-        if (visibleColumns === "all") return columns;
-
-        return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
-    }, [visibleColumns]);
-
-    const categoryOptions = categories.map((category: any) => ({
-        name: category.category_name,
-        uid: category.category_name,
-    }));
-
-    const filteredItems = React.useMemo(() => {
-        let filteredProducts = [...products];
-
-        if (hasSearchFilter) {
-            filteredProducts = filteredProducts.filter((product) =>
-                product.product_name.toLowerCase().includes(filterValue.toLowerCase()),
-            );
-        }
-
-
-        if (statusFilter !== "all" && Array.from(statusFilter).length !== categoryOptions.length) {
-            const selectedCategories = Array.from(statusFilter);
-            filteredProducts = filteredProducts.filter((product: any) =>
-                selectedCategories.some((category: any) => product.category.some((c: any) => c.category_name === category))
-            );
-        }
-
-        return filteredProducts;
-    }, [products, hasSearchFilter, filterValue, statusFilter, categoryOptions]);
-
-    const items = React.useMemo(() => {
-        const start = (page - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-
-        return filteredItems.slice(start, end);
-    }, [page, filteredItems, rowsPerPage]);
-
-    const sortedItems = React.useMemo(() => {
-
-        return [...items].sort((a: Product, b: Product) => {
-
-            const first = sortDescriptor.column === "price"
-                ? a.price : a[sortDescriptor.column as keyof Product];
-
-            const second = sortDescriptor.column === "price"
-                ? b.price : b[sortDescriptor.column as keyof Product];
-            const cmp = first < second ? -1 : first > second ? 1 : 0;
-
-            return sortDescriptor.direction === "descending" ? -cmp : cmp;
-        });
-    }, [sortDescriptor, items]);
-
-
-
-    const renderCell = React.useCallback((product: Product, columnKey: React.Key) => {
+    const renderCell = useCallback((product: Product, columnKey: React.Key) => {
         const cellValue = product[columnKey as keyof Product];
-
         switch (columnKey) {
             case "image":
                 return (
@@ -1119,7 +1078,6 @@ export default function CartProductList() {
                         ))}
                     </div>
                 );
-
             case "price":
                 return (
                     <div className="flex">
@@ -1132,7 +1090,6 @@ export default function CartProductList() {
                         ).format(product.price)}</span>
                     </div>
                 );
-
             case "quantity":
                 return (
                     <div className="flex">
@@ -1145,7 +1102,6 @@ export default function CartProductList() {
                         ).format(product.quantity)}</span>
                     </div>
                 );
-
             case "actions":
                 return (
                     <div className="relative flex justify-end items-center gap-2">
@@ -1180,15 +1136,13 @@ export default function CartProductList() {
         }
     }, [onSubmitEditProduct]);
 
-    const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const onRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));
         setPage(1);
     }, []);
 
-    const onSearchChange = React.useCallback((value?: string) => {
+    const onSearchChange = useCallback((value?: string) => {
         if (value) {
-            console.log("value", value);
-
             setFilterValue(value);
             setPage(1);
         } else {
@@ -1196,9 +1150,7 @@ export default function CartProductList() {
         }
     }, []);
 
-    const selectedKeysSet = new Set(selectedKeys);
-
-    const topContent = React.useMemo(() => {
+    const topContent = useMemo(() => {
         return (
             <div className="flex flex-col gap-4">
                 <div className="flex justify-between gap-3 items-end">
@@ -1217,7 +1169,6 @@ export default function CartProductList() {
                         onValueChange={onSearchChange}
                     />
                     <div className="flex gap-3">
-
                         <Dropdown>
                             <DropdownTrigger className="hidden sm:flex">
                                 <Button
@@ -1243,7 +1194,6 @@ export default function CartProductList() {
                                 ))}
                             </DropdownMenu>
                         </Dropdown>
-
                         <ButtonGroup size="sm" variant="flat" className="bg-background" >
                             <Button onPress={() => handleDropdownSelection(selectedOptionValue as string)} startContent={<PlusIcon />}>
                                 {
@@ -1304,7 +1254,6 @@ export default function CartProductList() {
                                     ) : labelsMap[selectedOptionValue]
                                 }
                             </Button>
-
                             <Dropdown placement="bottom-end" className="border-1 border-default-200">
                                 <DropdownTrigger>
                                     <Button isIconOnly>
@@ -1324,9 +1273,7 @@ export default function CartProductList() {
                                     <DropdownItem key="color">สี</DropdownItem> */}
                                 </DropdownMenu>
                             </Dropdown>
-
                         </ButtonGroup>
-
                         {/* <Dropdown className="border-1 border-default-200">
                             <DropdownTrigger className="">
                                 <Button
@@ -1372,11 +1319,7 @@ export default function CartProductList() {
         );
     }, [filterValue, /* visibleColumns, */ onSearchChange, onRowsPerPageChange, products.length, selectedOption, labelsMap, selectedOptionValue, statusFilter, categoryOptions]);
 
-    
-
-    const selectedIds = Array.from(normalizedSelectedKeys).map((id: any) => parseInt(id, 10));
-
-    const bottomContent = React.useMemo(() => {
+    const bottomContent = useMemo(() => {
         return (
             <div className="py-2 px-2 flex max-sm:flex-col justify-between items-center">
                 <div className="max-sm:mb-2">
@@ -1394,7 +1337,6 @@ export default function CartProductList() {
                 </div>
                 <Pagination
                     showControls
-
                     classNames={{
                         cursor: "bg-foreground-100/100 text-background",
                         base: "flex flex-start"
@@ -1407,12 +1349,11 @@ export default function CartProductList() {
                     variant="light"
                     onChange={setPage}
                 />
-                <div></div>
             </div>
         );
     }, [selectedKeys, products.length, selectedIds.length, hasSearchFilter, page, pages]);
 
-    const classNames = React.useMemo(
+    const classNames = useMemo(
         () => ({
             wrapper: ["max-h-full", "max-w-full", "shadow-none", "bg-background"],
             th: ["bg-transparent", "text-default-500", "border-b", "border-divider"],
@@ -1427,10 +1368,8 @@ export default function CartProductList() {
                 "group-data-[last=true]/tr:first:before:rounded-none",
                 "group-data-[last=true]/tr:last:before:rounded-none",
             ],
-        }),
-        [],
+        }), [],
     );
-
     return (
         <>
             <div className="mt-5 mx-auto max-w-screen-xl flex">
@@ -1440,7 +1379,6 @@ export default function CartProductList() {
                     aria-label="Example table with custom cells, pagination and sorting"
                     bottomContent={bottomContent}
                     bottomContentPlacement="outside"
-
                     checkboxesProps={{
                         classNames: {
                             wrapper: "after:bg-foreground after:text-background text-background",
@@ -1475,8 +1413,6 @@ export default function CartProductList() {
                     </TableBody>
                 </Table>
             </div>
-
-
             {/* {renderModal()} */}
             {renderAddProduct()}
             {renderEditProduct()}
@@ -1484,7 +1420,7 @@ export default function CartProductList() {
 
             {renderModalAddCategory()}
             {renderModalEditCategory()}
-            {/* {renderModalDeleteCategory()} */}
+            {/* {renderModalDeleteCategory()}
             {/* {renderModalAddSize()}
             {renderModalEditSize()}
             {renderModalDeleteSize()}

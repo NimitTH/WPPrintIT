@@ -1,8 +1,10 @@
 "use client";
-import React, { SVGProps, useState, useEffect, useCallback } from "react";
+
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import Link from "next/link";
 import { useSession } from "next-auth/react";
 import axios from "axios";
-import Link from "next/link";
+import type { OrderItems } from "@/types/index";
 import {
     Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
     Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
@@ -23,10 +25,6 @@ import {
 } from "@heroui/react";
 import { GalleryIcon, PaymentIcon, CanceledIcon, DeliverIcon, ReceivedIcon, SuccessfulIcon, RefundIcon, PlusIcon, VerticalDotsIcon, SearchIcon, ChevronDownIcon, Cancel } from "@/components/Icon"
 
-export type IconSvgProps = SVGProps<SVGSVGElement> & {
-    size?: number;
-};
-
 export function capitalize(s: string) {
     return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
 }
@@ -38,48 +36,15 @@ export const columns = [
     { name: "จำนวน", uid: "quantity", sortable: true },
     { name: "ราคา", uid: "price", sortable: true },
     { name: "ราคารวม", uid: "total_price", sortable: true },
-
 ];
-
 const INITIAL_VISIBLE_COLUMNS = ["product", "orderscreenedimages", "additional", "price", "total_price", "quantity"];
-
-type OrderItems = {
-    id: number;
-    orderId: number;
-    order_id: number;
-    order_item_id: number;
-    quantity: number;
-    productId: number;
-    product: {
-        product_id: number;
-        product_name: string;
-        description: string;
-        price: number;
-        quantity: number;
-        stock: number;
-        image: string;
-    };
-    screened_image: string;
-    orderscreenedimages: {
-        // orderItemId: number;
-        screened_image_id: number;
-        screened_image_url: string;
-    }[];
-    additional: string;
-    total_price: number;
-    status: string;
-    cart_item_id: number;
-    created_at: string;
-    updated_at: string;
-
-}
 
 export default function CartProductList() {
     const { data: session } = useSession();
     const [orderItems, setOrderItems] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState<string>('ToBePaid');
 
-    // type OrderItems = (typeof orderItems)[0]
+    const [openPopovers, setOpenPopovers] = useState<Record<number, boolean>>({});
 
     const fetchOrders = useCallback(async (status?: string) => {
         try {
@@ -91,12 +56,7 @@ export default function CartProductList() {
         } catch (error) {
             console.error("An error occurred while fetching products", error);
         }
-    }, [session])
-
-    console.log(orderItems);
-
-    const [openPopovers, setOpenPopovers] = useState<Record<number, boolean>>({});
-
+    }, [session]);
 
     useEffect(() => {
         fetchOrders(selectedStatus);
@@ -110,7 +70,7 @@ export default function CartProductList() {
     const [visibleColumns, setVisibleColumns] = useState<Selection>(
         new Set(INITIAL_VISIBLE_COLUMNS),
     );
-    // const [statusFilter, setStatusFilter] = useState<Selection>("all");
+
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
         column: "price",
@@ -123,13 +83,13 @@ export default function CartProductList() {
 
     const hasSearchFilter = Boolean(filterValue);
 
-    const headerColumns = React.useMemo(() => {
+    const headerColumns = useMemo(() => {
         if (visibleColumns === "all") return columns;
 
         return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
     }, [visibleColumns]);
 
-    const filteredItems = React.useMemo(() => {
+    const filteredItems = useMemo(() => {
         let filteredOrderItems = [...orderItems];
 
         if (hasSearchFilter) {
@@ -140,15 +100,14 @@ export default function CartProductList() {
         return filteredOrderItems;
     }, [orderItems, hasSearchFilter, filterValue]);
 
-    const items = React.useMemo(() => {
+    const items = useMemo(() => {
         const start = (page - 1) * rowsPerPage;
         const end = start + rowsPerPage;
 
         return filteredItems.slice(start, end);
     }, [page, filteredItems, rowsPerPage]);
 
-    const sortedItems = React.useMemo(() => {
-
+    const sortedItems = useMemo(() => {
         return [...items].sort((a: OrderItems, b: OrderItems) => {
 
             const first = sortDescriptor.column === "price"
@@ -162,21 +121,20 @@ export default function CartProductList() {
         });
     }, [sortDescriptor, items]);
 
+    // ✦. ── ✦. ── ✦. ยกเลิกออเดอร์ .✦ ── .✦ ── .✦
 
-    // ✦. ── ✦. ── ✦. ลบสินค้าออกจากรถเข็น .✦ ── .✦ ── .✦
+    // const deleteCartItem = async (cartItemId: number) => {
+    //     try {
+    //         console.log("cartItemId", cartItemId);
 
-    const deleteCartItem = async (cartItemId: number) => {
-        try {
-            console.log("cartItemId", cartItemId);
-
-            await axios.delete(`/api/cart/${cartItemId}`);
-            setOrderItems((prevProducts) =>
-                prevProducts.filter((product: OrderItems) => product.id !== cartItemId)
-            );
-        } catch (error) {
-            console.error("Error deleting cart item:", error);
-        }
-    }
+    //         await axios.delete(`/api/cart/${cartItemId}`);
+    //         setOrderItems((prevProducts) =>
+    //             prevProducts.filter((product: OrderItems) => product.id !== cartItemId)
+    //         );
+    //     } catch (error) {
+    //         console.error("Error deleting cart item:", error);
+    //     }
+    // }
 
     // const handleDeleteSelected = async () => {
     //     try {
@@ -206,9 +164,6 @@ export default function CartProductList() {
         setImageId(id)
         setModalScreenedImageOpen(true)
     }, [])
-
-
-    console.log(orderItems);
 
     // const handleImageChange = () => {
     //     const input = document.createElement("input");
@@ -255,14 +210,14 @@ export default function CartProductList() {
 
     // ✦. ── ✦. ── ✦. พวก Modal .✦ ── .✦ ── .✦
 
-    const { /* isOpen, onOpen,*/ onOpenChange } = useDisclosure();
+    const { onOpenChange } = useDisclosure();
     const [isModalScreenedImageOpen, setModalScreenedImageOpen] = useState(false);
 
-    const closeModal = React.useCallback(() => {
+    const closeModal = useCallback(() => {
         setModalScreenedImageOpen(false)
     }, []);
 
-    const renderModal = React.useCallback(() => {
+    const renderModal = useCallback(() => {
         return (
             <Modal
                 backdrop="opaque"
@@ -291,12 +246,8 @@ export default function CartProductList() {
         )
     }, [isModalScreenedImageOpen, onOpenChange, closeModal, imageSrc]);
 
-
     const renderCell = useCallback((order: OrderItems, columnKey: React.Key) => {
-        console.log(order);
-
         switch (columnKey) {
-
             case "product":
                 return (
                     <User
@@ -316,10 +267,8 @@ export default function CartProductList() {
             case "orderscreenedimages":
                 if (!order.orderscreenedimages || order.orderscreenedimages.length === 0) {
                     return <span>ไม่สกรีนภาพ</span>;
-                }
-
+                };
                 return (
-
                     <Popover
                         isOpen={!!openPopovers[order.order_item_id]}
                         onOpenChange={(open) =>
@@ -453,12 +402,12 @@ export default function CartProductList() {
         }
     }, [openPopovers, handleImageSrc]);
 
-    const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const onRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));
         setPage(1);
     }, []);
 
-    const onSearchChange = React.useCallback((value?: string) => {
+    const onSearchChange = useCallback((value?: string) => {
         if (value) {
             console.log("value", value);
 
@@ -469,7 +418,7 @@ export default function CartProductList() {
         }
     }, []);
 
-    const topContent = React.useMemo(() => {
+    const topContent = useMemo(() => {
         return (
             <div className="flex flex-col gap-4">
                 <div className="flex justify-between gap-3 items-end">
@@ -577,7 +526,7 @@ export default function CartProductList() {
     //     return totalPrice;
     // }, [orderItems, selectedIds]);
 
-    const bottomContent = React.useMemo(() => {
+    const bottomContent = useMemo(() => {
         // const totalPrice = calculateTotalPrice();
 
         return (
@@ -626,7 +575,7 @@ export default function CartProductList() {
 
 
 
-    const classNames = React.useMemo(
+    const classNames = useMemo(
         () => ({
             wrapper: ["max-h-full", "max-w-full", "shadow-none", "bg-background"],
             th: ["bg-transparent", "text-default-500", "border-b", "border-divider"],
@@ -641,10 +590,8 @@ export default function CartProductList() {
                 "group-data-[last=true]/tr:first:before:rounded-none",
                 "group-data-[last=true]/tr:last:before:rounded-none",
             ],
-        }),
-        [],
+        }), [],
     );
-
     return (
         <>
             <div className="mx-auto max-w-screen-xl flex flex-col mt-2">
@@ -655,7 +602,6 @@ export default function CartProductList() {
                         cursor: "w-full bg-[#22d3ee]",
                         tab: "max-w-fit px-0 h-12",
                         tabContent: "group-data-[selected=true]:text-[#06b6d4]",
-
                     }}
                     color="primary"
                     variant="underlined"
@@ -758,7 +704,6 @@ export default function CartProductList() {
                     )}
                 </TableBody>
             </Table>
-
             {renderModal()}
         </>
     );

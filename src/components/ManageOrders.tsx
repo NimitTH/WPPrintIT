@@ -1,5 +1,5 @@
 "use client";
-import React, { SVGProps, useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 import { redirect } from 'next/navigation';
@@ -19,11 +19,7 @@ import {
     User,
 } from "@heroui/react";
 import ListBox from "./ListBoxManage";
-import { GalleryIcon, PaymentIcon, CanceledIcon, DeliverIcon, ReceivedIcon, SuccessfulIcon, RefundIcon, PlusIcon, VerticalDotsIcon, SearchIcon, ChevronDownIcon, Cancel } from "@/components/Icon"
-
-export type IconSvgProps = SVGProps<SVGSVGElement> & {
-    size?: number;
-};
+import { GalleryIcon, PaymentIcon, CanceledIcon, DeliverIcon, ReceivedIcon, SuccessfulIcon, RefundIcon, PlusIcon, VerticalDotsIcon, SearchIcon, ChevronDownIcon, Cancel } from "@/components/Icon";
 
 export function capitalize(s: string) {
     return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
@@ -41,19 +37,18 @@ export const columns = [
 
 const INITIAL_VISIBLE_COLUMNS = ["order_id", "user", "product", "total_quantity", "total_amount", "status"];
 
-export default function CartProductList() {
+export default function ManageOrders() {
     const { data: session, status } = useSession();
-    if (status === "unauthenticated") redirect("signin")
-    const [orderItems, setOrderItems] = useState([]);
-    // const [selectedStatus, setSelectedStatus] = useState<string>('ToBePaid');
+    if (status === "unauthenticated") redirect("signin");
 
+    const [orderItems, setOrderItems] = useState([]);
     type OrderItems = (typeof orderItems)[0];
+    // const [selectedStatus, setSelectedStatus] = useState<string>('ToBePaid');
 
     const fetchOrders = async () => {
         try {
             const res = await axios.get(`/api/order`);
             setOrderItems(res.data)
-
         } catch (error) {
             console.error("An error occurred while fetching products", error);
         }
@@ -84,7 +79,7 @@ export default function CartProductList() {
 
     const hasSearchFilter = Boolean(filterValue);
 
-    const headerColumns = React.useMemo(() => {
+    const headerColumns = useMemo(() => {
         if (visibleColumns === "all") return columns;
 
         return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
@@ -92,16 +87,16 @@ export default function CartProductList() {
 
     const statusOptions = useMemo(() => {
         return [
-            { name: "ที่ต้องชำระ", uid: "ToBePaid" },
-            { name: "ที่ต้องจัดส่ง", uid: "ToBeDelivered" },
-            { name: "ที่ต้องได้รับ", uid: "ToBeReceived" },
-            { name: "ส่งสำเร็จ", uid: "SuccessfulDelivery" },
+            { name: "ที่ต้องชำระ", sid: "ToBePaid" },
+            { name: "ที่ต้องจัดส่ง", sid: "ToBeDelivered" },
+            { name: "ที่ต้องได้รับ", sid: "ToBeReceived" },
+            { name: "ส่งสำเร็จ", sid: "SuccessfulDelivery" },
             // {name: "ยกเลิก", uid: "Canceled"},
             // {name: "คืนเงิน/คืนสินค้า", uid: "RefundAndReturn"},
         ]
     }, []);
 
-    const filteredItems = React.useMemo(() => {
+    const filteredItems = useMemo(() => {
         let filteredOrderItems = [...orderItems];
 
         if (hasSearchFilter) {
@@ -121,14 +116,14 @@ export default function CartProductList() {
         return filteredOrderItems;
     }, [orderItems, hasSearchFilter, statusFilter, statusOptions.length, filterValue]);
 
-    const items = React.useMemo(() => {
+    const items = useMemo(() => {
         const start = (page - 1) * rowsPerPage;
         const end = start + rowsPerPage;
 
         return filteredItems.slice(start, end);
     }, [page, filteredItems, rowsPerPage]);
 
-    const sortedItems = React.useMemo(() => {
+    const sortedItems = useMemo(() => {
 
         return [...items].sort((a: any, b: any) => {
 
@@ -142,6 +137,8 @@ export default function CartProductList() {
             return sortDescriptor.direction === "descending" ? -cmp : cmp;
         });
     }, [sortDescriptor, items]);
+
+    // ✦. ── ✦. ── ✦. ลบ .✦ ── .✦ ── .✦
 
     // const handleDeleteSelected = async () => {
     //     try {
@@ -161,72 +158,9 @@ export default function CartProductList() {
     //     }
     // }
 
-    // ✦. ── ✦. ── ✦. จัดการภาพ .✦ ── .✦ ── .✦
+    // ✦. ── ✦. ── ✦. จัดการสถานะการสั่งซื้อ .✦ ── .✦ ── .✦
 
-    const [imageSrc, setImageSrc] = useState<string | any>("");
-    const [imageId, setImageId] = useState(0);
-
-    // const handleImageSrc = (src: string, id: number) => {
-    //     setImageSrc(src)
-    //     setImageId(id)
-    //     setModalScreenedImageOpen(true)
-    // }
-
-    // const handleImageChange = () => {
-    //     const input = document.createElement("input");
-    //     input.type = "file";
-    //     input.accept = "image/*";
-    //     input.onchange = async (e: Event) => {
-    //         const target = e.target as HTMLInputElement;
-    //         if (target.files && target.files[0]) {
-    //             const file = target.files[0];
-
-    //             if (file) {
-    //                 const formData = new FormData();
-    //                 formData.append("image", file);
-
-    //                 try {
-    //                     const res = await axios.post("/api/cart/upload", formData);
-
-    //                     if (res.data.success) {
-    //                         setImageSrc(res.data.url);
-    //                     }
-
-    //                     await axios.put(`/api/cart/${imageId}`, { screened_image: res.data.url });
-    //                     fetchOrders();
-
-    //                 } catch (error) {
-    //                     console.error("Image upload failed:", error);
-    //                 }
-    //             }
-    //         }
-    //     };
-    //     input.click();
-    // };
-
-    // const handleImageDelete = async () => {
-    //     try {
-
-    //         await axios.put(`/api/cart/${imageId}`, { screened_image: null });
-    //         setImageSrc("");
-    //         fetchOrders();
-    //     } catch (error) {
-    //         console.error("Error deleting image:", error);
-    //     }
-    // };
-
-    const handleStatusChange = useCallback(async (status: string, order_item_id: number) => {
-        try {
-            console.log(status, order_item_id);
-
-            await axios.put(`/api/order/status/${order_item_id}`, { status });
-            fetchOrders();
-        } catch (error) {
-            console.error("Error changing status:", error);
-        }
-    }, [])
-
-    const statusMap: Record<string, string> = React.useMemo(() => ({
+    const statusMap: Record<string, string> = useMemo(() => ({
         "ToBePaid": "ที่ต้องชำระ",
         "ToBeDelivered": "ที่ต้องจัดส่ง",
         "ToBeReceived": "ที่ต้องได้รับ",
@@ -235,43 +169,16 @@ export default function CartProductList() {
         // "RefundAndReturn": "คืนเงิน/คืนสินค้า",
     }), []);
 
-    // ✦. ── ✦. ── ✦. พวก Modal .✦ ── .✦ ── .✦
-
-    const { onOpenChange } = useDisclosure();
-    const [isModalScreenedImageOpen, setModalScreenedImageOpen] = useState(false);
-
-    const closeModal = React.useCallback(() => {
-        setModalScreenedImageOpen(false)
+    const handleStatusChange = useCallback(async (status: string, order_item_id: number) => {
+        try {
+            await axios.put(`/api/order/status/${order_item_id}`, { status });
+            fetchOrders();
+        } catch (error) {
+            console.error("Error changing status:", error);
+        }
     }, []);
 
-    const renderModal = React.useCallback(() => {
-        return (
-            <Modal
-                backdrop="opaque"
-                placement="center"
-                className=" "
-                classNames={{
-                    base: "border-1 border-default-200",
-                }}
-                isOpen={isModalScreenedImageOpen}
-                onOpenChange={onOpenChange}
-                onClose={closeModal}
-            >
-                <ModalContent>
-                    <ModalHeader className="flex flex-col gap-1 ">
-                        เปลี่ยนภาพสกรีน
-                    </ModalHeader>
-                    <ModalBody className="w-2xl h-2xl mx-auto">
-                        <Image
-                            isBlurred
-                            src={imageSrc || "cart/images/LINE_ALBUM_1122022_240625_2.jpg"}
-                            alt="Product Image"
-                        />
-                    </ModalBody>
-                </ModalContent>
-            </Modal>
-        )
-    }, [isModalScreenedImageOpen, onOpenChange, closeModal, imageSrc]);
+    // ✦. ── ✦. ── ✦. โหลดภาพ .✦ ── .✦ ── .✦
 
     const downloadImage = async (url: string) => {
         try {
@@ -279,16 +186,16 @@ export default function CartProductList() {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-    
+
             const blob = await response.blob();
             const link = document.createElement('a');
             const objectUrl = URL.createObjectURL(blob);
-    
+
             link.href = objectUrl;
             link.download = url.substring(url.lastIndexOf('/') + 1); // ใช้ชื่อไฟล์จาก URL
             document.body.appendChild(link);
             link.click();
-    
+
             // Cleanup
             document.body.removeChild(link);
             URL.revokeObjectURL(objectUrl);
@@ -296,10 +203,8 @@ export default function CartProductList() {
             console.error('Error downloading the image:', error);
         }
     };
-    
 
-
-    const renderCell = React.useCallback((order: any, columnKey: React.Key) => {
+    const renderCell = useCallback((order: any, columnKey: React.Key) => {
         switch (columnKey) {
             case "user":
                 return (
@@ -320,7 +225,6 @@ export default function CartProductList() {
                     <Popover
                         showArrow
                         placement="bottom"
-                        // as={ScrollShadow}
                         className="h-[300px] overflow-auto"
                     >
                         <PopoverTrigger className="cursor-pointer">
@@ -339,7 +243,7 @@ export default function CartProductList() {
                                                     <p>สินค้า</p>
                                                     <NextImage
                                                         src={item.product.image}
-                                                        
+
                                                         alt={`Product ${item.productId}`}
                                                         width={100}
                                                         height={100}
@@ -446,12 +350,12 @@ export default function CartProductList() {
         }
     }, [statusMap, handleStatusChange]);
 
-    const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const onRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));
         setPage(1);
     }, []);
 
-    const onSearchChange = React.useCallback((value?: string) => {
+    const onSearchChange = useCallback((value?: string) => {
         if (value) {
             console.log("value", value);
 
@@ -462,7 +366,7 @@ export default function CartProductList() {
         }
     }, []);
 
-    const topContent = React.useMemo(() => {
+    const topContent = useMemo(() => {
         return (
             <div className="flex flex-col gap-4">
                 <div className="flex justify-between gap-3 items-end">
@@ -480,8 +384,6 @@ export default function CartProductList() {
                         onClear={() => setFilterValue("")}
                         onValueChange={onSearchChange}
                     />
-
-
                     <div className="flex gap-3">
                         <Dropdown>
                             <DropdownTrigger className="hidden sm:flex">
@@ -502,7 +404,7 @@ export default function CartProductList() {
                                 onSelectionChange={setStatusFilter}
                             >
                                 {statusOptions.map((status) => (
-                                    <DropdownItem key={status.uid} className="capitalize">
+                                    <DropdownItem key={status.sid} className="capitalize">
                                         {capitalize(status.name)}
                                     </DropdownItem>
                                 ))}
@@ -595,9 +497,8 @@ export default function CartProductList() {
     //     return totalPrice;
     // }, [orderItems, selectedIds]);
 
-    const bottomContent = React.useMemo(() => {
+    const bottomContent = useMemo(() => {
         // const totalPrice = calculateTotalPrice();
-
         return (
             <div className="py-2 px-2 flex max-sm:flex-col justify-between items-center">
                 <div className="max-sm:mb-2">
@@ -613,7 +514,6 @@ export default function CartProductList() {
                 </div>
                 <Pagination
                     showControls
-
                     classNames={{
                         cursor: "bg-foreground-100/100 text-background",
                         base: "flex flex-start"
@@ -626,7 +526,6 @@ export default function CartProductList() {
                     variant="light"
                     onChange={setPage}
                 />
-                <div></div>
                 {/* <div>
                     <span className="mr-2 text-small font-medium text-default-400">
                         {selectedKeys === "all"
@@ -656,9 +555,7 @@ export default function CartProductList() {
         );
     }, [selectedKeys, orderItems.length, hasSearchFilter, page, pages]);
 
-
-
-    const classNames = React.useMemo(
+    const classNames = useMemo(
         () => ({
             wrapper: ["max-h-full", "max-w-full", "shadow-none", "bg-background"],
             th: ["bg-transparent", "text-default-500", "border-b", "border-divider"],
@@ -673,10 +570,8 @@ export default function CartProductList() {
                 "group-data-[last=true]/tr:first:before:rounded-none",
                 "group-data-[last=true]/tr:last:before:rounded-none",
             ],
-        }),
-        [],
+        }), [],
     );
-
     return (
         <>
             <div className="mt-5 mx-auto max-w-screen-xl flex">
@@ -721,7 +616,6 @@ export default function CartProductList() {
                     </TableBody>
                 </Table>
             </div>
-            {renderModal()}
         </>
     );
 }

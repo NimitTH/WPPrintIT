@@ -1,25 +1,25 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Button, Image, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Selection, ScrollShadow } from "@heroui/react";
-import Link from "next/link";
-import { ChevronDownIcon, FilterIcon, SearchIcon } from "./Icon";
-import axios from "axios";
-import React from "react";
 
-export default function ProductListItem1() {
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import Link from "next/link";
+import axios from "axios";
+import { Button, Image, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Selection, ScrollShadow } from "@heroui/react";
+import { FilterIcon, SearchIcon } from "./Icon";
+
+export default function ListProduct() {
     const [products, setProduct] = useState([]);
     const [categories, setCategories] = useState<any[]>([]);
     const [filterValue, setFilterValue] = useState("");
     const [statusFilter, setStatusFilter] = useState<Selection>(new Set(["all"]));
-    const [isLoading, setIsLoading] = useState(true); // เพิ่มสถานะการโหลด
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
-            setIsLoading(true); // เริ่มการโหลด
+            setIsLoading(true);
             try {
                 await Promise.all([fetchProduct(), fetchCategories()]);
             } finally {
-                setIsLoading(false); // สิ้นสุดการโหลด
+                setIsLoading(false);
             }
         };
         fetchData();
@@ -43,11 +43,11 @@ export default function ProductListItem1() {
         }
     };
 
-    const onSearchChange = React.useCallback((value?: string) => {
+    const onSearchChange = useCallback((value?: string) => {
         setFilterValue(value || "");
     }, []);
 
-    const filteredProducts = React.useMemo(() => {
+    const filteredProducts = useMemo(() => {
         const searchFilter = (product: any) =>
             product.product_name.toLowerCase().includes(filterValue.toLowerCase());
 
@@ -90,8 +90,6 @@ export default function ProductListItem1() {
                         <Button
                             startContent={<FilterIcon className="text-small" />}
                             className="h-[32px] max-sm:min-w-[32px]"
-                            
-                            
                             variant="flat"
                         >
                             <p className="max-sm:hidden">หมวดหมู่สินค้า</p>
@@ -105,9 +103,7 @@ export default function ProductListItem1() {
                         selectionMode="multiple"
                         onSelectionChange={setStatusFilter}
                         as={ScrollShadow}
-                        
                         className="w-[200px] h-[300px]"
-                        
                     >
                         <>
                             <DropdownItem key="all" className="capitalize">
@@ -162,4 +158,4 @@ export default function ProductListItem1() {
             </div>
         </div>
     );
-}
+};

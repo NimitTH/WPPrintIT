@@ -4,8 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
-import * as z from "zod";
-// import { schema, Schema } from "@/types";
+import { profileSchema, ProfileSchema } from "@/types/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
 import axios from "axios";
@@ -14,20 +13,6 @@ import {
     Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-
-export const schema1 = z.object({
-    username: z.string().min(1, "ต้องมีชื่อผู้ใช้").max(100),
-    name: z.string().max(100),
-    tel: z
-        .string()
-        .min(1, "ต้องมีเบอร์")
-        .min(10, "เบอร์ต้องมีความยาว 10 ตัวขึ้นไป"),
-    email: z.string().min(1, "ต้องมีอีเมล์").email("อีเมล์ไม่ถูกต้อง"),
-    address: z.string().max(100),
-    image: z.string().optional(),
-});
-
-export type Schema1 = z.infer<typeof schema1>;
 
 export default function Profile() {
     const { data: session } = useSession();
@@ -42,8 +27,8 @@ export default function Profile() {
         handleSubmit,
         setValue,
         formState: { errors, isSubmitting },
-    } = useForm<Schema1>({
-        resolver: zodResolver(schema1),
+    } = useForm<ProfileSchema>({
+        resolver: zodResolver(profileSchema),
     });
 
     useEffect(() => {
@@ -60,7 +45,6 @@ export default function Profile() {
 
     const handleImageChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        console.log(file);
 
         if (file) {
             const formData = new FormData();
@@ -88,19 +72,16 @@ export default function Profile() {
         }
     }, [session])
 
-    const onSubmit: SubmitHandler<Schema1> = async (edituser: Schema1) => {
+    const onSubmit: SubmitHandler<ProfileSchema> = async (edituser: ProfileSchema) => {
         try {
-
             const res = await axios.put(`/api/user/${session?.user.id}`, {
                 username: edituser.username,
                 name: edituser.name,
-                email: edituser.email, 
-                tel: edituser.tel, 
+                email: edituser.email,
+                tel: edituser.tel,
                 address: edituser.address,
                 image: profileImage
             });
-
-            console.log(res.data);
             alert("แก้ไขข้อมูลสำเร็จ");
             router.push("/products");
         } catch (error: any) {
@@ -109,7 +90,6 @@ export default function Profile() {
             alert("เกิดข้อผิดพลาดในการแก้ไขข้อมูล");
         }
     };
-
     return (
         <div>
             <div className="flex h-full w-full items-center justify-center mt-3">
@@ -138,7 +118,6 @@ export default function Profile() {
                                 isOpen={isOpen}
                                 onOpenChange={onOpenChange}>
                                 <ModalContent>
-
                                     <ModalHeader className="flex flex-col gap-1 text-xl font-medium">
                                         เลือกภาพ
                                     </ModalHeader>
@@ -153,10 +132,8 @@ export default function Profile() {
                                         />
                                     </ModalBody>
                                     <ModalFooter className=" flex justify-center">
-
                                         <Input
                                             onChange={handleImageChange}
-                                            // accept="image/*"
                                             radius="full"
                                             type="file"
                                             fullWidth
@@ -175,7 +152,6 @@ export default function Profile() {
                                 </ModalContent>
                             </Modal>
                         </div>
-
                         <Controller
                             name="username"
                             control={control}
@@ -257,4 +233,4 @@ export default function Profile() {
             </div>
         </div>
     );
-}
+};

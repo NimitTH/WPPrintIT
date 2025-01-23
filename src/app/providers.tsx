@@ -1,4 +1,6 @@
 "use client";
+
+import React from 'react';
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { HeroUIProvider } from "@heroui/react"
 import { ThemeProvider as NextThemesProvider } from "next-themes";
@@ -12,7 +14,6 @@ declare module "@react-types/shared" {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-
   return (
     <HeroUIProvider navigate={router.push} >
       <NextThemesProvider attribute="class" defaultTheme="dark">
