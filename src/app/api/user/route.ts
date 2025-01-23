@@ -27,14 +27,17 @@ export async function GET(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
     try {
-        const { name, username, email, tel, address, image } = await req.json();
+        const { name, username, email, tel, address, image, id } = await req.json();
+
+        console.log(name, username, email, tel, address, image, id);
+        
 
         if (!email) {
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
         }
 
         const updatedUser = await prisma.user.update({
-            where: { email },
+            where: { id: id },
             data: {
                 name: name,
                 username: username,

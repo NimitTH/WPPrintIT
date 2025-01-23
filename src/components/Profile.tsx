@@ -88,23 +88,18 @@ export default function Profile() {
         }
     }, [session])
 
-    const onSubmit: SubmitHandler<Schema1> = async (data: Schema1) => {
+    const onSubmit: SubmitHandler<Schema1> = async (edituser: Schema1) => {
         try {
-            console.log("Submitting data:", data);
-            console.log("Profile Image URL:", profileImage);
+            console.log(edituser);
 
-            const payload = {
-                ...data,
-                image: profileImage,
-            }
+            const res = await axios.put(`/api/user`, { ...edituser, image: profileImage, id: session?.user.id });
 
-            const response = await axios.post(`${process.env.AUTH_URL}/api/user`, payload);
-
-            console.log("Response from server:", response.data);
+            console.log(res.data);
             alert("แก้ไขข้อมูลสำเร็จ");
             router.push("/products");
         } catch (error: any) {
-            console.error("Error submitting form:", error.response?.data || error.message);
+            console.error("Error submitting form:", error.response?.data);
+            console.error("Error submitting form:", error.message);
             alert("เกิดข้อผิดพลาดในการแก้ไขข้อมูล");
         }
     };
