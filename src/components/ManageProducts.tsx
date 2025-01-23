@@ -145,6 +145,7 @@ export default function ManageProducts() {
 
         return filteredProducts;
     }, [products, hasSearchFilter, filterValue, statusFilter, categoryOptions]);
+    
 
     const items = useMemo(() => {
         const start = (page - 1) * rowsPerPage;
@@ -1188,7 +1189,7 @@ export default function ManageProducts() {
                                 onSelectionChange={setStatusFilter}
                             >
                                 {categoryOptions.map((category: any) => (
-                                    <DropdownItem key={category.uid} className="capitalize">
+                                    <DropdownItem key={category.name} className="capitalize">
                                         {capitalize(category.name)}
                                     </DropdownItem>
                                 ))}

@@ -445,7 +445,7 @@ export default function ManageUsers() {
                         }}
                     >
                         <DropdownTrigger>{statusMap[user.status]}</DropdownTrigger>
-                        <DropdownMenu key={user.id} onAction={(key) => (key as string, user.id, user.role)}>
+                        <DropdownMenu onAction={(key) => handleStatusChange(key as string, (user as any).id, user.role)}>
                             <DropdownItem key="approve">อนุมัติ</DropdownItem>
                             <DropdownItem key="suspended">ระงับการใช้งาน</DropdownItem>
                         </DropdownMenu>
@@ -483,7 +483,7 @@ export default function ManageUsers() {
             default:
                 return <span>{user[columnKey as keyof Users]?.toString() || "ไม่ระบุข้อมูล"}</span>;
         }
-    }, [/*roleMap*/, statusMap, handleStatusChange /*handleRoleChange,*/ , handleEditUser, handleDeleteUser]);
+    }, [statusMap, handleStatusChange, handleEditUser, handleDeleteUser]);
 
     const onRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));
