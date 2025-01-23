@@ -311,7 +311,7 @@ export default function ManageOrders() {
                         <DropdownTrigger>
                             <Button className="bg-transparent">{statusMap[order.status]}</Button>
                         </DropdownTrigger>
-                        <DropdownMenu onAction={(key) => handleStatusChange(key as string, (order as any).order_id)}>
+                        <DropdownMenu onAction={(key) => handleStatusChange(key as string, order.order_id)}>
                             <DropdownItem key="ToBePaid">ที่ต้องชำระ</DropdownItem>
                             <DropdownItem key="ToBeDelivered">ที่ต้องจัดส่ง</DropdownItem>
                             <DropdownItem key="ToBeReceived">ที่ต้องได้รับ</DropdownItem>

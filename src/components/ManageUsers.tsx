@@ -259,7 +259,7 @@ export default function ManageUsers() {
     const onSubmit: SubmitHandler<Schema> = useCallback(async (data: Schema) => {
         try {
             console.log(data);
-            await axios.put("/api/user", { ...data });
+            await axios.put(`/api/user/${data.id}`, { ...data });
             fetchUsers();
             setModalEditUserOpen(false);
             alert("แก้ไขข้อมูลผู้ใช้งานเรียบร้อย");
@@ -444,7 +444,7 @@ export default function ManageUsers() {
                         }}
                     >
                         <DropdownTrigger>{statusMap[user.status]}</DropdownTrigger>
-                        <DropdownMenu onAction={(key) => handleStatusChange(key as string, (user as any).id, user.role)}>
+                        <DropdownMenu onAction={(key) => handleStatusChange(key as string, user.id, user.role)}>
                             <DropdownItem key="approve">อนุมัติ</DropdownItem>
                             <DropdownItem key="suspended">ระงับการใช้งาน</DropdownItem>
                         </DropdownMenu>
