@@ -92,20 +92,20 @@ export default function Profile() {
         try {
             console.log(edituser);
 
-            const res = await fetch("/api/user", {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ ...edituser, image: profileImage, id: session?.user.id }),
-            }).then((res) => res.json());
-            // const res = await axios.put(`/api/user`, { ...edituser, image: profileImage, id: session?.user.id });
+            // const res = await fetch("/api/user", {
+            //     method: "PUT",
+            //     headers: {
+            //         "Content-Type": "application/json",
+            //     },
+            //     body: JSON.stringify({ ...edituser, image: profileImage, id: session?.user.id }),
+            // }).then((res) => res.json());
+            const res = await axios.put(`/api/user`, { ...edituser, image: profileImage });
 
-            console.log(res.user);
+            console.log(res.data);
             alert("แก้ไขข้อมูลสำเร็จ");
             router.push("/products");
         } catch (error: any) {
-            console.error("Error submitting form:", error.response?.data);
+            console.error("Error submitting form:", error.res?.data);
             console.error("Error submitting form:", error.message);
             alert("เกิดข้อผิดพลาดในการแก้ไขข้อมูล");
         }
