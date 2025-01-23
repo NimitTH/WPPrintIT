@@ -2,6 +2,7 @@
 import React, { SVGProps, useState, useEffect, useMemo, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import axios from "axios";
+import { redirect } from 'next/navigation';
 import NextImage from "next/image";
 import {
     Popover, PopoverTrigger, PopoverContent, Card, CardHeader, CardBody, CardFooter,
@@ -41,7 +42,8 @@ export const columns = [
 const INITIAL_VISIBLE_COLUMNS = ["order_id", "user", "product", "total_quantity", "total_amount", "status"];
 
 export default function CartProductList() {
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
+    if (status === "unauthenticated") redirect("signin")
     const [orderItems, setOrderItems] = useState([]);
     // const [selectedStatus, setSelectedStatus] = useState<string>('ToBePaid');
 

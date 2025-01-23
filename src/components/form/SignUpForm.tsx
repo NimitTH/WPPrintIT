@@ -97,7 +97,7 @@ export default function SignUpForm() {
 
             if (user.error) {
                 console.error(user.error);
-                alert("อีเมล์อยู่แล้ว")
+                alert("มีอีเมล์อยู่แล้ว")
             } else {
                 router.push("/products");
             }

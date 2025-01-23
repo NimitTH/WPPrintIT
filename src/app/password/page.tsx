@@ -19,6 +19,8 @@ import {
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import Navbar from '@/components/NavBar'
+import { redirect } from 'next/navigation';
+
 
 
 const schema = z.object({
@@ -34,8 +36,12 @@ const schema = z.object({
 
 type Schema = z.infer<typeof schema>;
 
-export default function Page() {
-    const { data: session } = useSession();
+export default async function Page() {
+    const { data: session, status } = useSession();
+    if (status === "unauthenticated") redirect("signin")
+    if (!session) redirect("/signin")
+    if (session.user.status === "suspended") redirect("/suspended")
+    
     const router = useRouter();
     const {
         control,
@@ -70,21 +76,21 @@ export default function Page() {
         } catch (error: any) {
             console.error(error);
 
-        // ตรวจสอบว่ามีการตอบกลับจากเซิร์ฟเวอร์
-        if (error.response) {
-            const status = error.response.status;
-            const message = error.response.data?.error || "เกิดข้อผิดพลาด";
+            // ตรวจสอบว่ามีการตอบกลับจากเซิร์ฟเวอร์
+            if (error.response) {
+                const status = error.response.status;
+                const message = error.response.data?.error || "เกิดข้อผิดพลาด";
 
-            if (status === 401) {
-                alert("รหัสผ่านเดิมไม่ถูกต้อง");
-            } else if (status === 404) {
-                alert("ไม่พบผู้ใช้งาน");
+                if (status === 401) {
+                    alert("รหัสผ่านเดิมไม่ถูกต้อง");
+                } else if (status === 404) {
+                    alert("ไม่พบผู้ใช้งาน");
+                } else {
+                    alert(message);
+                }
             } else {
-                alert(message);
+                alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
             }
-        } else {
-            alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
-        }
 
         }
     };

@@ -10,12 +10,12 @@ type Props = {
 }
 
 export default async function page({ params }: Props) {
-        const session = await auth();
-        if (!session) redirect("/signin")
-        if (session.user.status === "suspended") redirect("/suspended")
+    const session = await auth();
+    if (!session) redirect("/signin")
+    if (session.user.status === "suspended") redirect("/suspended")
     return (
         <div>
-            <ProductItem productid={params}/>
+            <ProductItem productid={params} />
         </div>
     )
 }
