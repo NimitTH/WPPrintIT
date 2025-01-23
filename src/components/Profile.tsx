@@ -92,9 +92,16 @@ export default function Profile() {
         try {
             console.log(edituser);
 
-            const res = await axios.put(`/api/user`, { ...edituser, image: profileImage, id: session?.user.id });
+            const res = await fetch("/api/user", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ ...edituser, image: profileImage, id: session?.user.id }),
+            }).then((res) => res.json());
+            // const res = await axios.put(`/api/user`, { ...edituser, image: profileImage, id: session?.user.id });
 
-            console.log(res.data);
+            console.log(res.user);
             alert("แก้ไขข้อมูลสำเร็จ");
             router.push("/products");
         } catch (error: any) {
