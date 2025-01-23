@@ -16,18 +16,19 @@ import { prisma } from "@/lib/prisma";
 // }
 
 
-export async function PUT(req: NextRequest) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string }}) {
     try {
-        const { name, username, email, tel, address, image, id } = await req.json();
+        const id = params.id;
+        const { name, username, email, tel, address, image } = await req.json();
 
-        console.log(name, username, email, tel, address, image, id);
+        console.log(name, username, email, tel, address, image );
 
         if (!email) {
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
         }
 
         const updatedUser = await prisma.user.update({
-            where: { email },
+            where: { id: Number(id) },
             data: {
                 name: name,
                 username: username,
