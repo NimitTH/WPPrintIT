@@ -2,8 +2,12 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
-    const users = await prisma.user.findMany(); // ตัวอย่าง query
-    return NextResponse.json(users)
+    try {
+        const users = await prisma.user.findMany();
+        return NextResponse.json(users);
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 // export async function POST(req: NextRequest) {
@@ -30,7 +34,7 @@ export async function PUT(req: NextRequest) {
         const { name, username, email, tel, address, image } = await req.json();
 
         console.log(name, username, email, tel, address, image);
-        
+
 
         if (!email) {
             return NextResponse.json({ error: "Email is required" }, { status: 400 });

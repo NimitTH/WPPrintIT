@@ -231,7 +231,6 @@ export default function ManageUsers() {
                 fetchUsers();
                 alert("เปลี่ยนสถานะเรียบร้อย");
             }
-            fetchUsers();
         } catch (error) {
             console.error("Error changing status:", error);
         }
@@ -468,13 +467,13 @@ export default function ManageUsers() {
                                 </Button>
                             </DropdownTrigger>
                             <DropdownMenu>
-                                <DropdownItem
+                                {/* <DropdownItem
                                     key="delete"
                                     onPress={() => handleEditUser(user.id, user.username, user.name, user.tel, user.email, user.address, user.image)}
                                     startContent={<EditDocumentIcon size={16} />}
                                 >
                                     แก้ไขข้อมูลผู้ใช้
-                                </DropdownItem>
+                                </DropdownItem> */}
                                 <DropdownItem
                                     key="delete"
                                     onPress={() => handleDeleteUser(user.id, user.role)}
