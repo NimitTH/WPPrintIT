@@ -51,7 +51,7 @@ export default function ManageUsers() {
 
     const fetchUsers = async () => {
         try {
-            const res = await axios.get(`/api/user`);
+            const res = await axios.get(`/api/users`);
             setUsers(res.data)
         } catch (error) {
             console.error("An error occurred while fetching products", error);
