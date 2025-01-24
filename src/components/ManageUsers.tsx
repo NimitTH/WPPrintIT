@@ -46,7 +46,7 @@ const INITIAL_VISIBLE_COLUMNS = ["id", "user", "product", "money", /* "role", */
 
 export default function ManageUsers() {
     const { data: session } = useSession();
-    const [users, setUsers] = useState<any[]>([]);
+    const [users, setUsers] = useState([]);
 
     type Users = (typeof users)[0];
 
@@ -94,7 +94,7 @@ export default function ManageUsers() {
         let filteredUsers = [...users];
 
         if (hasSearchFilter) {
-            filteredUsers = filteredUsers.filter((user) =>
+            filteredUsers = filteredUsers.filter((user: any) =>
                 user.name.toLowerCase().includes(filterValue.toLowerCase()),
             );
         }
@@ -110,7 +110,7 @@ export default function ManageUsers() {
 
     const sortedItems = useMemo(() => {
 
-        return [...items].sort((a: Users, b: Users) => {
+        return [...items].sort((a: any, b: any) => {
 
             const first = sortDescriptor.column === "price"
                 ? a.order_item_id : a[sortDescriptor.column as keyof Users];
