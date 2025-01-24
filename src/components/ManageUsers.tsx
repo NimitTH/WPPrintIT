@@ -403,7 +403,7 @@ export default function ManageUsers() {
         )
     }, [isModalEditUserOpen, onOpenChange, closeModal, handleSubmit, onSubmit, imageSrc, control, isSubmitting, handleImageChange, userId, errors.username, errors.name, errors.tel, errors.email, errors.address]);
 
-    const renderCell = useCallback((user: Users, columnKey: React.Key) => {
+    const renderCell = useCallback((user: any, columnKey: React.Key) => {
         switch (columnKey) {
             case "user":
                 return (
@@ -681,9 +681,9 @@ export default function ManageUsers() {
                             </TableColumn>
                         )}
                     </TableHeader>
-                    <TableBody emptyContent={"ไม่มีผู้ใช้งาน"} items={sortedItems}>
-                        {(item) => (
-                            <TableRow key={item.order_id}>
+                    <TableBody emptyContent={"ไม่มีผู้ใช้"} items={sortedItems}>
+                        {(item: any) => (
+                            <TableRow key={item.id}>
                                 {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
                             </TableRow>
                         )}
