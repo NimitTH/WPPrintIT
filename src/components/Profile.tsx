@@ -50,7 +50,7 @@ export default function Profile() {
                 console.error("Image upload failed:", error);
             }
         }
-    }, [profileImage]);
+    }, []);
 
     // const handleImageDelete = useCallback(async () => {
     //     try {
