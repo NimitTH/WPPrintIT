@@ -232,7 +232,6 @@ export default function ManageUsers() {
                 alert("เปลี่ยนสถานะเรียบร้อย");
             }
             fetchUsers();
-            alert("เปลี่ยนสถานะเรียบร้อย");
         } catch (error) {
             console.error("Error changing status:", error);
         }
