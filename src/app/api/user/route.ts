@@ -1,33 +1,18 @@
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { NextResponse, type NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
     try {
-        const users = await prisma.user.findMany();
+        const users = await prisma.user.findMany({
+            orderBy: { createdAt: "desc" },
+        });
+        
         return NextResponse.json(users);
     } catch (error) {
         console.log(error);
+        return NextResponse.json({ error: "An error occurred while fetching users" }, { status: 500 });
     }
 }
-
-// export async function POST(req: NextRequest) {
-//     const body = await req.json();
-//     if (body._method === "PUT") {
-//         const { name, username, email, tel, address, image } = body;
-
-//         const updatedUser = await prisma.user.update({
-//             where: { email },
-//             data: { name, username, email, tel, address, image, updatedAt: new Date() },
-//         });
-
-//         return NextResponse.json({
-//             message: "User edited successfully",
-//             user: updatedUser,
-//         });
-//     }
-//     return NextResponse.json({ error: "Invalid method" }, { status: 405 });
-// }
-
 
 export async function PUT(req: NextRequest) {
     try {

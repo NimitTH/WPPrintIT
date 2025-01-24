@@ -28,7 +28,6 @@ import {
 import ListBox from "./ListBoxManage";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { EditDocumentIcon, VerticalDotsIcon, SearchIcon, ChevronDownIcon, Cancel } from '@/components/Icon';
-import { set } from "zod";
 
 export function capitalize(s: string) {
     return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
