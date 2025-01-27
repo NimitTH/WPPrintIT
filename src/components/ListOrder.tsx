@@ -599,9 +599,9 @@ export default function CartProductList() {
                     aria-label="Options"
                     classNames={{
                         tabList: "gap-8 w-full relative rounded-none p-0 border-b border-divider",
-                        cursor: "w-full bg-[#22d3ee]",
+                        cursor: "w-full bg-[#fb8500]",
                         tab: "max-w-fit px-0 h-12",
-                        tabContent: "group-data-[selected=true]:text-[#06b6d4]",
+                        tabContent: "group-data-[selected=true]:text-[#fb8500]",
                     }}
                     color="primary"
                     variant="underlined"

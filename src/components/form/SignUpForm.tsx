@@ -55,6 +55,7 @@ export default function SignUpForm() {
 
     const onsubmit: SubmitHandler<SignUpSchema> = async (data: SignUpSchema) => {
         try {
+            console.log(data);
             await axios.post("/api/signup", { ...data, image: profileImage });
 
             const user: any = await signIn("credentials", {

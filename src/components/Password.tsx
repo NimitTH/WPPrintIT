@@ -79,7 +79,6 @@ export default function Password() {
                                     label="รหัสผ่านเดิม"
                                     labelPlacement="outside"
                                     placeholder="กรอกรหัสผ่านเดิมของคุณ"
-                                    maxLength={10}
                                     isInvalid={!!errors.password}
                                     errorMessage={errors.password?.message}
                                 />
@@ -95,7 +94,6 @@ export default function Password() {
                                     label="รหัสผ่านใหม่"
                                     labelPlacement="outside"
                                     placeholder="กรอกรหัสผ่านใหม่ของคุณ"
-                                    maxLength={10}
                                     isInvalid={!!errors.newpassword}
                                     errorMessage={errors.newpassword?.message}
                                 />
