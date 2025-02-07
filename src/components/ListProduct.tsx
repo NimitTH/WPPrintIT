@@ -100,7 +100,7 @@ export default function ListProduct() {
                         aria-label="Table Columns"
                         closeOnSelect={false}
                         selectedKeys={statusFilter}
-                        selectionMode="multiple"
+                        selectionMode="single"
                         onSelectionChange={setStatusFilter}
                         as={ScrollShadow}
                         className="w-[200px] h-[300px]"

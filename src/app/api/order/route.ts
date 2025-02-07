@@ -109,7 +109,7 @@ export async function GET(req: NextRequest) {
         const orders = await prisma.order.findMany({
             include: { orderitem: { include: { product: true, orderscreenedimages: true } }, user: true },
             orderBy: { order_date: "desc" },
-        });
+        }); 
 
         return NextResponse.json(orders);
     } catch (error) {

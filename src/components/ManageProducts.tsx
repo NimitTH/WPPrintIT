@@ -22,6 +22,7 @@ import {
     Image,
     Input,
     User,
+    ScrollShadow,
 } from "@heroui/react";
 import { PlusIcon, VerticalDotsIcon, SearchIcon1, ChevronDownIcon, EditIcon, DeleteIcon, DeleteIcon1, FilterIcon, Cancel } from "@/components/Icon";
 import { Icon } from "@iconify/react/dist/iconify.js";
@@ -102,7 +103,7 @@ export default function ManageProducts() {
     const [visibleColumns, setVisibleColumns] = useState<Selection>(
         new Set(INITIAL_VISIBLE_COLUMNS),
     );
-    const [statusFilter, setStatusFilter] = useState<Selection>("all");
+    const [statusFilter, setStatusFilter] = useState<Selection>(new Set(["all"]));
 
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
@@ -136,8 +137,16 @@ export default function ManageProducts() {
             );
         }
 
-        if (statusFilter !== "all" && Array.from(statusFilter).length !== categoryOptions.length) {
+        if (statusFilter) {
             const selectedCategories = Array.from(statusFilter);
+            console.log("categoryOptions: " , categoryOptions);
+            console.log("statusFilter: " , statusFilter);
+            console.log("selectedCategories: " , selectedCategories);
+
+            if (selectedCategories.includes("all")) {
+                return filteredProducts;
+            }
+
             filteredProducts = filteredProducts.filter((product: any) =>
                 selectedCategories.some((category: any) => product.category.some((c: any) => c.category_name === category))
             );
@@ -145,7 +154,6 @@ export default function ManageProducts() {
 
         return filteredProducts;
     }, [products, hasSearchFilter, filterValue, statusFilter, categoryOptions]);
-    
 
     const items = useMemo(() => {
         const start = (page - 1) * rowsPerPage;
@@ -1170,7 +1178,7 @@ export default function ManageProducts() {
                         onValueChange={onSearchChange}
                     />
                     <div className="flex gap-3">
-                        <Dropdown>
+                        <Dropdown className="border-1 border-default-200">
                             <DropdownTrigger className="hidden sm:flex">
                                 <Button
                                     startContent={<FilterIcon className="text-small" />}
@@ -1182,17 +1190,24 @@ export default function ManageProducts() {
                             </DropdownTrigger>
                             <DropdownMenu
                                 disallowEmptySelection
-                                aria-label="Table Columns"
+                                aria-label="Category Columns"
                                 closeOnSelect={false}
                                 selectedKeys={statusFilter}
-                                selectionMode="multiple"
+                                selectionMode="single"
                                 onSelectionChange={setStatusFilter}
+                                as={ScrollShadow}
+                                className="w-[200px] h-[300px]"
                             >
-                                {categoryOptions.map((category: any) => (
-                                    <DropdownItem key={category.name} className="capitalize">
-                                        {capitalize(category.name)}
+                                <>
+                                    <DropdownItem key="all" className="capitalize">
+                                        ทั้งหมด
                                     </DropdownItem>
-                                ))}
+                                    {categoryOptions.map((category: any) => (
+                                        <DropdownItem key={category.name} className="capitalize">
+                                            {capitalize(category.name)}
+                                        </DropdownItem>
+                                    ))}
+                                </>
                             </DropdownMenu>
                         </Dropdown>
                         <ButtonGroup size="sm" variant="flat" className="bg-background" >

@@ -66,7 +66,7 @@ export default function ManageOrders() {
     const [visibleColumns, setVisibleColumns] = useState<Selection>(
         new Set(INITIAL_VISIBLE_COLUMNS),
     );
-    const [statusFilter, setStatusFilter] = useState<Selection>("all");
+    const [statusFilter, setStatusFilter] = useState<Selection>(new Set(["all"]));
     const [rowsPerPage, setRowsPerPage] = useState(20);
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
         column: "order_id",
@@ -107,7 +107,11 @@ export default function ManageOrders() {
             );
         }
 
-        if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
+        if (statusFilter) {
+            const selectedStatus = Array.from(statusFilter);
+            if (selectedStatus.includes("all")) {
+                return filteredOrderItems;
+            }
             filteredOrderItems = filteredOrderItems.filter((orderItems: any) =>
                 Array.from(statusFilter).includes(orderItems.status),
             );
@@ -307,6 +311,7 @@ export default function ManageOrders() {
                         classNames={{
                             trigger: "border-none",
                         }}
+                        className="border-1 border-default-200"
                     >
                         <DropdownTrigger>
                             <Button className="bg-transparent">{statusMap[order.status]}</Button>
@@ -385,8 +390,8 @@ export default function ManageOrders() {
                         onValueChange={onSearchChange}
                     />
                     <div className="flex gap-3">
-                        <Dropdown>
-                            <DropdownTrigger className="hidden sm:flex">
+                        <Dropdown className="border-1 border-default-200">
+                            <DropdownTrigger className="hidden sm:flex border-1 border-default-200">
                                 <Button
                                     endContent={<ChevronDownIcon className="text-small" />}
                                     size="sm"
@@ -403,11 +408,16 @@ export default function ManageOrders() {
                                 selectionMode="single"
                                 onSelectionChange={setStatusFilter}
                             >
-                                {statusOptions.map((status) => (
-                                    <DropdownItem key={status.sid} className="capitalize">
-                                        {capitalize(status.name)}
+                                <>
+                                    <DropdownItem key="all" className="capitalize">
+                                        ทั้งหมด
                                     </DropdownItem>
-                                ))}
+                                    {statusOptions.map((status) => (
+                                        <DropdownItem key={status.sid} className="capitalize">
+                                            {capitalize(status.name)}
+                                        </DropdownItem>
+                                    ))}
+                                </>
                             </DropdownMenu>
                         </Dropdown>
                         {/* <Dropdown>

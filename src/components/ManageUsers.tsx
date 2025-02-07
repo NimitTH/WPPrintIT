@@ -487,7 +487,7 @@ export default function ManageUsers() {
             default:
                 return <span>{user[columnKey as keyof Users]?.toString() || "ไม่ระบุข้อมูล"}</span>;
         }
-    }, [statusMap, handleStatusChange, handleEditUser, handleDeleteUser]);
+    }, [statusMap, handleStatusChange, handleDeleteUser]);
 
     const onRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));

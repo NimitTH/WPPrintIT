@@ -8,7 +8,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
         await prisma.order.update({
             where: { order_id: parseInt(id) },
-            data: { status: status }
+            data: { status: status },
         });
 
         console.log(status, id);
