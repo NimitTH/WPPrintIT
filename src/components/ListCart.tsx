@@ -367,9 +367,10 @@ export default function CartProductList() {
                     <ModalContent>
                         <ModalHeader>สั่งซื้อสินค้าสำเร็จ</ModalHeader>
                         <ModalBody>
-                            {/* <div className="flex justify-center items-center">
-                                <Image className="w-full h-full mx-auto" src="https://media.tenor.com/bi6I4XsPH3sAAAAi/kitty-fancy.gif" alt="receipt" />
-                            </div> */}
+                            <div className="flex justify-center items-center">
+                                {/* <img src="/pngegg.png" /> */}
+                                <Image className="w-16 h-16 mx-auto" src="/pngegg.png" alt="receipt" />
+                            </div>
                             <span>
                                 ดาวน์โหลดใบเสร็จหรือไม่
                             </span>

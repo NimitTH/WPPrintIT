@@ -12,6 +12,7 @@ import { SessionProvider } from "next-auth/react"
 //   variable: "--font-geist-sans",
 //   weight: "100 900",
 // });
+
 // const geistMono = localFont({
 //   src: "./fonts/GeistMonoVF.woff",
 //   variable: "--font-geist-mono",
@@ -27,7 +28,7 @@ import { SessionProvider } from "next-auth/react"
 const sarabun = Sarabun({
   subsets: ['thai', 'latin'],
   weight: ['400', '700'],
-  style: ['normal', 'italic'],
+  // style: ['normal', 'italic'],
   display: 'swap',
 });
 

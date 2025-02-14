@@ -91,10 +91,17 @@ export default function ManageOrders() {
             { name: "ที่ต้องจัดส่ง", sid: "ToBeDelivered" },
             { name: "ที่ต้องได้รับ", sid: "ToBeReceived" },
             { name: "ส่งสำเร็จ", sid: "SuccessfulDelivery" },
-            // {name: "ยกเลิก", uid: "Canceled"},
-            // {name: "คืนเงิน/คืนสินค้า", uid: "RefundAndReturn"},
+            // {name: "ยกเลิก", sid: "Canceled"},
+            // {name: "คืนเงิน/คืนสินค้า", sid: "RefundAndReturn"},
         ]
     }, []);
+
+    const statusCounts = useMemo(() => {
+        return statusOptions.map((status) => ({
+            ...status,
+            count: orderItems.filter((order: any) => order.status === status.sid).length,
+        }));
+    }, [orderItems, statusOptions]);
 
     const filteredItems = useMemo(() => {
         let filteredOrderItems = [...orderItems];
@@ -103,7 +110,8 @@ export default function ManageOrders() {
             filteredOrderItems = filteredOrderItems.filter((order: any) =>
                 order.orderitem.some((item: any) =>
                     item.product.product_name.toLowerCase().includes(filterValue.toLowerCase())
-                )
+                ) ||
+                order.user.name.toLowerCase().includes(filterValue.toLowerCase())
             );
         }
 
@@ -118,7 +126,7 @@ export default function ManageOrders() {
         }
 
         return filteredOrderItems;
-    }, [orderItems, hasSearchFilter, statusFilter, statusOptions.length, filterValue]);
+    }, [orderItems, hasSearchFilter, statusFilter, filterValue]);
 
     const items = useMemo(() => {
         const start = (page - 1) * rowsPerPage;
@@ -229,12 +237,11 @@ export default function ManageOrders() {
                     <Popover
                         showArrow
                         placement="bottom"
-                        className="h-[300px] overflow-auto"
                     >
                         <PopoverTrigger className="cursor-pointer">
                             ดูสินค้า
                         </PopoverTrigger>
-                        <PopoverContent className="p-1 border-1 border-default-200">
+                        <PopoverContent className="p-1 border-1 border-default-200 max-h-[300px] overflow-auto">
                             <Card className="max-w-full border-none dark:border-1 dark:border-default-200 bg-transparent" shadow="none">
                                 <CardHeader>
                                     รายละเอียดสินค้าที่สั่งซื้อ
@@ -381,7 +388,7 @@ export default function ManageOrders() {
                             base: "w-full sm:max-w-[44%]",
                             inputWrapper: "border-1",
                         }}
-                        placeholder="ค้นหาออเดอร์ที่สั่งซื้อ..."
+                        placeholder="ค้นหาชื่อผู้สั่งซื้อ หรือสินค้าที่สั่งซื้อ..."
                         size="sm"
                         startContent={<SearchIcon className="text-default-300" />}
                         value={filterValue}
@@ -410,11 +417,11 @@ export default function ManageOrders() {
                             >
                                 <>
                                     <DropdownItem key="all" className="capitalize">
-                                        ทั้งหมด
+                                        ทั้งหมด ({orderItems.length})
                                     </DropdownItem>
-                                    {statusOptions.map((status) => (
+                                    {statusCounts.map((status) => (
                                         <DropdownItem key={status.sid} className="capitalize">
-                                            {capitalize(status.name)}
+                                            {capitalize(status.name)} ({status.count})
                                         </DropdownItem>
                                     ))}
                                 </>
@@ -463,7 +470,7 @@ export default function ManageOrders() {
                 </div>
             </div>
         );
-    }, [filterValue, onSearchChange, statusFilter, statusOptions, /* visibleColumns, */ orderItems.length, onRowsPerPageChange]);
+    }, [filterValue, onSearchChange, statusFilter, /* visibleColumns, */ statusCounts, orderItems.length, onRowsPerPageChange]);
 
     // const handleDeleteSelected = async () => {
     //     try {
@@ -506,6 +513,7 @@ export default function ManageOrders() {
 
     //     return totalPrice;
     // }, [orderItems, selectedIds]);
+    
 
     const bottomContent = useMemo(() => {
         // const totalPrice = calculateTotalPrice();
@@ -617,7 +625,7 @@ export default function ManageOrders() {
                             </TableColumn>
                         )}
                     </TableHeader>
-                    <TableBody emptyContent={"ไม่มีสินค้า"} items={sortedItems}>
+                    <TableBody emptyContent={"ไม่มีออเดอร์"} items={sortedItems}>
                         {(item: any) => (
                             <TableRow key={item.order_id}>
                                 {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}

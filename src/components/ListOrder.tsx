@@ -252,7 +252,7 @@ export default function CartProductList() {
                 return (
                     <User
                         as={Link}
-                        href={`/products/${order.product.product_id}`}
+                        href={`/product/${order.product.product_id}`}
                         avatarProps={{ radius: "full", size: "sm", src: order.product.image }}
                         classNames={{
                             description: "text-default-500 line-clamp-1 w-[100px]",

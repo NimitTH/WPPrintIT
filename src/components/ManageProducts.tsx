@@ -260,7 +260,6 @@ export default function ManageProducts() {
 
     const [isModalAddCategoryOpen, setModalAddCategoryOpen] = useState(false);
     const [isModalEditCategoryOpen, setModalEditCategoryOpen] = useState(false);
-    // const [isModalDeleteCategoryOpen, setModalDeleteCategoryOpen] = useState(false);
 
     const renderModalAddCategory = useCallback(() => {
         return (
@@ -316,17 +315,6 @@ export default function ManageProducts() {
     } = useForm<SchemaCategory>({
         resolver: zodResolver(schemaCategory),
     });
-
-    const onCategoryDeleteSubmit: SubmitHandler<SchemaCategory> = useCallback(async (category: SchemaCategory) => {
-        try {
-            await axios.delete(`/api/product/category/${category.category_id}`);
-            closeModal()
-            await fetchCategories();
-            resetCategoryDelete()
-        } catch (error) {
-            console.error(error);
-        }
-    }, [closeModal, resetCategoryDelete]);
 
     const handleCategoryChange = useCallback((index: number, value: string) => {
         const updatedCategories = [...editCategories];
@@ -398,56 +386,6 @@ export default function ManageProducts() {
             </Modal >
         )
     }, [closeModal, isModalEditCategoryOpen, onOpenChange, editCategories, handleCategoryChange, handleCategoryDelete, handleCategorySubmit])
-
-    // const renderModalDeleteCategory = useCallback(() => {
-    //     return (
-    //         <Modal
-    //             isKeyboardDismissDisabled={true}
-    //             isOpen={isModalDeleteCategoryOpen}
-    //             onOpenChange={onOpenChange}
-    //             onClose={closeModal}
-    //             classNames={{
-    //                 base: "border-1 border-default-200"
-    //             }}
-    //         >
-    //             <ModalContent>
-    //                 <ModalHeader className="flex flex-col gap-1">ลบหมวดหมู่สินค้า</ModalHeader>
-    //                 <form onSubmit={handleSubmitCategoryDelete(onCategoryDeleteSubmit)} >
-    //                     <ModalBody className="flex flex-col gap-3">
-    //                         <Controller
-    //                             name="category_name"
-    //                             control={controlCategoryDelete}
-    //                             render={({ field }) => (
-    //                                 <Input
-    //                                     {...field}
-    //                                     label="ชื่อหมวดหมู่"
-    //                                     labelPlacement="outside"
-    //                                     placeholder="ตั้งชื่อหมวดหมู่"
-    //                                     isInvalid={!!errorsCategoryDelete.category_name}
-    //                                     errorMessage={errorsCategoryDelete.category_name?.message}
-    //                                 />
-    //                             )}
-    //                         />
-    //                     </ModalBody>
-    //                     <ModalFooter>
-    //                         <Button color="danger" variant="light" onPress={onClose}>
-    //                             ปิด
-    //                         </Button>
-    //                         <Button disabled={isSubmittingCategoryDelete} color="primary" type="submit">
-    //                             ลบหมวดหมู่สินค้า
-    //                         </Button>
-    //                     </ModalFooter>
-    //                 </form>
-    //             </ModalContent>
-    //         </Modal>
-    //     )
-    // }, [
-    //     closeModal,
-    //     isModalDeleteCategoryOpen,
-    //     onClose,
-    //     onOpenChange,
-    //     controlCategoryDelete, errorsCategoryDelete, handleSubmitCategoryDelete, isSubmittingCategoryDelete, onCategoryDeleteSubmit
-    // ])
 
     // ✦. ── ✦. ── ✦. ── ✦. ── ✦. ── ✦. ขนาดสินค้า .✦ ── .✦ ── .✦ ── .✦ ── .✦ ── .✦
 
